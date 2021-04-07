@@ -1,0 +1,5 @@
+aws gamelift update-fleet-port-settings --fleet-id  "fleet-ebbdf776-89e8-429c-9976-c41abcd4d0d2" --inbound-permission-authorizations "FromPort=22,ToPort=22,IpRange=0.0.0.0/0,Protocol=TCP" --region us-west-2
+
+aws gamelift describe-instances --fleet-id fleet-ebbdf776-89e8-429c-9976-c41abcd4d0d2
+
+aws gamelift get-instance-access --fleet-id fleet-ebbdf776-89e8-429c-9976-c41abcd4d0d2 --instance-id i-0e99cda0f933f42f9 --region us-west-2 > Secret.Txt
