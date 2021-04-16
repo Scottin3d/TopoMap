@@ -6,21 +6,24 @@ EditorBuildSettings:
   serializedVersion: 2
   m_Scenes:
   - enabled: 1
+    path: Assets/Resources/Scene/WaitingRoom.unity
+    guid: 4b9e535e510abae449699304cc376399
+  - enabled: 1
     path: Assets/ASL/ASL_Scenes/ASL_LobbyScene.unity
     guid: 31f3bf0f357b60c4981e20725877fd45
   - enabled: 1
     path: Assets/ASL/ASL_Scenes/ASL_SceneLoader.unity
     guid: 6026d53651e499849a1420efc6833ec7
-  - enabled: 1
+  - enabled: 0
     path: Assets/ASL/ASL_Scenes/Demo.unity
     guid: de4b9eecfbfd1b44ba9de8fed731cf4c
-  - enabled: 1
+  - enabled: 0
     path: Assets/ASL/ASL_Tutorials/Simple/CreateObject/CreateObject_Example.unity
     guid: 5713198fc7e4cab4294d32fc0e0aae63
-  - enabled: 1
+  - enabled: 0
     path: Assets/ASL/ASL_Tutorials/Simple/ClaimObject/ClaimObject_Example.unity
     guid: 35d26674c870ffa46bda178ccc3d190e
-  - enabled: 1
+  - enabled: 0
     path: Assets/ASL/ASL_Scenes/TerrainDemo.unity
     guid: 7a51e183f73a3d647a66fc0d223e62d6
   m_configObjects:
