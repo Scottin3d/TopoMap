@@ -39,8 +39,8 @@ public static class ASLObjectTrackingSystem {
     }
     public static List<Transform> GetPlayers() {
         List<Transform> players = new List<Transform>();
-        foreach (var pair in ASLPlayersInScene) {
-            players.Add(pair.Value);
+        foreach (var pair in ASLHelper.m_ASLObjects) {
+            players.Add(pair.Value.transform);
         }
         return players;
     }

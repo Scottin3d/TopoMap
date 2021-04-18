@@ -36,11 +36,12 @@ public class MarkerDisplay : MonoBehaviour
     }
 
     public void UpdatePlayerMapMarkers(List<Transform> playerTransforms) {
+        
         int numPlayers = playerTransforms.Count;
         for (int i = 0; i < playerMarkerPool.Count; i++) {
             if (i < numPlayers) {
                 playerMarkerPool[i].SetActive(true);
-                Vector3 position = mapDisplay.position - (playerTransforms[i].position / mapScaleFactor);
+                Vector3 position = mapDisplay.position + (playerTransforms[i].position / mapScaleFactor);
                 position.y = mapDisplay.position.y;
                 playerMarkerPool[i].transform.position = position;
 

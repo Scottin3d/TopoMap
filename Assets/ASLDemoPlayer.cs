@@ -6,53 +6,51 @@ using ASL;
 public class ASLDemoPlayer : MonoBehaviour {
     static bool RunUpdate;
     public GameObject playerPrefab = null;
-    public static GameObject player;
-    public static GameObject localPlayer;
+    static GameObject PlayerObject = null;
+    static GameObject ASLplayer;
 
-    private static ASLObject ASLplayer;
     // Start is called before the first frame update
     void Start() {
         RunUpdate = false;
-        localPlayer = GameObject.Find("Player");
+        PlayerObject = GameObject.Find("Player");
         Transform spawnPosition = PlayerSpawnPosition.current.GetSpawnPosition();
-        localPlayer.transform.position = spawnPosition.position;
-        ASLHelper.InstantiateASLObject("PlayerPrefab", spawnPosition.position, Quaternion.identity, null, null, PlayerCreated);
+
+        PlayerObject.transform.position = spawnPosition.position;
+
+        ASLHelper.InstantiateASLObject("PlayerPrefab", spawnPosition.position, Quaternion.identity, "", "", PlayerCreated);
     }
 
     // Update is called once per frame
     void FixedUpdate() {
-
         if (RunUpdate) {
             SendAndSetClaimPlayer();
+        }
+
+        if (Input.GetKeyDown(KeyCode.Alpha1)) {
+            ASL.ASLHelper.InstantiateASLObject(PrimitiveType.Cylinder,
+                        PlayerObject.transform.position,
+                        Quaternion.identity);
         }
     }
 
     private void SendAndSetClaimPlayer() {
-        player.transform.position = localPlayer.transform.position;
-        player.transform.rotation = localPlayer.transform.rotation;
+        ASLplayer.transform.position = PlayerObject.transform.position;
+        ASLplayer.transform.rotation = PlayerObject.transform.rotation;
 
-        ASLplayer.SendAndSetClaim(() => {
-            ASLplayer.SendAndSetWorldRotation(player.transform.rotation);
-            ASLplayer.SendAndSetWorldPosition(player.transform.position);
+        ASLplayer.GetComponent<ASL.ASLObject>().SendAndSetClaim(() => {
+            ASLplayer.GetComponent<ASL.ASLObject>().SendAndSetWorldRotation(PlayerObject.transform.rotation);
+            ASLplayer.GetComponent<ASL.ASLObject>().SendAndSetWorldPosition(PlayerObject.transform.position);
         });
 
-        ASLObjectTrackingSystem.UpdatePlayerTransform(ASLplayer, player.transform);
+        ASLObjectTrackingSystem.UpdatePlayerTransform(ASLplayer.GetComponent<ASL.ASLObject>(), ASLplayer.transform);
     }
 
 
 
     public static void PlayerCreated(GameObject _gameObject) {
-        player = _gameObject;
-        ASLplayer = _gameObject.GetComponent<ASLObject>();
-        //GameObject camera = GameObject.Find("Camera");
-        //camera.transform.parent = player.transform;
-        //camera.transform.localPosition = new Vector3(0f, 1f, -2f);
-        //Quaternion rotation = Quaternion.identity;
-        //rotation.eulerAngles = new Vector3(20f, 0f, 0f);
-        //camera.transform.localRotation = rotation;
-        // set camera transform
-        //player.GetComponent<MeshRenderer>().enabled = false;
+        ASLplayer = _gameObject;
+        ASLplayer.GetComponent<MeshRenderer>().enabled = false;
         RunUpdate = true;
-        ASLObjectTrackingSystem.AddPlayerToTrack(ASLplayer, player.transform);
+        ASLObjectTrackingSystem.AddPlayerToTrack(_gameObject.GetComponent<ASL.ASLObject>(), _gameObject.transform);
     }
 }
