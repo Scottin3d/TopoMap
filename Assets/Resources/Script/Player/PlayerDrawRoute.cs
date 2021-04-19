@@ -8,9 +8,11 @@ public class PlayerDrawRoute : MonoBehaviour
     private Camera PlayerCamera;
     public static List<GameObject> MyBrushList = new List<GameObject>();
     public Dropdown MyEraseDropDown;
+    private static GameObject ThisGameObject;
 
     void Awake()
     {
+        ThisGameObject = this.gameObject;
         PlayerCamera = GameObject.Find("Player").GetComponentInChildren<Camera>();
     }
 
@@ -44,6 +46,7 @@ public class PlayerDrawRoute : MonoBehaviour
 
     private static void GetEachBrush(GameObject _myGameObject)
     {
+        _myGameObject.transform.parent = ThisGameObject.transform;
         MyBrushList.Add(_myGameObject);
     }
 
@@ -74,13 +77,19 @@ public class PlayerDrawRoute : MonoBehaviour
 
     private static void EraseLastTenLine()
     {
-        for(int i = 0; i < 100; i++)
+        for (int i = 0; i < 10; i++)
         {
-            MyBrushList[MyBrushList.Count - 1].GetComponent<ASL.ASLObject>().SendAndSetClaim(() =>
+            if (MyBrushList.Count != 0)
             {
-                MyBrushList[MyBrushList.Count - 1].GetComponent<ASL.ASLObject>().DeleteObject();
-            });
-            MyBrushList.RemoveAt(MyBrushList.Count - 1);
+                GameObject LastBrush = MyBrushList[MyBrushList.Count - 1];
+
+                LastBrush.GetComponent<ASL.ASLObject>().SendAndSetClaim(() =>
+                {
+                    LastBrush.GetComponent<ASL.ASLObject>().DeleteObject();
+                });
+
+                MyBrushList.RemoveAt(MyBrushList.Count - 1);
+            }
         }
     }
 }
