@@ -14,6 +14,7 @@
     "com.unity.xr.arsubsystems": "4.0.8",
     "com.unity.xr.management": "3.2.13",
     "com.unity.xr.windowsmr": "4.4.1",
+    "com.valvesoftware.unity.openvr": "file:../Assets/SteamVR/OpenVRUnityXRPackage/Editor/com.valvesoftware.unity.openvr-1.1.4.tgz",
     "com.unity.modules.ai": "1.0.0",
     "com.unity.modules.androidjni": "1.0.0",
     "com.unity.modules.animation": "1.0.0",
