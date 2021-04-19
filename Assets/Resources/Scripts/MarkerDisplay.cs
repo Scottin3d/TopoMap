@@ -6,11 +6,13 @@ using ASL;
 public class MarkerDisplay : MonoBehaviour
 {
     public static MarkerDisplay current;
+    public int mapScaleFactor;
 
-    public float updatesPerSecond = 10f;
+    public float updatesPerSecond = 2f;
+
     public GameObject playerMaker = null;
     public Transform mapDisplay = null;
-    public int mapScaleFactor;
+
 
     private List<GameObject> playerMarkerPool = new List<GameObject>();
 
@@ -31,23 +33,38 @@ public class MarkerDisplay : MonoBehaviour
         while (true) {
             yield return new WaitForSeconds(1 / updatesPerSecond);
 
-            UpdatePlayerMapMarkers(ASLObjectTrackingSystem.GetPlayers());
+            UpdateMapMarkers();
         }
     }
 
-    public void UpdatePlayerMapMarkers(List<Transform> playerTransforms) {
-        
+    public void UpdateMapMarkers() {
+        List<Transform> playerTransforms = ASLObjectTrackingSystem.GetPlayers();
+        List<Transform> objectTransforms = ASLObjectTrackingSystem.GetObjects();
+
         int numPlayers = playerTransforms.Count;
-        for (int i = 0; i < playerMarkerPool.Count; i++) {
+        int numObjects = objectTransforms.Count;
+
+        for (int i = 0, o = 0; i < playerMarkerPool.Count; i++) {
             if (i < numPlayers) {
                 playerMarkerPool[i].SetActive(true);
+                playerMarkerPool[i].transform.GetComponentInChildren<MeshRenderer>().material.color = Color.blue;
                 Vector3 position = mapDisplay.position + (playerTransforms[i].position / mapScaleFactor);
                 position.y = mapDisplay.position.y;
                 playerMarkerPool[i].transform.position = position;
+                Quaternion rotation = Quaternion.identity;
+                rotation.eulerAngles = new Vector3(0f, playerTransforms[i].rotation.eulerAngles.y, 0f);
+                playerMarkerPool[i].transform.rotation = rotation;
+            } else if (o < numObjects) {
+                playerMarkerPool[i].SetActive(true);
+                playerMarkerPool[i].transform.GetComponentInChildren<MeshRenderer>().material.color = Color.green;
+                Vector3 position = mapDisplay.position + (objectTransforms[o].position / mapScaleFactor);
+                position.y = mapDisplay.position.y;
+                playerMarkerPool[i].transform.position = position;
 
-                playerMarkerPool[i].transform.rotation = playerTransforms[i].rotation;
-    } else {
-                playerMarkerPool[i].SetActive(false);
+                o++;
+            } else { 
+                        playerMarkerPool[i].SetActive(false);
+            
             }
             
         }

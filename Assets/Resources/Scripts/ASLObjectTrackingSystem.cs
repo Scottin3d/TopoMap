@@ -10,8 +10,9 @@ public static class ASLObjectTrackingSystem {
 
     private static int numberOfPlayers = 0;
     public static int NumberOfPlayers { get => numberOfPlayers; set => numberOfPlayers = value; }
+    public static int NumberOfObjects { get => numberOfObjects; set => numberOfObjects = value; }
 
-
+    private static int numberOfObjects = 0;
     public static bool AddPlayerToTrack(ASLObject playerToTrack, Transform playerTransform) {
         // try to emplace
         if (ASLPlayersInScene.ContainsKey(playerToTrack)) {
@@ -39,11 +40,17 @@ public static class ASLObjectTrackingSystem {
     }
     public static List<Transform> GetPlayers() {
         List<Transform> players = new List<Transform>();
+        /*
         foreach (var pair in ASLHelper.m_ASLObjects) {
             players.Add(pair.Value.transform);
         }
+        */
+        foreach (var pair in ASLPlayersInScene) {
+            players.Add(pair.Value);
+        }
         return players;
     }
+
     public static Transform GetPlayerTransform(ASLObject playerToTrack) {
         if (ASLPlayersInScene.ContainsKey(playerToTrack)) {
             return ASLPlayersInScene[playerToTrack];
@@ -102,6 +109,18 @@ public static class ASLObjectTrackingSystem {
         }
         
     }
+    public static List<Transform> GetObjects() {
+        List<Transform> objects = new List<Transform>();
+        /*
+        foreach (var pair in ASLHelper.m_ASLObjects) {
+            players.Add(pair.Value.transform);
+        }
+        */
+        foreach (var pair in ASLObjectsInScene) {
+            objects.Add(pair.Value);
+        }
+        return objects;
+    }
 
-    
+
 }

@@ -4,53 +4,69 @@ using UnityEngine;
 using ASL;
 
 public class ASLDemoPlayer : MonoBehaviour {
-    static bool RunUpdate;
     public GameObject playerPrefab = null;
-    static GameObject PlayerObject = null;
-    static GameObject ASLplayer;
 
-    // Start is called before the first frame update
+    static GameObject _playerObject = null;
+    static ASLObject _playerAslObject = null;
+
+    private static readonly float UPDATES_PER_SECOND = 2.0f;
+
     void Start() {
-        RunUpdate = false;
-        PlayerObject = GameObject.Find("Player");
-        Transform spawnPosition = PlayerSpawnPosition.current.GetSpawnPosition();
+        ASLHelper.InstantiateASLObject(playerPrefab.name, Vector3.zero, Quaternion.identity, null, null, OnPlayerCreated);
 
-        PlayerObject.transform.position = spawnPosition.position;
-
-        ASLHelper.InstantiateASLObject("PlayerPrefab", spawnPosition.position, Quaternion.identity, "", "", PlayerCreated);
+        StartCoroutine(DelayedInit());
+        StartCoroutine(NetworkedUpdate());
     }
 
-    // Update is called once per frame
-    void FixedUpdate() {
-        if (RunUpdate) {
-            SendAndSetClaimPlayer();
-        }
-
+    private void Update() {
         if (Input.GetKeyDown(KeyCode.Alpha1)) {
-            ASL.ASLHelper.InstantiateASLObject(PrimitiveType.Cylinder,
-                        PlayerObject.transform.position,
-                        Quaternion.identity);
+            ASLHelper.InstantiateASLObject(PrimitiveType.Capsule, _playerObject.transform.position, Quaternion.identity, null, null, OnPrimitiveCreate);
+            
         }
     }
 
-    private void SendAndSetClaimPlayer() {
-        ASLplayer.transform.position = PlayerObject.transform.position;
-        ASLplayer.transform.rotation = PlayerObject.transform.rotation;
+    IEnumerator DelayedInit() {
+        while (_playerObject == null) {
+            yield return new WaitForSeconds(0.1f);
+        }
 
-        ASLplayer.GetComponent<ASL.ASLObject>().SendAndSetClaim(() => {
-            ASLplayer.GetComponent<ASL.ASLObject>().SendAndSetWorldRotation(PlayerObject.transform.rotation);
-            ASLplayer.GetComponent<ASL.ASLObject>().SendAndSetWorldPosition(PlayerObject.transform.position);
+        Transform spawnPosition = PlayerSpawnPosition.current.GetSpawnPosition();
+        _playerObject.transform.position = spawnPosition.position;
+        //GameObject.Find("CameraMain").transform.parent = _playerObject.transform;
+        
+        _playerAslObject.SendAndSetClaim(() => {
+            _playerAslObject.SendAndSetWorldPosition(
+                _playerAslObject.transform.position);
         });
 
-        ASLObjectTrackingSystem.UpdatePlayerTransform(ASLplayer.GetComponent<ASL.ASLObject>(), ASLplayer.transform);
+        ASLObjectTrackingSystem.AddPlayerToTrack(_playerAslObject, _playerObject.transform);
+        //_playerObject.SetActive(false);
+
     }
 
+    IEnumerator NetworkedUpdate() {
+        while (true) {
+            while (_playerObject == null) {
+                yield return new WaitForSeconds(0.1f);
+            }
 
+            _playerAslObject.SendAndSetClaim(() => {
+                _playerAslObject.SendAndSetWorldPosition(transform.position);
+            });
 
-    public static void PlayerCreated(GameObject _gameObject) {
-        ASLplayer = _gameObject;
-        ASLplayer.GetComponent<MeshRenderer>().enabled = false;
-        RunUpdate = true;
-        ASLObjectTrackingSystem.AddPlayerToTrack(_gameObject.GetComponent<ASL.ASLObject>(), _gameObject.transform);
+            ASLObjectTrackingSystem.UpdatePlayerTransform(_playerAslObject, _playerAslObject.transform);
+
+            yield return new WaitForSeconds(1 / UPDATES_PER_SECOND);
+        }
+    }
+
+    private static void OnPlayerCreated(GameObject obj) {
+        _playerObject = obj;
+        _playerAslObject = obj.GetComponent<ASLObject>();
+        
+    }
+
+    private static void OnPrimitiveCreate(GameObject _gameObject) {
+        ASLObjectTrackingSystem.AddObjectToTrack(_gameObject.GetComponent<ASLObject>(), _gameObject.transform);
     }
 }
