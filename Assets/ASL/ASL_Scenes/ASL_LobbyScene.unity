@@ -200,7 +200,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 11854756}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 556.659, y: 1850.6648, z: -832.96277}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 0}
@@ -980,8 +980,8 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 723893227}
   m_HandleRect: {fileID: 1192939527}
   m_Direction: 2
-  m_Value: 1.0000015
-  m_Size: 0.8406783
+  m_Value: 1.0000019
+  m_Size: 0.84067833
   m_NumberOfSteps: 0
   m_OnValueChanged:
     m_PersistentCalls:
@@ -3313,49 +3313,7 @@ MonoBehaviour:
   m_Value: 0
   m_Options:
     m_Options:
-    - m_Text: AR_CSS451_Mp2
-      m_Image: {fileID: 0}
-    - m_Text: AR_CSS451_Mp2_Shadows
-      m_Image: {fileID: 0}
-    - m_Text: CSS451_Mp1
-      m_Image: {fileID: 0}
-    - m_Text: CSS451_Mp2
-      m_Image: {fileID: 0}
-    - m_Text: CSS451_Mp3
-      m_Image: {fileID: 0}
-    - m_Text: CSS385_Mp2
-      m_Image: {fileID: 0}
-    - m_Text: StressTest_150_ASLObjects
-      m_Image: {fileID: 0}
-    - m_Text: StressTest_CreateDelete
-      m_Image: {fileID: 0}
-    - m_Text: StressTest_FightOverFiveObjects
-      m_Image: {fileID: 0}
-    - m_Text: ARCloudAnchors_Example
-      m_Image: {fileID: 0}
-    - m_Text: ClaimObject_Example
-      m_Image: {fileID: 0}
-    - m_Text: ColorObject_Example
-      m_Image: {fileID: 0}
-    - m_Text: CreateObject_Example
-      m_Image: {fileID: 0}
-    - m_Text: DeleteObject_Example
-      m_Image: {fileID: 0}
-    - m_Text: LoadScene_Example
-      m_Image: {fileID: 0}
-    - m_Text: QuickConnect_Example
-      m_Image: {fileID: 0}
-    - m_Text: Send2DTexture_Example
-      m_Image: {fileID: 0}
-    - m_Text: SendFloat4_Example
-      m_Image: {fileID: 0}
-    - m_Text: SliderBar_Example
-      m_Image: {fileID: 0}
-    - m_Text: TransformObjectViaLocalSpace_Example
-      m_Image: {fileID: 0}
-    - m_Text: TransformObjectViaWorldSpace_Example
-      m_Image: {fileID: 0}
-    - m_Text: ASLRoomLoadingExample
+    - m_Text: Tracking
       m_Image: {fileID: 0}
   m_OnValueChanged:
     m_PersistentCalls:
@@ -5087,7 +5045,7 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 0
     m_LineSpacing: 1
-  m_Text: AR_CSS451_Mp2
+  m_Text: Tracking
 --- !u!222 &1522670409
 CanvasRenderer:
   m_ObjectHideFlags: 0
