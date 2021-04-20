@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 using Valve.VR;
 
 public class VRStartupController : MonoBehaviour
@@ -18,10 +19,14 @@ public class VRStartupController : MonoBehaviour
     //this is the gameobject that represents whatever needs to be turned off for VR to function in the scene.
     public GameObject PlayerToTurnOff = null;
 
+    //this is the button that will switch between VR and non-VR modes
+    public Button VRToggle = null;
+
 
     // Start is called before the first frame update
     void Start()
     {
+        VRToggle.onClick.AddListener(onVRToggleButtonPressed);
         if (UnityEngine.XR.XRSettings.isDeviceActive)
         {
             isInVR = true;
@@ -74,11 +79,18 @@ public class VRStartupController : MonoBehaviour
         {
             if (!isInVR)
             {
-                Debug.Log("Attempted VR shutoff when already off");
+                Debug.Log("Attempted VR shutoff when already off.");
             }
             isInVR = false;
-            
+            PlayerToTurnOff.SetActive(true);
+            VRPlayerObject.SetActive(false);
         }
+    }
+
+    //this function is a listener to when the VR Toggle Button is pressed. it will switch between VR and Non-VR by caling enableVR()
+    public void onVRToggleButtonPressed()
+    {
+        enableVR(!isInVR);
     }
 
 }
