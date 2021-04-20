@@ -48,8 +48,6 @@ public static class MeshGenerator {
         int verticesPerLine = (width - 1) / meshSimplificationIncrement + 1;
 
         float meshStep = chunkSize / (width - 1);
-        float topLeftX = center.x - (chunkSize / 2f);
-        float topLeftZ = center.y + (chunkSize / 2f);
 
         float lowerLeftX = chunkSize / -2f;
         float lowerLeftZ = chunkSize / -2f;

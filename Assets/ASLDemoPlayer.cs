@@ -67,6 +67,6 @@ public class ASLDemoPlayer : MonoBehaviour {
     }
 
     private static void OnPrimitiveCreate(GameObject _gameObject) {
-        ASLObjectTrackingSystem.AddObjectToTrack(_gameObject.GetComponent<ASLObject>(), _gameObject.transform);
+       ASLObjectTrackingSystem.AddObjectToTrack(_gameObject.GetComponent<ASLObject>(), _gameObject.transform);
     }
 }
