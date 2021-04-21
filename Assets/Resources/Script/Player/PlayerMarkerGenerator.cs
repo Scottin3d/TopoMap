@@ -67,6 +67,12 @@ public class PlayerMarkerGenerator : MonoBehaviour
         }
     }
 
+    
+    //S Map center position - Marker position ===== vector 3 V
+    //S Map is 1 and L map size is 5, V * 5
+    //L Map 
+
+
     private static void GetHoldObject(GameObject _myGameObject)
     {
         MarkerObject = _myGameObject;
