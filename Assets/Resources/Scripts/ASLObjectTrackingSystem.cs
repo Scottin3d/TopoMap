@@ -8,6 +8,8 @@ public static class ASLObjectTrackingSystem {
     private static Dictionary<ASLObject, Transform> ASLObjectsInScene = new Dictionary<ASLObject, Transform>();
     private static Dictionary<ASLObject, Transform> ASLPlayersInScene = new Dictionary<ASLObject, Transform>();
 
+
+
     private static int numberOfPlayers = 0;
     public static int NumberOfPlayers { get => numberOfPlayers; set => numberOfPlayers = value; }
     public static int NumberOfObjects { get => numberOfObjects; set => numberOfObjects = value; }
@@ -40,11 +42,6 @@ public static class ASLObjectTrackingSystem {
     }
     public static List<Transform> GetPlayers() {
         List<Transform> players = new List<Transform>();
-        /*
-        foreach (var pair in ASLHelper.m_ASLObjects) {
-            players.Add(pair.Value.transform);
-        }
-        */
         foreach (var pair in ASLPlayersInScene) {
             players.Add(pair.Value);
         }
