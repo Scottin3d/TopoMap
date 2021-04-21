@@ -14,6 +14,9 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/ASL/ASL_Scenes/ASL_SceneLoader.unity
     guid: 6026d53651e499849a1420efc6833ec7
+  - enabled: 1
+    path: Assets/ASL/ASL_Scenes/Tracking.unity
+    guid: 627db06cea40dbe4a86061b8b8800459
   - enabled: 0
     path: Assets/ASL/ASL_Scenes/Demo.unity
     guid: de4b9eecfbfd1b44ba9de8fed731cf4c
@@ -27,6 +30,7 @@ EditorBuildSettings:
     path: Assets/ASL/ASL_Scenes/TerrainDemo.unity
     guid: 7a51e183f73a3d647a66fc0d223e62d6
   m_configObjects:
+    Unity.XR.OpenVR.Settings: {fileID: 11400000, guid: 5c0a27ea3bb56f948b34883893d2193c, type: 2}
     Unity.XR.WindowsMR.Settings: {fileID: 11400000, guid: bf557935255407f40b56b5c173577bf9, type: 2}
     UnityEditor.XR.ARCore.ARCoreSettings: {fileID: 11400000, guid: f81eaaa375ab70b40957a0e33db2d86f, type: 2}
     com.unity.xr.management.arcore_loader: {fileID: 11400000, guid: 23a24ef9a392c0e4f95ea82d0acb26a1, type: 2}

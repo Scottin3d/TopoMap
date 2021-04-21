@@ -87,9 +87,12 @@ public class GenerateMapFromHeightMap : MonoBehaviour {
             for (int x = 0; x < numberOfChunks; x++) {
                 // find the center of the chunk
                 float halfChunk = chunkSize / 2f;
-                Vector2 chunkCenter = new Vector2(mapLowerLeftX + (x  * chunkSize) + halfChunk, 
-                                                  mapLowerLeftZ + (z * chunkSize) - halfChunk);
-                
+                Vector2 chunkCenter = new Vector2(mapLowerLeftX + (x  * chunkSize) + halfChunk,
+                                                 mapLowerLeftZ - (z * chunkSize) + halfChunk);
+
+                //Vector2 chunkCenter = new Vector2(mapLowerLeftX + (x * chunkSize) + halfChunk,
+                //                                  mapLowerLeftZ + (z * chunkSize) - halfChunk);
+
                 // generate heightmap chunk
                 Texture2D _heightmap = GetPixelTest((mapWidth / numberOfChunks) * x,
                                                     (mapHeight / numberOfChunks) * z,
@@ -117,7 +120,7 @@ public class GenerateMapFromHeightMap : MonoBehaviour {
                 chunk.transform.localScale = Vector3.one;
                 chunk.tag = "Chunk";
                 chunk.name = "chunk" + z + x;
-                chunk.transform.position = new Vector3(chunkCenter.x, this.transform.position.y, chunkCenter.y);
+                chunk.transform.position = new Vector3(transform.position.x + chunkCenter.x, 0f, transform.position.y + chunkCenter.y);
                 chunk.AddComponent<MeshFilter>().sharedMesh = mesh;
                 chunk.AddComponent<MeshCollider>().sharedMesh = mesh;
                 chunk.AddComponent<MeshRenderer>().sharedMaterial = Instantiate(material);
