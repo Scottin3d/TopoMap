@@ -36,7 +36,7 @@ public class PlayerDrawRoute : MonoBehaviour
             RaycastHit Hit;
             if (Physics.Raycast(MouseRay, out Hit))
             {
-                if (Hit.collider.tag == "WhiteBoard")
+                if (Hit.collider.tag == "WhiteBoard" || Hit.collider.tag == "Chunk")
                 {
                     ASL.ASLHelper.InstantiateASLObject("Brush", Hit.point, Quaternion.identity, "", "", GetEachBrush);
                 }

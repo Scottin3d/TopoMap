@@ -1406,6 +1406,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   MyDropdownList: {fileID: 1870110756}
+  LargerMapGenerator: {fileID: 1408569331}
+  SmallMapGenerator: {fileID: 2118281286}
 --- !u!1 &747331822
 GameObject:
   m_ObjectHideFlags: 0
@@ -2887,7 +2889,7 @@ GameObject:
   - component: {fileID: 1408569332}
   - component: {fileID: 1408569333}
   m_Layer: 0
-  m_Name: SpawnMap
+  m_Name: SpawnLargerMap
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -2901,7 +2903,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1408569331}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 55, z: 0}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 0}
@@ -2920,7 +2922,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   heightmap: {fileID: 2800000, guid: ec6146467ac2d554895b02ddb5377f4c, type: 3}
-  mapSize: 10
+  mapSize: 100
   material: {fileID: 2100000, guid: aa51ed62bd15500438dacc5d81a801e8, type: 2}
   useDefaultMeshHeight: 1
   meshHeight: 1
@@ -4367,3 +4369,83 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2098455219}
   m_CullTransparentMesh: 1
+--- !u!1 &2118281286
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 2118281287}
+  - component: {fileID: 2118281288}
+  m_Layer: 0
+  m_Name: SpawnSmallMap
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &2118281287
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2118281286}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 50, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_RootOrder: 14
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &2118281288
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2118281286}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8a1a2b3aef5961748af1b57380ce474a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  heightmap: {fileID: 2800000, guid: ec6146467ac2d554895b02ddb5377f4c, type: 3}
+  mapSize: 10
+  material: {fileID: 2100000, guid: aa51ed62bd15500438dacc5d81a801e8, type: 2}
+  useDefaultMeshHeight: 1
+  meshHeight: 1
+  meshHieghtCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 0
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    - serializedVersion: 3
+      time: 1
+      value: 1
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  normalizeMode: 0
+  noiseScale: 0.3
+  octaves: 4
+  persistence: 0.5
+  lacunarity: 1
+  seed: 69
+  offset: {x: 0, y: 0}
+  regions: []

@@ -25,6 +25,7 @@ public class PlayerControlGlobalLight : MonoBehaviour
 
     void Update()
     {
+
     }
 
     //Change direction of the light for all the user.

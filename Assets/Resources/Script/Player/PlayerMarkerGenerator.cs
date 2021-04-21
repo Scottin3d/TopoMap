@@ -11,6 +11,17 @@ public class PlayerMarkerGenerator : MonoBehaviour
     public static List<GameObject> PlayerSetMarker = new List<GameObject>();
     public Dropdown MyDropdownList;
 
+    public GameObject LargerMapGenerator;
+    public GameObject SmallMapGenerator;
+
+    private Vector3 LargerMapCenter;
+    private Vector3 SmallMapCenter;
+    private float LargerMapHeight;
+    private float SmallMapHeight;
+    private int LargeMapSize;
+    private int SmallMapSize;
+    private float SmallScaleUp;
+
     void Awake()
     {
         PlayerCamera = GameObject.Find("Player").GetComponentInChildren<Camera>();
@@ -19,7 +30,13 @@ public class PlayerMarkerGenerator : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-
+        LargerMapCenter = LargerMapGenerator.transform.position;
+        SmallMapCenter = SmallMapGenerator.transform.position;
+        LargerMapHeight = LargerMapGenerator.GetComponent<GenerateMapFromHeightMap>().meshHeight;
+        SmallMapHeight = SmallMapGenerator.GetComponent<GenerateMapFromHeightMap>().meshHeight;
+        LargeMapSize = LargerMapGenerator.GetComponent<GenerateMapFromHeightMap>().mapSize;
+        SmallMapSize = SmallMapGenerator.GetComponent<GenerateMapFromHeightMap>().mapSize;
+        SmallScaleUp = LargeMapSize / SmallMapSize;
     }
 
     // Update is called once per frame
@@ -36,10 +53,11 @@ public class PlayerMarkerGenerator : MonoBehaviour
             RaycastHit Hit;
             if (Physics.Raycast(MouseRay, out Hit))
             {
-                if (Hit.collider.tag == "Plane")
+                if (Hit.collider.tag == "Chunk")
                 {
                     string DropdownOpionValue = MyDropdownList.options[MyDropdownList.value].text;
                     ASL.ASLHelper.InstantiateASLObject(DropdownOpionValue, Hit.point, Quaternion.identity, "", "", GetHoldObject);
+                    GenerateMarkerOnLargerMap(Hit.point);
                 }
                 else
                 {
@@ -53,5 +71,25 @@ public class PlayerMarkerGenerator : MonoBehaviour
     {
         MarkerObject = _myGameObject;
         PlayerSetMarker.Add(_myGameObject);
+    }
+
+    private void GenerateMarkerOnLargerMap(Vector3 MarkerPosition)
+    {
+        Vector3 CenterToMarker = VectorFromSmallMapCenterToMarker(MarkerPosition) * SmallScaleUp / 2;
+        Vector3 NewPositionOnLargeMap = CenterToMarker + LargerMapCenter;
+        SpawnMarkerOnLargerMap(NewPositionOnLargeMap);
+    }
+
+    //Get the math vector
+    private Vector3 VectorFromSmallMapCenterToMarker(Vector3 MarkerPosition)
+    {
+        //Direction of this Vector is from SmallMapCenter to Marker
+        Vector3 V = MarkerPosition - SmallMapCenter;
+        return V;
+    }
+
+    private void SpawnMarkerOnLargerMap(Vector3 PositionOnLargerMap)
+    {
+        ASL.ASLHelper.InstantiateASLObject("Marker", PositionOnLargerMap, Quaternion.identity);
     }
 }

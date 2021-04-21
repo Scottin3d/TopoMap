@@ -117,12 +117,11 @@ public class GenerateMapFromHeightMap : MonoBehaviour {
                 chunk.transform.localScale = Vector3.one;
                 chunk.tag = "Chunk";
                 chunk.name = "chunk" + z + x;
-                chunk.transform.position = new Vector3(chunkCenter.x, 0f, chunkCenter.y);
+                chunk.transform.position = new Vector3(chunkCenter.x, this.transform.position.y, chunkCenter.y);
                 chunk.AddComponent<MeshFilter>().sharedMesh = mesh;
                 chunk.AddComponent<MeshCollider>().sharedMesh = mesh;
                 chunk.AddComponent<MeshRenderer>().sharedMaterial = Instantiate(material);
                 chunk.GetComponent<MeshRenderer>().sharedMaterial.mainTexture = mapChunks[x, z].heightmap;
-
             }
         }
     }
