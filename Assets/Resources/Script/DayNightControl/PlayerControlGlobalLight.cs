@@ -12,7 +12,7 @@ public class PlayerControlGlobalLight : MonoBehaviour
     public Slider LightSlider;
     public Light MyDirectionalSunLight;
     public Gradient SunColor;
-
+    //Awake
     void Awake()
     {
         //MyDirectionalLight = this.GetComponent<Light>();
