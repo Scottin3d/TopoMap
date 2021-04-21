@@ -38,7 +38,7 @@ RenderSettings:
   m_ReflectionIntensity: 1
   m_CustomReflection: {fileID: 0}
   m_Sun: {fileID: 2138677392}
-  m_IndirectSpecularColor: {r: 0.4145541, g: 0.4409283, b: 0.45393676, a: 1}
+  m_IndirectSpecularColor: {r: 0.15596758, g: 0.17844078, b: 0.19186054, a: 1}
   m_UseRadianceAmbientProbe: 0
 --- !u!157 &3
 LightmapSettings:
@@ -615,7 +615,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!114 &468696375
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -629,10 +629,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   heightmap: {fileID: 2800000, guid: ec6146467ac2d554895b02ddb5377f4c, type: 3}
-  mapSize: 10
-  material: {fileID: 2100000, guid: fd7581ee4cd698e47806dad5e11450b6, type: 2}
+  mapSize: 5
+  material: {fileID: 2100000, guid: 1bd258dd9c1c6f7469ff3cd2c6bfa65f, type: 2}
   useDefaultMeshHeight: 0
-  meshHeight: 0.85
+  meshHeight: 0.65
   meshHieghtCurve:
     serializedVersion: 2
     m_Curve:
@@ -673,7 +673,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 468696374}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalPosition: {x: 0, y: 0.5, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 0}
@@ -1079,7 +1079,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 994805314}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0.529, z: 0}
+  m_LocalPosition: {x: 0, y: 0.509, z: 0}
   m_LocalScale: {x: 0.5, y: 1, z: 0.5}
   m_Children: []
   m_Father: {fileID: 0}
