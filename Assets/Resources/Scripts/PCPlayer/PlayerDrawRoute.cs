@@ -6,6 +6,7 @@ using UnityEngine.UI;
 public class PlayerDrawRoute : MonoBehaviour
 {
     private Camera PlayerCamera;
+    private Camera PlayerTableViewCamera;
     public static List<GameObject> MyBrushList = new List<GameObject>();
     public Dropdown MyEraseDropDown;
     private static GameObject ThisGameObject;
@@ -14,6 +15,7 @@ public class PlayerDrawRoute : MonoBehaviour
     {
         ThisGameObject = this.gameObject;
         PlayerCamera = GameObject.Find("Player").GetComponentInChildren<Camera>();
+        PlayerTableViewCamera = GameObject.Find("PlayerTopViewCamera").GetComponentInChildren<Camera>();
     }
 
     // Start is called before the first frame update
@@ -32,13 +34,29 @@ public class PlayerDrawRoute : MonoBehaviour
     {
         if (Input.GetMouseButton(1))
         {
-            Ray MouseRay = PlayerCamera.ScreenPointToRay(Input.mousePosition);
-            RaycastHit Hit;
-            if (Physics.Raycast(MouseRay, out Hit))
+            if (PlayerCamera.isActiveAndEnabled == true)
             {
-                if (Hit.collider.tag == "WhiteBoard" || Hit.collider.tag == "Chunk")
+                Ray MouseRay = PlayerCamera.ScreenPointToRay(Input.mousePosition);
+                RaycastHit Hit;
+                if (Physics.Raycast(MouseRay, out Hit))
                 {
-                    ASL.ASLHelper.InstantiateASLObject("Brush", Hit.point, Quaternion.identity, "", "", GetEachBrush);
+                    if (Hit.collider.tag == "WhiteBoard" || (Hit.collider.tag == "Chunk" && Hit.collider.transform.parent.name == "SpawnSmallMap"))
+                    {
+                        ASL.ASLHelper.InstantiateASLObject("Brush", Hit.point, Quaternion.identity, "", "", GetEachBrush);
+                    }
+                }
+            }
+
+            if (PlayerTableViewCamera.isActiveAndEnabled == true)
+            {
+                Ray MouseRay = PlayerTableViewCamera.ScreenPointToRay(Input.mousePosition);
+                RaycastHit Hit;
+                if (Physics.Raycast(MouseRay, out Hit))
+                {
+                    if (Hit.collider.tag == "Chunk")
+                    {
+                        ASL.ASLHelper.InstantiateASLObject("Brush", Hit.point, Quaternion.identity, "", "", GetEachBrush);
+                    }
                 }
             }
         }

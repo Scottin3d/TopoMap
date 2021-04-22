@@ -9,6 +9,7 @@ TagManager:
   - Chunk
   - Plane
   - WhiteBoard
+  - Table
   layers:
   - Default
   - TransparentFX

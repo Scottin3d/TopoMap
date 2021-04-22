@@ -30,22 +30,5 @@ public class PlayerControlICameraWaitingRoom : MonoBehaviour
         this.transform.localRotation = Quaternion.Euler(XMove, 0, 0);
 
         PlayerObject.Rotate(Vector3.up * XDirection);
-        //SendAndSetClaimPlayerRotation();
-    }
-
-    private void SendAndSetClaimPlayerRotation()
-    {
-        GameObject Player = this.gameObject;
-        if (Player != null)
-        {
-            Player.GetComponent<ASL.ASLObject>().SendAndSetClaim(() =>
-            {
-                Player.GetComponent<ASL.ASLObject>().SendAndSetWorldRotation(this.transform.rotation);
-            });
-        }
-        else
-        {
-            return;
-        }
     }
 }

@@ -28,22 +28,6 @@ public class PlayerControlInWaitingRoom : MonoBehaviour
         ChangePosition();
     }
 
-    private void SendAndSetClaimPlayerLoaction()
-    {
-        GameObject Player = this.gameObject;
-        if (Player != null)
-        {
-            Player.GetComponent<ASL.ASLObject>().SendAndSetClaim(() =>
-            {
-                Player.GetComponent<ASL.ASLObject>().SendAndSetWorldPosition(this.transform.position);
-            });
-        }
-        else
-        {
-            return;
-        }
-    }
-
     private void ChangePosition()
     {
         float XDirection, ZDirection;
@@ -62,6 +46,5 @@ public class PlayerControlInWaitingRoom : MonoBehaviour
         NewMove.y = NewMove.y - g * Time.deltaTime;
 
         PlayerController.Move(NewMove * WalkSpeed * Time.deltaTime);
-        //SendAndSetClaimPlayerLoaction();
     }
 }

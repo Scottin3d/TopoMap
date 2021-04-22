@@ -34,6 +34,7 @@ public class SpawnPlayer : MonoBehaviour
         Cube = _myGameObject;
         RunUpdate = true;
         Cube.GetComponent<MeshRenderer>().enabled = false;
+        ASLObjectTrackingSystem.AddPlayerToTrack(Cube.GetComponent<ASL.ASLObject>(), Cube.transform);
     }
 
     private void SendAndSetClaimPlayer()
@@ -45,6 +46,7 @@ public class SpawnPlayer : MonoBehaviour
         {
             Cube.GetComponent<ASL.ASLObject>().SendAndSetWorldRotation(PlayerObject.transform.rotation);
             Cube.GetComponent<ASL.ASLObject>().SendAndSetWorldPosition(PlayerObject.transform.position);
+            ASLObjectTrackingSystem.UpdatePlayerTransform(Cube.GetComponent<ASL.ASLObject>(), Cube.transform);
         });
     }
 }
