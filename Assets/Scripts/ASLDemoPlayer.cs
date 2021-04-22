@@ -5,6 +5,7 @@ using ASL;
 
 public class ASLDemoPlayer : MonoBehaviour {
     public GameObject playerPrefab = null;
+    public VRStartupController VRController = null; //VR controller to give 2D player object to.
 
     static GameObject _playerObject = null;
     static ASLObject _playerAslObject = null;
@@ -42,6 +43,7 @@ public class ASLDemoPlayer : MonoBehaviour {
         ASLObjectTrackingSystem.AddPlayerToTrack(_playerAslObject, _playerObject.transform);
         //_playerObject.SetActive(false);
 
+        VRController.setPlayer2D(_playerObject);
     }
 
     IEnumerator NetworkedUpdate() {
