@@ -14,7 +14,7 @@ public class MarkerDisplay : MonoBehaviour
     public Transform mapDisplay = null;
 
 
-    private List<GameObject> playerMarkerPool = new List<GameObject>();
+    private static List<GameObject> playerMarkerPool = new List<GameObject>();
 
     private void Awake() {
         current = this;
@@ -31,6 +31,9 @@ public class MarkerDisplay : MonoBehaviour
 
     IEnumerator UpdatePlayerPositions() {
         while (true) {
+            if (playerMarkerPool.Count == 0) {
+                yield return new WaitForSeconds(1f);
+            }
             yield return new WaitForSeconds(1 / updatesPerSecond);
 
             UpdateMapMarkers();
@@ -54,12 +57,27 @@ public class MarkerDisplay : MonoBehaviour
                 Quaternion rotation = Quaternion.identity;
                 rotation.eulerAngles = new Vector3(0f, playerTransforms[i].rotation.eulerAngles.y, 0f);
                 playerMarkerPool[i].transform.rotation = rotation;
+
+                // send to ASL
+                ASLObject marker = playerMarkerPool[i].GetComponent<ASLObject>();
+                marker.SendAndSetClaim(() => {
+                    marker.SendAndSetWorldPosition(playerMarkerPool[i].transform.position);
+                    marker.SendAndIncrementWorldRotation(rotation);
+                });
+
             } else if (o < numObjects) {
                 playerMarkerPool[i].SetActive(true);
                 playerMarkerPool[i].transform.GetComponentInChildren<MeshRenderer>().material.color = Color.green;
                 Vector3 position = mapDisplay.position + (objectTransforms[o].position / mapScaleFactor);
                 position.y = mapDisplay.position.y;
                 playerMarkerPool[i].transform.position = position;
+
+                // send to ASL
+                ASLObject marker = playerMarkerPool[i].GetComponent<ASLObject>();
+                marker.SendAndSetClaim(() => {
+                    marker.SendAndSetWorldPosition(playerMarkerPool[i].transform.position);
+                });
+
 
                 o++;
             } else { 
@@ -72,10 +90,13 @@ public class MarkerDisplay : MonoBehaviour
 
     private void GeneratePlayerPool() {
         for (int i = 0; i < 20; i++) {
-            GameObject newPlayer = Instantiate(playerMaker, transform);
-            newPlayer.SetActive(false);
-            playerMarkerPool.Add(newPlayer);
+            ASLHelper.InstantiateASLObject(playerMaker.name, Vector3.zero, Quaternion.identity, null, null, OnMarkerCreate);
         }
         
+    }
+
+    private static void OnMarkerCreate(GameObject _gameObject) {
+        playerMarkerPool.Add(_gameObject);
+        _gameObject.SetActive(false);
     }
 }

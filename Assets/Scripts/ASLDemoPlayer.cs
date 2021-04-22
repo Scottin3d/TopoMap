@@ -22,7 +22,7 @@ public class ASLDemoPlayer : MonoBehaviour {
     private void Update() {
         if (Input.GetKeyDown(KeyCode.Alpha1)) {
             ASLHelper.InstantiateASLObject(PrimitiveType.Capsule, _playerObject.transform.position, Quaternion.identity, null, null, OnPrimitiveCreate);
-            
+        
         }
     }
 
@@ -54,6 +54,7 @@ public class ASLDemoPlayer : MonoBehaviour {
 
             _playerAslObject.SendAndSetClaim(() => {
                 _playerAslObject.SendAndSetWorldPosition(transform.position);
+
             });
 
             ASLObjectTrackingSystem.UpdatePlayerTransform(_playerAslObject, _playerAslObject.transform);

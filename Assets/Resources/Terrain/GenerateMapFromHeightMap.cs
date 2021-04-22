@@ -14,7 +14,7 @@ public class GenerateMapFromHeightMap : MonoBehaviour {
     public int mapSize = 10;                    // the total size of the map
     private const int chunkResolution = 32;     // the texture resolution of each chunk
     private int numberOfChunks;                 // the number of chunks (width, height) the heightmap is made of. heightmap resolution / chunkResolution
-    private int chunkSize;                      // the world unit size of each chunk. mapSize / numberOf Chunks 
+    private float chunkSize;                      // the world unit size of each chunk. mapSize / numberOf Chunks 
     private  MapChunk[,] mapChunks;             // map chunk container
 
     [Header("Mesh Properties")]
@@ -55,7 +55,7 @@ public class GenerateMapFromHeightMap : MonoBehaviour {
         Debug.Assert(heightmap != null && heightmap.width >= 32 && heightmap.width % 2 == 0, "Missing or invalid heightmap.");
         //heightMapChunks = (heightMapChunks % 2 == 0) ? heightMapChunks : 32;
         numberOfChunks = heightmap.width / chunkResolution;
-        chunkSize = mapSize / numberOfChunks;
+        chunkSize = (float)mapSize / numberOfChunks;
         chunkSize = (chunkSize > 0) ? chunkSize : 1;
 
         if (useDefaultMeshHeight) {
@@ -87,8 +87,8 @@ public class GenerateMapFromHeightMap : MonoBehaviour {
             for (int x = 0; x < numberOfChunks; x++) {
                 // find the center of the chunk
                 float halfChunk = chunkSize / 2f;
-                Vector2 chunkCenter = new Vector2(mapLowerLeftX + (x  * chunkSize) + halfChunk,
-                                                 mapLowerLeftZ - (z * chunkSize) + halfChunk);
+                Vector2 chunkCenter = new Vector2(transform.position.x + mapLowerLeftX + (x  * chunkSize) + halfChunk,
+                                                 transform.position.z + mapLowerLeftZ + (z * chunkSize) + halfChunk);
 
                 //Vector2 chunkCenter = new Vector2(mapLowerLeftX + (x * chunkSize) + halfChunk,
                 //                                  mapLowerLeftZ + (z * chunkSize) - halfChunk);
@@ -119,8 +119,8 @@ public class GenerateMapFromHeightMap : MonoBehaviour {
                 chunk.transform.parent = transform;
                 chunk.transform.localScale = Vector3.one;
                 chunk.tag = "Chunk";
-                chunk.name = "chunk" + z + x;
-                chunk.transform.position = new Vector3(transform.position.x + chunkCenter.x, 0f, transform.position.y + chunkCenter.y);
+                chunk.name = "chunk" + z + ", " + x;
+                chunk.transform.position = new Vector3(chunkCenter.x, transform.position.y, chunkCenter.y);
                 chunk.AddComponent<MeshFilter>().sharedMesh = mesh;
                 chunk.AddComponent<MeshCollider>().sharedMesh = mesh;
                 chunk.AddComponent<MeshRenderer>().sharedMaterial = Instantiate(material);
