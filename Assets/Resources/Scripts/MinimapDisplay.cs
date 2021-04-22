@@ -10,11 +10,14 @@ public class MinimapDisplay : MonoBehaviour
     public float updatesPerSecond = 10f;
     public GameObject playerMarker = null;
     public GameObject routeNodeMarker = null;
+    public GameObject routePathMarker = null;
 
     private List<GameObject> playerMarkerPool = new List<GameObject>();
     private List<GameObject> routeMarkerPool = new List<GameObject>();
+    private List<GameObject> routeConnectPool = new List<GameObject>();
 
     private static bool PlayerInitFinished = false;
+     bool RouteChanged = false;
 
     private void Awake()
     {
@@ -27,6 +30,7 @@ public class MinimapDisplay : MonoBehaviour
     {
         Debug.Assert(playerMarker != null, "Please set " + playerMarker + " in the inspector.");
         Debug.Assert(routeNodeMarker != null, "Please set " + routeNodeMarker + " in the inspector.");
+        Debug.Assert(routePathMarker != null, "Please set " + routePathMarker + " in the inspector.");
 
         GeneratePlayerPool();
         StartCoroutine(DelayedPlayerInit());
@@ -46,6 +50,7 @@ public class MinimapDisplay : MonoBehaviour
             yield return new WaitForSeconds(1 / updatesPerSecond);
 
             UpdatePlayerMinimapMarkers(ASLObjectTrackingSystem.GetPlayers());
+            UpdateRouteMinimapMarkers();
         }
     }
 
@@ -85,13 +90,23 @@ public class MinimapDisplay : MonoBehaviour
         }
     }
 
-    public void AddRouteMarker()
+    public static void AddRouteMarker(Vector3 position)
     {
-        GameObject newMarker = Instantiate(routeNodeMarker, transform);
-        routeMarkerPool.Add(newMarker);
+        GameObject newMarker = Instantiate(current.routeNodeMarker, current.transform);
+        position.y = 9.5f;
+        newMarker.transform.position = position;
+        current.routeMarkerPool.Add(newMarker);
+        ASLObjectTrackingSystem.AddObjectToTrack(newMarker.GetComponent<ASLObject>(), newMarker.transform);
+        current.RouteChanged = true;
+        Debug.Log("Added marker");
     }
 
-    public void UpdatePlayerMinimapMarkers(List<Transform> playerTransforms)
+    public void RemoveRouteMarker(GameObject routeMarker)
+    {
+
+    }
+
+    void UpdatePlayerMinimapMarkers(List<Transform> playerTransforms)
     {
         int numPlayers = playerTransforms.Count;
         for(int i = 0; i < playerMarkerPool.Count; i++)
@@ -108,4 +123,42 @@ public class MinimapDisplay : MonoBehaviour
             }
         }
     }
+
+    void UpdateRouteMinimapMarkers()
+    {
+        GameObject newPath;
+        Vector3 dir;
+        Vector3 scale;
+        Vector3 pos;
+        float length;
+        int ndx = 0;
+        if (RouteChanged)
+        {
+            Debug.Log("Route changed");
+            for (ndx = 0; ndx < routeMarkerPool.Count - 1; ndx++)
+            {
+                dir = routeMarkerPool[ndx + 1].transform.position - routeMarkerPool[ndx].transform.position;
+                length = (routeMarkerPool[ndx + 1].transform.position - routeMarkerPool[ndx].transform.position).magnitude / 2f;
+
+                if (routeConnectPool.Count < routeMarkerPool.Count - 1)
+                {
+                    Debug.Log("Creating new path");
+                    newPath = Instantiate(routePathMarker, transform);
+                    routeConnectPool.Add(newPath);
+                }
+
+                Debug.Log(length);
+                routeConnectPool[ndx].transform.up = dir;
+                scale = routeConnectPool[ndx].transform.localScale;
+                scale.y = length;
+                pos = routeMarkerPool[ndx].transform.position + (length * routeConnectPool[ndx].transform.up);
+                routeConnectPool[ndx].transform.position = pos;
+                routeConnectPool[ndx].transform.localScale = scale;
+            }
+
+            RouteChanged = false;
+        }
+    }
 }
+
+
