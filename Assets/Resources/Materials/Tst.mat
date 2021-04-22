@@ -8,13 +8,14 @@ Material:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_Name: Tst
-  m_Shader: {fileID: 46, guid: 0000000000000000f000000000000000, type: 0}
-  m_ShaderKeywords: _ENVIRONMENTREFLECTIONS_OFF _GLOSSYREFLECTIONS_OFF
+  m_Shader: {fileID: 4800000, guid: 933532a4fcc9baf4fa0491de14d08ed7, type: 3}
+  m_ShaderKeywords: _ENVIRONMENTREFLECTIONS_OFF
   m_LightmapFlags: 4
   m_EnableInstancingVariants: 0
   m_DoubleSidedGI: 0
-  m_CustomRenderQueue: -1
-  stringTagMap: {}
+  m_CustomRenderQueue: 2004
+  stringTagMap:
+    RenderType: Opaque
   disabledShaderPasses: []
   m_SavedProperties:
     serializedVersion: 3
@@ -60,7 +61,7 @@ Material:
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _BaseMap:
-        m_Texture: {fileID: 0}
+        m_Texture: {fileID: 2800000, guid: ec6146467ac2d554895b02ddb5377f4c, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _BumpMap:
@@ -95,8 +96,12 @@ Material:
         m_Texture: {fileID: 2800000, guid: 3e99d685ee054b948a48a8ae7ba48ba8, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
+    - _HologramScanlines:
+        m_Texture: {fileID: 2800000, guid: 10d7ac9601723a8498425199ad66d10d, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
     - _MainTex:
-        m_Texture: {fileID: 2800000, guid: da32138c6e3c58948a5064d344011bc8, type: 3}
+        m_Texture: {fileID: 2800000, guid: ec6146467ac2d554895b02ddb5377f4c, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _MetallicGlossMap:
@@ -174,6 +179,7 @@ Material:
     - _QueueOffset: 4
     - _ReceiveShadows: 1
     - _Rough: 0
+    - _ScrollSpeed: 0.005
     - _Smoothness: 0
     - _SmoothnessTextureChannel: 0
     - _SpecularHighlights: 1
@@ -187,7 +193,10 @@ Material:
     - _BaseColor: {r: 1, g: 1, b: 1, a: 1}
     - _Color: {r: 1, g: 1, b: 1, a: 1}
     - _EmissionColor: {r: 0, g: 0, b: 0, a: 1}
+    - _FresnelColor: {r: 0.09544443, g: 0.0779192, b: 0.9716981, a: 0}
     - _GrassTile: {r: 50, g: 50, b: 0, a: 0}
+    - _HologramTiling: {r: 64, g: 64, b: 0, a: 0}
+    - _MainColor: {r: 1, g: 1, b: 1, a: 0}
     - _RockTile: {r: 50, g: 50, b: 25, a: 0}
     - _SpecColor: {r: 0.19999996, g: 0.19999996, b: 0.19999996, a: 1}
   m_BuildTextureStacks: []
@@ -203,4 +212,4 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d0353a89b1f911e48b9e16bdc9f2e058, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  version: 2
+  version: 4
