@@ -30,7 +30,15 @@ public class VRStartupController : MonoBehaviour
         if (UnityEngine.XR.XRSettings.isDeviceActive)
         {
             isInVR = true;
-            StartVR();
+            if (PlayerToTurnOff != null)
+            {
+                StartVR();
+            }
+            else
+            {
+                isInVR = false;
+                Debug.Log("VR Detected but no 2D Player Object given, waiting for runtime player");
+            }
         }
         Debug.Log("VR Status is: " + isInVR);
     }
@@ -48,7 +56,7 @@ public class VRStartupController : MonoBehaviour
 
         PlayerToTurnOff.SetActive(false);
 
-        VRPlayerObject = (GameObject) Instantiate(Resources.Load("VR/Player"));
+        VRPlayerObject = (GameObject) Instantiate(Resources.Load("VR/PlayerVR"));
         VRPlayerObject.transform.position = VRSpawnPoint.transform.position;
         VRPlayerObject.transform.rotation = VRSpawnPoint.transform.rotation;
     }
@@ -93,4 +101,21 @@ public class VRStartupController : MonoBehaviour
         enableVR(!isInVR);
     }
 
+    //this is a function intended to be called near the start of runtime to provide the 2D player object at runtime. It will essentially run start's logic for starting up VR once the player is created,
+    //which may cause errors if called at another time
+    public void setPlayer2D(GameObject player)
+    {
+        PlayerToTurnOff = player;
+        if (UnityEngine.XR.XRSettings.isDeviceActive)
+        {
+            isInVR = true;
+            StartVR();
+        }
+    }
+
+    //this function will return whether or not VR has been detected on the PC (essentilly XR isDeviceActive)
+    public static bool isVRDetected()
+    {
+        return UnityEngine.XR.XRSettings.isDeviceActive;
+    }
 }

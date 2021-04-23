@@ -4,8 +4,12 @@ using UnityEngine;
 using ASL;
 
 public class ASLDemoPlayer : MonoBehaviour {
-    public GameObject playerPrefab = null;
 
+    //public GameObject localPlayerPrefab = null;
+    public GameObject playerPrefab = null;
+    public VRStartupController VRController = null; //VR controller to give 2D player object to.
+
+    static GameObject _localPlayerObject = null;
     static GameObject _playerObject = null;
     static ASLObject _playerAslObject = null;
 
@@ -14,8 +18,13 @@ public class ASLDemoPlayer : MonoBehaviour {
     private static readonly float UPDATES_PER_SECOND = 2.0f;
 
     void Start() {
+
+        //_localPlayerObject = (GameObject)Instantiate(Resources.Load(localPlayerPrefab.name));
+        _localPlayerObject = (GameObject)Instantiate(Resources.Load("MyPrefabs/Player"));
         ASLHelper.InstantiateASLObject(playerPrefab.name, Vector3.zero, Quaternion.identity, null, null, OnPlayerCreated);
         miniCam = Instantiate(Resources.Load("MyPrefabs/MinimapCamera")) as GameObject;
+
+        VRController.setPlayer2D(_localPlayerObject);
 
         StartCoroutine(DelayedInit());
         StartCoroutine(NetworkedUpdate());
@@ -23,7 +32,7 @@ public class ASLDemoPlayer : MonoBehaviour {
 
     private void Update() {
         if (Input.GetKeyDown(KeyCode.Alpha1)) {
-            ASLHelper.InstantiateASLObject(PrimitiveType.Capsule, _playerObject.transform.position, Quaternion.identity, null, null, OnPrimitiveCreate);
+            ASLHelper.InstantiateASLObject(PrimitiveType.Capsule, _localPlayerObject.transform.position, Quaternion.identity, null, null, OnPrimitiveCreate);
         
         }
     }
@@ -34,17 +43,18 @@ public class ASLDemoPlayer : MonoBehaviour {
         }
 
         Transform spawnPosition = PlayerSpawnPosition.current.GetSpawnPosition();
-        _playerObject.transform.position = spawnPosition.position;
+        _localPlayerObject.transform.position = spawnPosition.position;
         //GameObject.Find("CameraMain").transform.parent = _playerObject.transform;
         
         _playerAslObject.SendAndSetClaim(() => {
-            _playerAslObject.SendAndSetWorldPosition(
-                _playerAslObject.transform.position);
+            _playerAslObject.SendAndSetWorldPosition(_localPlayerObject.transform.position);
+            _playerAslObject.SendAndSetWorldRotation(_localPlayerObject.transform.rotation);
         });
 
-        ASLObjectTrackingSystem.AddPlayerToTrack(_playerAslObject, _playerObject.transform);
+        ASLObjectTrackingSystem.AddPlayerToTrack(_playerAslObject, _localPlayerObject.transform);
         //_playerObject.SetActive(false);
 
+        
     }
 
     IEnumerator NetworkedUpdate() {
@@ -54,8 +64,8 @@ public class ASLDemoPlayer : MonoBehaviour {
             }
 
             _playerAslObject.SendAndSetClaim(() => {
-                _playerAslObject.SendAndSetWorldPosition(transform.position);
-
+                _playerAslObject.SendAndSetWorldPosition(_localPlayerObject.transform.position);
+                _playerAslObject.SendAndSetWorldRotation(_localPlayerObject.transform.rotation);
             });
 
             ASLObjectTrackingSystem.UpdatePlayerTransform(_playerAslObject, _playerAslObject.transform);
