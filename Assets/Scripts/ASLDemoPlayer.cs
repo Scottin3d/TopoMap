@@ -16,9 +16,8 @@ public class ASLDemoPlayer : MonoBehaviour {
     private static readonly float UPDATES_PER_SECOND = 2.0f;
 
     void Start() {
-
-        //_localPlayerObject = (GameObject)Instantiate(Resources.Load(localPlayerPrefab.name));
         _localPlayerObject = (GameObject)Instantiate(Resources.Load("MyPrefabs/Player"));
+
         ASLHelper.InstantiateASLObject(playerPrefab.name, Vector3.zero, Quaternion.identity, null, null, OnPlayerCreated);
 
         VRController.setPlayer2D(_localPlayerObject);
@@ -41,7 +40,6 @@ public class ASLDemoPlayer : MonoBehaviour {
 
         Transform spawnPosition = PlayerSpawnPosition.current.GetSpawnPosition();
         _localPlayerObject.transform.position = spawnPosition.position;
-        //GameObject.Find("CameraMain").transform.parent = _playerObject.transform;
         
         _playerAslObject.SendAndSetClaim(() => {
             _playerAslObject.SendAndSetWorldPosition(_localPlayerObject.transform.position);
@@ -49,7 +47,6 @@ public class ASLDemoPlayer : MonoBehaviour {
         });
 
         ASLObjectTrackingSystem.AddPlayerToTrack(_playerAslObject, _localPlayerObject.transform);
-        //_playerObject.SetActive(false);
 
         
     }
