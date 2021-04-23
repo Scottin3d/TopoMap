@@ -39,12 +39,17 @@ public class ASLVRCameraTracking : MonoBehaviour
         {
             yield return new WaitForSeconds(0.1f);
         }
+        ASLObjectTrackingSystem.AddPlayerToTrack(VRCameraToTrack.GetComponent<ASLObject>(), VRCameraToTrack.transform);
         while (true)
         {
             yield return new WaitForSeconds(0.1f);
             if (VRStartupController.isInVR) //checks the VR state here rather than detected to know if the VR stuff needs to be tracked at this time or not
             {
-                VRCameraToTrack.GetComponent<ASLObject>().SendAndSetClaim(() => { VRCameraToTrack.GetComponent<ASLObject>().SendAndSetLocalPosition(LocalVRCamera.transform.position); VRCameraToTrack.GetComponent<ASLObject>().SendAndSetLocalRotation(LocalVRCamera.transform.rotation); });
+                VRCameraToTrack.GetComponent<ASLObject>().SendAndSetClaim(() => { 
+                    VRCameraToTrack.GetComponent<ASLObject>().SendAndSetLocalPosition(LocalVRCamera.transform.position); 
+                    VRCameraToTrack.GetComponent<ASLObject>().SendAndSetLocalRotation(LocalVRCamera.transform.rotation);
+                    ASLObjectTrackingSystem.UpdatePlayerTransform(VRCameraToTrack.GetComponent<ASLObject>(), VRCameraToTrack.transform);
+                });
             }
             else
             {

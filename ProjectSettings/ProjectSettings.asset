@@ -4,11 +4,7 @@
 PlayerSettings:
   m_ObjectHideFlags: 0
   serializedVersion: 22
-<<<<<<< HEAD
-  productGUID: 4fd76586c927a664ba290b3f530ae9fd
-=======
-  productGUID: bb5180fc8a0fcad4cb61fc6cbd3df9b1
->>>>>>> 9cc2b65ec4e2966dcf71cbdb69017bc0a1fdcf14
+  productGUID: 57eceb0f1a6eaa643b24c796e114c40b
   AndroidProfiler: 0
   AndroidFilterTouchesWhenObscured: 0
   AndroidEnableSustainedPerformanceMode: 0
@@ -17,11 +13,7 @@ PlayerSettings:
   useOnDemandResources: 0
   accelerometerFrequency: 60
   companyName: DefaultCompany
-<<<<<<< HEAD
   productName: ASLTopoJakeVR
-=======
-  productName: TopoMap
->>>>>>> 9cc2b65ec4e2966dcf71cbdb69017bc0a1fdcf14
   defaultCursor: {fileID: 0}
   cursorHotspot: {x: 0, y: 0}
   m_SplashScreenBackgroundColor: {r: 0.13725491, g: 0.12156863, b: 0.1254902, a: 1}
@@ -50,21 +42,12 @@ PlayerSettings:
   m_SplashScreenLogos: []
   m_VirtualRealitySplashScreen: {fileID: 0}
   m_HolographicTrackingLossScreen: {fileID: 0}
-<<<<<<< HEAD
   defaultScreenWidth: 1920
   defaultScreenHeight: 1080
   defaultScreenWidthWeb: 960
   defaultScreenHeightWeb: 600
   m_StereoRenderingPath: 0
   m_ActiveColorSpace: 0
-=======
-  defaultScreenWidth: 1024
-  defaultScreenHeight: 768
-  defaultScreenWidthWeb: 960
-  defaultScreenHeightWeb: 600
-  m_StereoRenderingPath: 0
-  m_ActiveColorSpace: 1
->>>>>>> 9cc2b65ec4e2966dcf71cbdb69017bc0a1fdcf14
   m_MTRendering: 1
   mipStripping: 0
   numberOfMipsStripped: 0
@@ -99,7 +82,7 @@ PlayerSettings:
   bakeCollisionMeshes: 0
   forceSingleInstance: 0
   useFlipModelSwapchain: 1
-  resizableWindow: 1
+  resizableWindow: 0
   useMacAppStoreValidation: 0
   macAppStoreCategory: public.app-category.games
   gpuSkinning: 0
@@ -145,7 +128,8 @@ PlayerSettings:
     16:9: 1
     Others: 1
   bundleVersion: 1.0
-  preloadedAssets: []
+  preloadedAssets:
+  - {fileID: -4954083692503614620, guid: 9884d9205f7a5604c9da4d3f97b10a5e, type: 2}
   metroInputSource: 0
   wsaTransparentSwapchain: 0
   m_HolographicPauseOnTrackingLoss: 1
@@ -551,27 +535,16 @@ PlayerSettings:
   apiCompatibilityLevelPerPlatform: {}
   m_RenderingPath: 1
   m_MobileRenderingPath: 1
-<<<<<<< HEAD
   metroPackageName: ASLTopoJakeVR
   metroPackageVersion: 
-=======
-  metroPackageName: TopoMap
-  metroPackageVersion: 1.0.0.0
->>>>>>> 9cc2b65ec4e2966dcf71cbdb69017bc0a1fdcf14
   metroCertificatePath: 
   metroCertificatePassword: 
   metroCertificateSubject: 
   metroCertificateIssuer: 
   metroCertificateNotAfter: 0000000000000000
-<<<<<<< HEAD
   metroApplicationDescription: ASLTopoJakeVR
   wsaImages: {}
   metroTileShortName: 
-=======
-  metroApplicationDescription: TopoMap
-  wsaImages: {}
-  metroTileShortName: TopoMap
->>>>>>> 9cc2b65ec4e2966dcf71cbdb69017bc0a1fdcf14
   metroTileShowName: 0
   metroMediumTileShowName: 0
   metroLargeTileShowName: 0
