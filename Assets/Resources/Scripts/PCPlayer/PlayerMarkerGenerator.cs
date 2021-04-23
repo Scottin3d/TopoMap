@@ -21,11 +21,13 @@ public class PlayerMarkerGenerator : MonoBehaviour
     private int SmallMapSize;
 
     private GameObject LocalProjectMarker;
+    private static GameObject MiniMapDisplayObject;
 
     void Awake()
     {
         PlayerCamera = GameObject.Find("Player").GetComponentInChildren<Camera>();
         PlayerTableViewCamera = GameObject.Find("PlayerTopViewCamera").GetComponentInChildren<Camera>();
+        MiniMapDisplayObject = GameObject.Find("MiniMapDisplay");
     }
 
     // Start is called before the first frame update
@@ -53,18 +55,38 @@ public class PlayerMarkerGenerator : MonoBehaviour
 
     private void ProjectMarker()
     {
-        Ray MouseRay = PlayerCamera.ScreenPointToRay(Input.mousePosition);
-        RaycastHit Hit;
-        if (Physics.Raycast(MouseRay, out Hit))
+        if (PlayerCamera.isActiveAndEnabled == true)
         {
-            if (Hit.collider.tag == "Chunk" && Hit.collider.transform.parent.name == "SpawnSmallMap")
+            Ray MouseRay = PlayerCamera.ScreenPointToRay(Input.mousePosition);
+            RaycastHit Hit;
+            if (Physics.Raycast(MouseRay, out Hit))
             {
-                LocalProjectMarker.SetActive(true);
-                LocalProjectMarker.transform.position = Hit.point;
+                if (Hit.collider.tag == "Chunk" && Hit.collider.transform.parent.name == "SpawnSmallMap")
+                {
+                    LocalProjectMarker.SetActive(true);
+                    LocalProjectMarker.transform.position = Hit.point;
+                }
+                else
+                {
+                    LocalProjectMarker.SetActive(false);
+                }
             }
-            else
+        }
+        if (PlayerTableViewCamera.isActiveAndEnabled == true)
+        {
+            Ray MouseRay = PlayerTableViewCamera.ScreenPointToRay(Input.mousePosition);
+            RaycastHit Hit;
+            if (Physics.Raycast(MouseRay, out Hit))
             {
-                LocalProjectMarker.SetActive(false);
+                if (Hit.collider.tag == "Chunk" && Hit.collider.transform.parent.name == "SpawnSmallMap")
+                {
+                    LocalProjectMarker.SetActive(true);
+                    LocalProjectMarker.transform.position = Hit.point;
+                }
+                else
+                {
+                    LocalProjectMarker.SetActive(false);
+                }
             }
         }
     }
@@ -118,6 +140,8 @@ public class PlayerMarkerGenerator : MonoBehaviour
     private static void GetLargerMapMarker(GameObject _myGameObject)
     {
         ASLObjectTrackingSystem.AddObjectToTrack(_myGameObject.GetComponent<ASL.ASLObject>(), _myGameObject.transform);
+        //MiniMapDisplayObject.GetComponent<MinimapDisplay>().AddRouteMarker(_myGameObject.transform.position);
+        MinimapDisplay.AddRouteMarker(_myGameObject.transform.position);
         LargerMapMarkerList.Add(_myGameObject);
     }
 

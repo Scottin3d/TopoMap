@@ -115,7 +115,7 @@ public class MinimapDisplay : MonoBehaviour
             {
                 playerMarkerPool[i].SetActive(true);
                 Vector3 position = playerTransforms[i].position;
-                position.y = 10f;
+                position.y = 55f;
                 playerMarkerPool[i].transform.position = position;
             } else
             {
