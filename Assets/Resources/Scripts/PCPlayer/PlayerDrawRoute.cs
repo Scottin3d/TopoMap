@@ -10,7 +10,7 @@ public class PlayerDrawRoute : MonoBehaviour
     public static List<GameObject> MyBrushList = new List<GameObject>();
     public Dropdown MyEraseDropDown;
     private static GameObject ThisGameObject;
-
+    //Awake
     void Awake()
     {
         ThisGameObject = this.gameObject;
