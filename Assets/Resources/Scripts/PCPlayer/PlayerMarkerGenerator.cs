@@ -20,6 +20,8 @@ public class PlayerMarkerGenerator : MonoBehaviour
     private int LargeMapSize;
     private int SmallMapSize;
 
+    private GameObject LocalProjectMarker;
+
     void Awake()
     {
         PlayerCamera = GameObject.Find("Player").GetComponentInChildren<Camera>();
@@ -33,16 +35,37 @@ public class PlayerMarkerGenerator : MonoBehaviour
         SmallMapCenter = SmallMapGenerator.transform.position;
         LargeMapSize = LargerMapGenerator.GetComponent<GenerateMapFromHeightMap>().mapSize;
         SmallMapSize = SmallMapGenerator.GetComponent<GenerateMapFromHeightMap>().mapSize;
+        LocalProjectMarker = Instantiate(Resources.Load("MyPrefabs/PlayerMarker") as GameObject);
+        LocalProjectMarker.SetActive(false);
     }
 
     // Update is called once per frame
     void Update()
     {
+        ProjectMarker();
         SelectObjectByClick();
 
         if (Input.GetKeyDown(KeyCode.Backspace))
         {
             RemoveLastMarker();
+        }
+    }
+
+    private void ProjectMarker()
+    {
+        Ray MouseRay = PlayerCamera.ScreenPointToRay(Input.mousePosition);
+        RaycastHit Hit;
+        if (Physics.Raycast(MouseRay, out Hit))
+        {
+            if (Hit.collider.tag == "Chunk" && Hit.collider.transform.parent.name == "SpawnSmallMap")
+            {
+                LocalProjectMarker.SetActive(true);
+                LocalProjectMarker.transform.position = Hit.point;
+            }
+            else
+            {
+                LocalProjectMarker.SetActive(false);
+            }
         }
     }
 
