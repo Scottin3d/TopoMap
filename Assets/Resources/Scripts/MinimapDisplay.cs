@@ -8,16 +8,16 @@ public class MinimapDisplay : MonoBehaviour
     public static MinimapDisplay current;
 
     public float updatesPerSecond = 10f;
-    public GameObject playerMarker = null;
+    //public GameObject playerMarker = null;
     public GameObject routeNodeMarker = null;
     public GameObject routePathMarker = null;
 
-    private List<GameObject> playerMarkerPool = new List<GameObject>();
+    //private List<GameObject> playerMarkerPool = new List<GameObject>();
     private List<GameObject> routeMarkerPool = new List<GameObject>();
     private List<GameObject> routeConnectPool = new List<GameObject>();
 
-    private static bool PlayerInitFinished = false;
-     bool RouteChanged = false;
+    //private static bool PlayerInitFinished = false;
+    bool RouteChanged = false;
 
     private void Awake()
     {
@@ -28,12 +28,12 @@ public class MinimapDisplay : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        Debug.Assert(playerMarker != null, "Please set " + playerMarker + " in the inspector.");
+        //Debug.Assert(playerMarker != null, "Please set " + playerMarker + " in the inspector.");
         Debug.Assert(routeNodeMarker != null, "Please set " + routeNodeMarker + " in the inspector.");
         Debug.Assert(routePathMarker != null, "Please set " + routePathMarker + " in the inspector.");
 
-        GeneratePlayerPool();
-        StartCoroutine(DelayedPlayerInit());
+        //GeneratePlayerPool();
+        //StartCoroutine(DelayedPlayerInit());
         StartCoroutine(UpdatePlayerPositions());
     }
 
@@ -45,16 +45,16 @@ public class MinimapDisplay : MonoBehaviour
 
     IEnumerator UpdatePlayerPositions()
     {
-        while (PlayerInitFinished)
+        while (true)
         {
             yield return new WaitForSeconds(1 / updatesPerSecond);
 
-            UpdatePlayerMinimapMarkers(ASLObjectTrackingSystem.GetPlayers());
+            //UpdatePlayerMinimapMarkers(ASLObjectTrackingSystem.GetPlayers());
             UpdateRouteMinimapMarkers();
         }
     }
 
-    IEnumerator DelayedPlayerInit()
+    /*IEnumerator DelayedPlayerInit()
     {
         Color theColor;
         for(int i = 0; i < playerMarkerPool.Count; i++)
@@ -88,7 +88,7 @@ public class MinimapDisplay : MonoBehaviour
             newPlayer.SetActive(false);
             playerMarkerPool.Add(newPlayer);
         }
-    }
+    }*/
 
     public static void AddRouteMarker(Vector3 position)
     {
@@ -106,7 +106,7 @@ public class MinimapDisplay : MonoBehaviour
 
     }
 
-    void UpdatePlayerMinimapMarkers(List<Transform> playerTransforms)
+    /*void UpdatePlayerMinimapMarkers(List<Transform> playerTransforms)
     {
         int numPlayers = playerTransforms.Count;
         for(int i = 0; i < playerMarkerPool.Count; i++)
@@ -122,7 +122,7 @@ public class MinimapDisplay : MonoBehaviour
                 playerMarkerPool[i].SetActive(false);
             }
         }
-    }
+    }*/
 
     void UpdateRouteMinimapMarkers()
     {
