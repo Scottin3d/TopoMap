@@ -827,6 +827,7 @@ GameObject:
   m_Component:
   - component: {fileID: 302996598}
   - component: {fileID: 302996599}
+  - component: {fileID: 302996600}
   m_Layer: 0
   m_Name: MiniMapDisplay
   m_TagString: Untagged
@@ -863,6 +864,19 @@ MonoBehaviour:
   updatesPerSecond: 1
   routeNodeMarker: {fileID: 2605839277329164192, guid: 6fd80fd765c413a419f4b47fc7302970, type: 3}
   routePathMarker: {fileID: 6751030655008426935, guid: 8f2d774bd20be934685b26e8eb263f48, type: 3}
+  routeConnectPool: []
+--- !u!114 &302996600
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 302996597}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 03c58412da33e154692db87cbf8c6ff0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &308766229
 GameObject:
   m_ObjectHideFlags: 0

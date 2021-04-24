@@ -8,16 +8,19 @@ public class MinimapDisplay : MonoBehaviour
     public static MinimapDisplay current;
 
     public float updatesPerSecond = 10f;
-    //public GameObject playerMarker = null;
     public GameObject routeNodeMarker = null;
     public GameObject routePathMarker = null;
 
-    //private List<GameObject> playerMarkerPool = new List<GameObject>();
     private List<GameObject> routeMarkerPool = new List<GameObject>();
-    private List<GameObject> routeConnectPool = new List<GameObject>();
+    private List<GameObject> linkedTransform = new List<GameObject>();
+    public List<GameObject> routeConnectPool = new List<GameObject>();
+    private GameObject nextMarker = null;
+    private GameObject nextRoute = null;
+    private Vector3 nextPos, nextRoutePos, nextScale, nextDir;
+    private string nextId;
 
-    //private static bool PlayerInitFinished = false;
     bool RouteChanged = false;
+    bool NodeRemoved = false;
 
     private void Awake()
     {
@@ -28,13 +31,73 @@ public class MinimapDisplay : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        //Debug.Assert(playerMarker != null, "Please set " + playerMarker + " in the inspector.");
         Debug.Assert(routeNodeMarker != null, "Please set " + routeNodeMarker + " in the inspector.");
         Debug.Assert(routePathMarker != null, "Please set " + routePathMarker + " in the inspector.");
 
-        //GeneratePlayerPool();
-        //StartCoroutine(DelayedPlayerInit());
-        StartCoroutine(UpdatePlayerPositions());
+        gameObject.GetComponent<ASLObject>()._LocallySetFloatCallback(SyncLists);
+        StartCoroutine(UpdateRoutePositions());
+    }
+
+    public void SyncLists(string _id, float[] _f)
+    {
+        float[] copy = new float[_f.Length - 1];
+        System.Array.ConstrainedCopy(_f, 1, copy, 0, copy.Length);
+        string theID = current.AssembleID(copy);
+        List<Transform> transforms = ASLObjectTrackingSystem.GetObjects();
+
+        switch (_f[1])
+        {
+            case 0:
+                Debug.Log("Adding object: " + theID);
+                //Add to list
+                bool isPresent = false;
+                foreach (GameObject obj in routeMarkerPool)
+                {
+                    if(obj.GetComponent<ASLObject>().m_Id.Equals(theID))
+                    {
+                        isPresent = true;
+                    }
+                }
+                if (!isPresent)
+                {
+                    Debug.Log("Object not yet tracked");
+                    GameObject toAdd = null;
+                    foreach (Transform t in transforms)
+                    {
+                        Debug.Log(t.gameObject.GetComponent<ASLObject>().m_Id);
+                        if (t.gameObject.GetComponent<ASLObject>().m_Id.Equals(theID))
+                        {
+                            toAdd = t.gameObject;
+                        }
+                    }
+                    /*if (toAdd != null)
+                    {
+                        routeMarkerPool.Add(toAdd);
+                        Debug.Log("Now tracking object");
+                    }
+                    else
+                    {
+                        Debug.Log("Already tracking object");
+                    }*/
+                }
+                break;
+            case 1:
+                //Remove from list
+                int removeNdx = -1;
+                break;
+                
+            
+        }
+    }
+
+    private string AssembleID(float[] f_id)
+    {
+        char[] c_id = new char[f_id.Length];
+        for (int i = 0; i < c_id.Length; i++)
+        {
+            c_id[i] = (char)f_id[i];
+        }
+        return string.Concat(c_id);
     }
 
     // Update is called once per frame
@@ -43,93 +106,96 @@ public class MinimapDisplay : MonoBehaviour
         
     }
 
-    IEnumerator UpdatePlayerPositions()
+    IEnumerator UpdateRoutePositions()
     {
         while (true)
         {
             yield return new WaitForSeconds(1 / updatesPerSecond);
-
-            //UpdatePlayerMinimapMarkers(ASLObjectTrackingSystem.GetPlayers());
             UpdateRouteMinimapMarkers();
         }
     }
 
-    /*IEnumerator DelayedPlayerInit()
+    
+    public static void AddRouteMarker(Transform _t)
     {
-        Color theColor;
-        for(int i = 0; i < playerMarkerPool.Count; i++)
-        {
-            while(playerMarkerPool[i] == null)
-            {
-                yield return new WaitForSeconds(0.1f);
-            }
-            Debug.Log("Marker " + i + " initialized");
-            theColor = new Color(Random.Range(0, 1f), Random.Range(0, 1f), Random.Range(0, 1f), 1f);
-            playerMarkerPool[i].GetComponent<Renderer>().material.color = theColor;
-
-            playerMarkerPool[i].GetComponent<ASLObject>().SendAndSetClaim(() =>
-            {
-                playerMarkerPool[i].GetComponent<ASLObject>().SendAndSetObjectColor(theColor, theColor);
-            });
-
-            playerMarkerPool[i].SetActive(false);
-            ASLObjectTrackingSystem.AddObjectToTrack(playerMarkerPool[i].GetComponent<ASLObject>(), playerMarkerPool[i].transform);
-        }
-
-        Debug.Log("Init finished");
-        PlayerInitFinished = true;
-    }
-
-    void GeneratePlayerPool()
-    {
-        for(int i = 0; i < 20; i++)
-        {
-            GameObject newPlayer = Instantiate(playerMarker, transform);
-            newPlayer.SetActive(false);
-            playerMarkerPool.Add(newPlayer);
-        }
-    }*/
-
-    public static void AddRouteMarker(Vector3 position)
-    {
-        GameObject newMarker = Instantiate(current.routeNodeMarker, current.transform);
-        position.y = 9.5f;
-        newMarker.transform.position = position;
-        current.routeMarkerPool.Add(newMarker);
-        ASLObjectTrackingSystem.AddObjectToTrack(newMarker.GetComponent<ASLObject>(), newMarker.transform);
-        current.RouteChanged = true;
+        current.linkedTransform.Add(_t.gameObject);
+        current.nextPos = _t.position;
+        current.nextPos.y = 10f;
+        ASLHelper.InstantiateASLObject("MinimapMarker_RouteNode", new Vector3(0, 0, 0), Quaternion.identity, "", "", MarkerInstantiation);
+              
+        
         Debug.Log("Added marker");
     }
 
-    public void RemoveRouteMarker(GameObject routeMarker)
+    public static void RemoveRouteMarker(Transform _t)
     {
+        int ndx = current.linkedTransform.IndexOf(_t.gameObject);
+        if(ndx > -1)
+        {
+            GameObject toRemove = current.routeMarkerPool[ndx];
+            current.linkedTransform.Remove(_t.gameObject);
+            current.routeMarkerPool.RemoveAt(ndx);
+            ASLObjectTrackingSystem.RemoveObjectToTrack(toRemove.GetComponent<ASLObject>());
+            toRemove.GetComponent<ASLObject>().SendAndSetClaim(() =>
+            {
+                toRemove.GetComponent<ASLObject>().DeleteObject();
+            });
 
+            current.RouteChanged = true;
+            current.NodeRemoved = true;
+        }        
     }
 
-    /*void UpdatePlayerMinimapMarkers(List<Transform> playerTransforms)
+    private static void MarkerInstantiation(GameObject _myGameObject)
     {
-        int numPlayers = playerTransforms.Count;
-        for(int i = 0; i < playerMarkerPool.Count; i++)
+        current.nextMarker = _myGameObject;
+        current.routeMarkerPool.Add(_myGameObject);
+        current.nextMarker.GetComponent<ASLObject>().SendAndSetClaim(() =>
         {
-            if(i < numPlayers)
-            {
-                playerMarkerPool[i].SetActive(true);
-                Vector3 position = playerTransforms[i].position;
-                position.y = 55f;
-                playerMarkerPool[i].transform.position = position;
-            } else
-            {
-                playerMarkerPool[i].SetActive(false);
-            }
-        }
-    }*/
+            current.nextMarker.GetComponent<ASLObject>().SendAndSetLocalPosition(current.nextPos);
+            current.nextId = current.nextMarker.GetComponent<ASLObject>().m_Id;
+        });
+        ASLObjectTrackingSystem.AddObjectToTrack(_myGameObject.GetComponent<ASLObject>(), _myGameObject.transform);
+        current.RouteChanged = true;
 
+        /*current.gameObject.GetComponent<ASLObject>().SendAndSetClaim(() =>
+        {
+            //float[] Ids = new float[2];
+
+            //Based on an answer to
+            //https://stackoverflow.com/questions/5322056/how-to-convert-an-ascii-character-into-an-int-in-c/37736710#:~:text=A%20char%20value%20in%20C,it%20with%20(int)c%20.
+            char[] splitId = current.nextId.ToCharArray();
+            float[] Ids = new float[splitId.Length + 1];
+            Ids[0] = 0;
+            for(int i = 0; i < splitId.Length; i++)
+            {
+                Ids[i + 1] = (float)splitId[i];
+            }
+            current.gameObject.GetComponent<ASLObject>().SendFloatArray(Ids);
+        });*/
+    }
+
+    private static void RouteInstantiation(GameObject _myGameObject)
+    {
+        current.nextRoute = _myGameObject;
+        current.routeConnectPool.Add(_myGameObject);
+        _myGameObject.transform.up = current.nextDir;
+        current.nextRoute.GetComponent<ASLObject>().SendAndSetClaim(() =>
+        {
+            current.nextRoute.GetComponent<ASLObject>().SendAndSetWorldPosition(current.nextRoutePos);
+            current.nextRoute.GetComponent<ASLObject>().SendAndSetLocalRotation(_myGameObject.transform.localRotation);
+            current.nextRoute.GetComponent<ASLObject>().SendAndSetLocalScale(current.nextScale);
+        });
+        ASLObjectTrackingSystem.AddObjectToTrack(_myGameObject.GetComponent<ASLObject>(), _myGameObject.transform);
+    }
+
+    
+    
     void UpdateRouteMinimapMarkers()
     {
         GameObject newPath;
-        Vector3 dir;
-        Vector3 scale;
-        Vector3 pos;
+        GameObject curNode, nextNode;
+
         float length;
         int ndx = 0;
         if (RouteChanged)
@@ -137,27 +203,69 @@ public class MinimapDisplay : MonoBehaviour
             Debug.Log("Route changed");
             for (ndx = 0; ndx < routeMarkerPool.Count - 1; ndx++)
             {
-                dir = routeMarkerPool[ndx + 1].transform.position - routeMarkerPool[ndx].transform.position;
-                length = (routeMarkerPool[ndx + 1].transform.position - routeMarkerPool[ndx].transform.position).magnitude / 2f;
+                curNode = routeMarkerPool[ndx]; nextNode = routeMarkerPool[ndx + 1];
 
+                nextDir = nextNode.transform.position - curNode.transform.position;
+                length = (nextNode.transform.position - curNode.transform.position).magnitude / 2f;
+                nextScale = new Vector3(.25f, length, .25f);
+                nextRoutePos = curNode.transform.position + (length * nextDir.normalized);
+
+                Debug.Log(routeConnectPool.Count < routeMarkerPool.Count - 1);
                 if (routeConnectPool.Count < routeMarkerPool.Count - 1)
                 {
                     Debug.Log("Creating new path");
-                    newPath = Instantiate(routePathMarker, transform);
-                    routeConnectPool.Add(newPath);
+                    ASLHelper.InstantiateASLObject("MinimapMarker_RoutePath", new Vector3(0, 0, 0), Quaternion.identity, "", "", RouteInstantiation);
+                } else if (NodeRemoved)
+                {
+                Debug.Log("Changing existing path");
+                GameObject theRoute = routeConnectPool[ndx];
+                theRoute.transform.up = nextDir;
+                theRoute.GetComponent<ASLObject>().SendAndSetClaim(() =>
+                    {
+                        theRoute.GetComponent<ASLObject>().SendAndSetWorldPosition(current.nextRoutePos);
+                        theRoute.GetComponent<ASLObject>().SendAndSetLocalRotation(theRoute.transform.localRotation);
+                        theRoute.GetComponent<ASLObject>().SendAndSetLocalScale(current.nextScale);
+                    });
+                    ASLObjectTrackingSystem.UpdateObjectTransform(theRoute.GetComponent<ASLObject>(), theRoute.transform);
                 }
-
                 Debug.Log(length);
-                routeConnectPool[ndx].transform.up = dir;
-                scale = routeConnectPool[ndx].transform.localScale;
-                scale.y = length;
-                pos = routeMarkerPool[ndx].transform.position + (length * routeConnectPool[ndx].transform.up);
-                routeConnectPool[ndx].transform.position = pos;
-                routeConnectPool[ndx].transform.localScale = scale;
             }
 
+            /*GameObject toRemove;
+            while (routeConnectPool.Count >= ndx && ndx != 0)
+            {
+                toRemove = routeConnectPool[ndx];
+                int removeNdx = routeConnectPool.IndexOf(toRemove);
+                routeConnectPool.RemoveAt(removeNdx);
+                ASLObjectTrackingSystem.RemoveObjectToTrack(toRemove.GetComponent<ASLObject>());
+                toRemove.GetComponent<ASLObject>().SendAndSetClaim(() =>
+                {
+                    toRemove.GetComponent<ASLObject>().DeleteObject();
+                });
+            }*/
+            StartCoroutine(TrimRoute(ndx));
+
             RouteChanged = false;
+            NodeRemoved = false;
         }
+    }
+
+    IEnumerator TrimRoute(int ndx)
+    {
+        int count = 0;
+        foreach(GameObject g in routeConnectPool)
+        {
+            if (g == null) yield return new WaitForSeconds(0.1f);
+            count++;
+        }
+        Debug.Log(count);
+        Debug.Log(routeConnectPool.Count);
+        StopCoroutine(TrimRoute(ndx));
+    }
+
+    private void DrawDirectRoute(Transform start, Transform end)
+    {
+
     }
 }
 

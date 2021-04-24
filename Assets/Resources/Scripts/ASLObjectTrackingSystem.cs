@@ -81,6 +81,22 @@ public static class ASLObjectTrackingSystem {
             return true;
         }
     }
+    public static bool RemoveObjectToTrack(ASLObject objectToRemove)
+    {
+        // try to emplace
+        if (ASLObjectsInScene.ContainsKey(objectToRemove))
+        {
+            ASLObjectsInScene.Remove(objectToRemove);
+            numberOfObjects = (numberOfObjects - 1 >= 0) ? numberOfObjects-- : 0;
+            return true;
+
+            // add if not
+        }
+        else
+        {
+            return false;
+        }
+    }
 
     public static void UpdateObjectTransform(ASLObject objectToTrack, Transform objectTransform) {
         // try to emplace
@@ -116,6 +132,4 @@ public static class ASLObjectTrackingSystem {
         }
         return objects;
     }
-
-
 }

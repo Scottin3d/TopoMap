@@ -141,7 +141,7 @@ public class PlayerMarkerGenerator : MonoBehaviour
     {
         ASLObjectTrackingSystem.AddObjectToTrack(_myGameObject.GetComponent<ASL.ASLObject>(), _myGameObject.transform);
         //MiniMapDisplayObject.GetComponent<MinimapDisplay>().AddRouteMarker(_myGameObject.transform.position);
-        MinimapDisplay.AddRouteMarker(_myGameObject.transform.position);
+        MinimapDisplay.AddRouteMarker(_myGameObject.transform);
         LargerMapMarkerList.Add(_myGameObject);
     }
 
@@ -179,6 +179,7 @@ public class PlayerMarkerGenerator : MonoBehaviour
         if (LargerMapMarkerList.Count > 0)
         {
             GameObject LMarker = LargerMapMarkerList[LargerMapMarkerList.Count - 1];
+            MinimapDisplay.RemoveRouteMarker(LMarker.transform);
 
             LMarker.GetComponent<ASL.ASLObject>().SendAndSetClaim(() =>
             {
