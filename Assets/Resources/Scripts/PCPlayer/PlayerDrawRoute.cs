@@ -5,9 +5,13 @@ using UnityEngine.UI;
 
 public class PlayerDrawRoute : MonoBehaviour
 {
+    public GameObject LargerMapGenerator;
+    public GameObject SmallMapGenerator;
     private Camera PlayerCamera;
     private Camera PlayerTableViewCamera;
-    public static List<GameObject> MyBrushList = new List<GameObject>();
+    private static List<GameObject> MyBrushList = new List<GameObject>();
+    private static List<GameObject> MySmallBrushList = new List<GameObject>();
+    private static List<GameObject> MyLargerBrushList = new List<GameObject>();
     public Dropdown MyEraseDropDown;
     private static GameObject ThisGameObject;
     //Awake function
@@ -40,9 +44,17 @@ public class PlayerDrawRoute : MonoBehaviour
                 RaycastHit Hit;
                 if (Physics.Raycast(MouseRay, out Hit))
                 {
-                    if (Hit.collider.tag == "WhiteBoard" || (Hit.collider.tag == "Chunk" && Hit.collider.transform.parent.name == "SpawnSmallMap"))
+                    if (Hit.collider.tag == "WhiteBoard")
                     {
-                        ASL.ASLHelper.InstantiateASLObject("Brush", Hit.point, Quaternion.identity, "", "", GetEachBrush);
+                        ASL.ASLHelper.InstantiateASLObject("Brush", Hit.point, Quaternion.identity, "", "", GetEachBrushOnWhiteBoard);
+                    }
+                    if (Hit.collider.tag == "Chunk" && Hit.collider.transform.parent.name == "SpawnSmallMap")
+                    {
+                        ASL.ASLHelper.InstantiateASLObject("Brush", Hit.point, Quaternion.identity, "", "", GetEachBrushOnSmallMap);
+                        int LargeMapSize = LargerMapGenerator.GetComponent<GenerateMapFromHeightMap>().mapSize;
+                        int SmallMapSize = SmallMapGenerator.GetComponent<GenerateMapFromHeightMap>().mapSize;
+                        Vector3 NewPositionOneLargeMap = ((Hit.point - SmallMapGenerator.transform.position) * (LargeMapSize / SmallMapSize)) + LargerMapGenerator.transform.position;
+                        ASL.ASLHelper.InstantiateASLObject("LargeBrush", NewPositionOneLargeMap, Quaternion.identity, "", "", GetEachBrushOnLargerMap);
                     }
                 }
             }
@@ -55,17 +67,33 @@ public class PlayerDrawRoute : MonoBehaviour
                 {
                     if (Hit.collider.tag == "Chunk")
                     {
-                        ASL.ASLHelper.InstantiateASLObject("Brush", Hit.point, Quaternion.identity, "", "", GetEachBrush);
+                        ASL.ASLHelper.InstantiateASLObject("Brush", Hit.point, Quaternion.identity, "", "", GetEachBrushOnSmallMap);
+                        int LargeMapSize = LargerMapGenerator.GetComponent<GenerateMapFromHeightMap>().mapSize;
+                        int SmallMapSize = SmallMapGenerator.GetComponent<GenerateMapFromHeightMap>().mapSize;
+                        Vector3 NewPositionOneLargeMap = ((Hit.point - SmallMapGenerator.transform.position) * (LargeMapSize / SmallMapSize)) + LargerMapGenerator.transform.position;
+                        ASL.ASLHelper.InstantiateASLObject("LargeBrush", NewPositionOneLargeMap, Quaternion.identity, "", "", GetEachBrushOnLargerMap);
                     }
                 }
             }
         }
     }
 
-    private static void GetEachBrush(GameObject _myGameObject)
+    private static void GetEachBrushOnWhiteBoard(GameObject _myGameObject)
     {
         _myGameObject.transform.parent = ThisGameObject.transform;
         MyBrushList.Add(_myGameObject);
+    }
+    
+    private static void GetEachBrushOnSmallMap(GameObject _myGameObject)
+    {
+        _myGameObject.transform.parent = ThisGameObject.transform;
+        MySmallBrushList.Add(_myGameObject);
+    }
+
+    private static void GetEachBrushOnLargerMap(GameObject _myGameObject)
+    {
+        _myGameObject.transform.parent = ThisGameObject.transform;
+        MyLargerBrushList.Add(_myGameObject);
     }
 
     public void EraseLine()
@@ -107,6 +135,65 @@ public class PlayerDrawRoute : MonoBehaviour
                 });
 
                 MyBrushList.RemoveAt(MyBrushList.Count - 1);
+            }
+        }
+    }
+
+    public void EraseLineOnMap()
+    {
+        if (MyEraseDropDown.options[MyEraseDropDown.value].text == "EraseAll")
+        {
+            EraseAllLineOnMap();
+        }
+        if (MyEraseDropDown.options[MyEraseDropDown.value].text == "EraseLastTen")
+        {
+            EraseLastTenLineOnMap();
+        }
+    }
+
+    private static void EraseAllLineOnMap()
+    {
+        foreach (GameObject SingleBrush in MySmallBrushList)
+        {
+            SingleBrush.GetComponent<ASL.ASLObject>().SendAndSetClaim(() =>
+            {
+                SingleBrush.GetComponent<ASL.ASLObject>().DeleteObject();
+            });
+        }
+
+        foreach (GameObject SingleBrush in MyLargerBrushList)
+        {
+            SingleBrush.GetComponent<ASL.ASLObject>().SendAndSetClaim(() =>
+            {
+                SingleBrush.GetComponent<ASL.ASLObject>().DeleteObject();
+            });
+        }
+
+        MySmallBrushList.Clear();
+        MyLargerBrushList.Clear();
+    }
+
+    private static void EraseLastTenLineOnMap()
+    {
+        for (int i = 0; i < 10; i++)
+        {
+            if (MySmallBrushList.Count != 0)
+            {
+                GameObject LastBrushOnSmallMap = MySmallBrushList[MyBrushList.Count - 1];
+                GameObject LastBrushOnLargeMap = MyLargerBrushList[MyBrushList.Count - 1];
+
+                LastBrushOnSmallMap.GetComponent<ASL.ASLObject>().SendAndSetClaim(() =>
+                {
+                    LastBrushOnSmallMap.GetComponent<ASL.ASLObject>().DeleteObject();
+                });
+
+                LastBrushOnLargeMap.GetComponent<ASL.ASLObject>().SendAndSetClaim(() =>
+                {
+                    LastBrushOnLargeMap.GetComponent<ASL.ASLObject>().DeleteObject();
+                });
+
+                MySmallBrushList.RemoveAt(MySmallBrushList.Count - 1);
+                MyLargerBrushList.RemoveAt(MyLargerBrushList.Count - 1);
             }
         }
     }
