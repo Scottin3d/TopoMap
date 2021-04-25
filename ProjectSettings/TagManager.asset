@@ -7,6 +7,9 @@ TagManager:
   - MatchInfo
   - AvailableMatches
   - Chunk
+  - Plane
+  - WhiteBoard
+  - Table
   layers:
   - Default
   - TransparentFX
@@ -15,7 +18,7 @@ TagManager:
   - Water
   - UI
   - Markers
-  - 
+  - Minimap
   - PostProcessing
   - 
   - 

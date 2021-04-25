@@ -126,8 +126,6 @@ public class GenerateMapFromHeightMap : MonoBehaviour {
                 chunk.AddComponent<MeshCollider>().sharedMesh = mesh;
                 chunk.AddComponent<MeshRenderer>().sharedMaterial = Instantiate(material);
                 chunk.GetComponent<MeshRenderer>().sharedMaterial.mainTexture = mapChunks[x, z].heightmap;
-
-                //yield return new WaitForSeconds(0.5f);
             }
         }
     }

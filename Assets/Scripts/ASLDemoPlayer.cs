@@ -13,12 +13,15 @@ public class ASLDemoPlayer : MonoBehaviour {
     static GameObject _playerObject = null;
     static ASLObject _playerAslObject = null;
 
+    private GameObject miniCam;
+
     private static readonly float UPDATES_PER_SECOND = 2.0f;
 
     void Start() {
         _localPlayerObject = (GameObject)Instantiate(Resources.Load("MyPrefabs/Player"));
 
         ASLHelper.InstantiateASLObject(playerPrefab.name, Vector3.zero, Quaternion.identity, null, null, OnPlayerCreated);
+        miniCam = Instantiate(Resources.Load("MyPrefabs/MinimapCamera")) as GameObject;
 
         VRController.setPlayer2D(_localPlayerObject);
 
@@ -63,6 +66,9 @@ public class ASLDemoPlayer : MonoBehaviour {
             });
 
             ASLObjectTrackingSystem.UpdatePlayerTransform(_playerAslObject, _playerAslObject.transform);
+            Vector3 position = _playerAslObject.transform.position;
+            position.y = 15f;
+            miniCam.transform.position = position;
 
             yield return new WaitForSeconds(1 / UPDATES_PER_SECOND);
         }
