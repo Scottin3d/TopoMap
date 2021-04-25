@@ -41,12 +41,12 @@ Material:
         m_Offset: {x: 0, y: 0}
     m_Floats:
     - Vector1_3bffd8b2ecf94a89be53cf253098125e: 12.2
-    - _ScrollSpeed: 0.01
+    - _ScrollSpeed: 0.001
     - _Transparency: 1
     m_Colors:
     - Color_a5a1fd1a653945d5945634ab2bf0ed6b: {r: 0, g: 0, b: 0, a: 0}
     - _FresnelColor: {r: 1, g: 1, b: 1, a: 0}
-    - _HologramTiling: {r: 16, g: 16, b: 0, a: 0}
+    - _HologramTiling: {r: 32, g: 32, b: 0, a: 0}
     - _MainColor: {r: 0.028969401, g: 0.12116364, b: 0.8773585, a: 0}
     - _MainTex: {r: 0.9622642, g: 0.028264329, b: 0, a: 0}
   m_BuildTextureStacks: []

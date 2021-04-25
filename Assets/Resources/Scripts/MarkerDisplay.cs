@@ -6,7 +6,10 @@ using ASL;
 public class MarkerDisplay : MonoBehaviour
 {
     public static MarkerDisplay current;
-    public int mapScaleFactor;
+    public GenerateMapFromHeightMap bigMap = null;
+    public GenerateMapFromHeightMap smallMap = null;
+
+    private int mapScaleFactor = 1;
 
     public float updatesPerSecond = 2f;
 
@@ -23,7 +26,12 @@ public class MarkerDisplay : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
+        Debug.Assert(bigMap != null, "Please set " + bigMap + " in the inspector.");
+        Debug.Assert(smallMap != null, "Please set " + smallMap + " in the inspector.");
         Debug.Assert(playerMaker != null, "Please set " + playerMaker + " in the inspector.");
+
+        mapScaleFactor = bigMap.mapSize / smallMap.mapSize;
+
         GeneratePlayerPool();
 
         StartCoroutine(UpdatePlayerPositions());
@@ -52,7 +60,7 @@ public class MarkerDisplay : MonoBehaviour
                 playerMarkerPool[i].SetActive(true);
                 playerMarkerPool[i].transform.GetComponentInChildren<MeshRenderer>().material.color = Color.blue;
                 Vector3 position = mapDisplay.position + (playerTransforms[i].position / mapScaleFactor);
-                position.y = mapDisplay.position.y;
+                //position.y = mapDisplay.position.y;
                 playerMarkerPool[i].transform.position = position;
                 Quaternion rotation = Quaternion.identity;
                 rotation.eulerAngles = new Vector3(0f, playerTransforms[i].rotation.eulerAngles.y, 0f);
@@ -69,7 +77,7 @@ public class MarkerDisplay : MonoBehaviour
                 playerMarkerPool[i].SetActive(true);
                 playerMarkerPool[i].transform.GetComponentInChildren<MeshRenderer>().material.color = Color.green;
                 Vector3 position = mapDisplay.position + (objectTransforms[o].position / mapScaleFactor);
-                position.y = mapDisplay.position.y;
+                //position.y = mapDisplay.position.y;
                 playerMarkerPool[i].transform.position = position;
 
                 // send to ASL

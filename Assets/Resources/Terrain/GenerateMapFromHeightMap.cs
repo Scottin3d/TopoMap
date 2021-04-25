@@ -69,6 +69,7 @@ public class GenerateMapFromHeightMap : MonoBehaviour {
     /// 
     /// </summary>
     private void Start() {
+        //StartCoroutine(GenerateMap());
         GenerateMap();
     }
     /// <summary>
@@ -126,6 +127,7 @@ public class GenerateMapFromHeightMap : MonoBehaviour {
                 chunk.AddComponent<MeshRenderer>().sharedMaterial = Instantiate(material);
                 chunk.GetComponent<MeshRenderer>().sharedMaterial.mainTexture = mapChunks[x, z].heightmap;
 
+                //yield return new WaitForSeconds(0.5f);
             }
         }
     }
