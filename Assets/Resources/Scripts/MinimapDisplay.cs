@@ -8,6 +8,7 @@ public class MinimapDisplay : MonoBehaviour
     public static MinimapDisplay current;
 
     public float updatesPerSecond = 10f;
+    public float heightAboveMarker = 5f;
     public GameObject routeNodeMarker = null;
     public GameObject routePathMarker = null;
 
@@ -88,8 +89,7 @@ public class MinimapDisplay : MonoBehaviour
     public static void AddRouteMarker(Transform _t)
     {
         current.linkedTransform.Add(_t.gameObject);
-        current.nextPos = _t.position;
-        current.nextPos.y = 10f;
+        current.nextPos = _t.position + current.heightAboveMarker * Vector3.up;
         ASLHelper.InstantiateASLObject("MinimapMarker_RouteNode", new Vector3(0, 0, 0), Quaternion.identity, "", "", MarkerInstantiation);
         ASLHelper.InstantiateASLObject("MinimapMarker_RoutePath", new Vector3(0, 0, 0), Quaternion.identity, "", "", RouteInstantiation);
     }

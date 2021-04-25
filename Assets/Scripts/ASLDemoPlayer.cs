@@ -14,18 +14,16 @@ public class ASLDemoPlayer : MonoBehaviour {
     static GameObject _playerObject = null;
     static ASLObject _playerAslObject = null;
 
-    static GameObject _localMinimapObject = null;
     static GameObject _minimapObject = null;
     static ASLObject _minimapAslObject = null;
 
     private GameObject miniCam;
 
-    private static readonly float UPDATES_PER_SECOND = 2.0f;
+    private static readonly float UPDATES_PER_SECOND = 10.0f;
 
     void Start() {
         _myColor = new Color(Random.Range(0, 1f), Random.Range(0, 1f), Random.Range(0, 1f), .25f);
         _localPlayerObject = (GameObject)Instantiate(Resources.Load("MyPrefabs/Player"));
-        _localMinimapObject = (GameObject)Instantiate(Resources.Load("MyPrefabs/MinimapMarker_Player"));
 
         ASLHelper.InstantiateASLObject(playerPrefab.name, Vector3.zero, Quaternion.identity, null, null, OnPlayerCreated);
         ASLHelper.InstantiateASLObject("MinimapMarker_Player", new Vector3(0, 0, 0), Quaternion.identity, null, null, OnPlayerMarkerCreated);
@@ -39,7 +37,6 @@ public class ASLDemoPlayer : MonoBehaviour {
 
     private void Update() {
         miniCam.transform.position = _localPlayerObject.transform.position + 15f * Vector3.up;
-        _localMinimapObject.transform.position = _localPlayerObject.transform.position + 10f * Vector3.up;
         if (Input.GetKeyDown(KeyCode.Alpha1)) {
             ASLHelper.InstantiateASLObject(PrimitiveType.Capsule, _localPlayerObject.transform.position, Quaternion.identity, null, null, OnPrimitiveCreate);
         
@@ -66,11 +63,11 @@ public class ASLDemoPlayer : MonoBehaviour {
             yield return new WaitForSeconds(0.1f);
         }
 
-        _localMinimapObject.transform.position = spawnPosition.position + 10f * Vector3.up;
+        Vector3 pos = spawnPosition.position + 10f * Vector3.up;
 
         _minimapAslObject.SendAndSetClaim(() =>
         {
-            _minimapAslObject.SendAndSetWorldPosition(_localMinimapObject.transform.position);
+            _minimapAslObject.SendAndSetWorldPosition(pos);
             _minimapAslObject.SendAndSetObjectColor(_myColor, _myColor);
         });
         //ASLObjectTrackingSystem.AddObjectToTrack(_minimapAslObject, _minimapObject.transform);
@@ -94,9 +91,10 @@ public class ASLDemoPlayer : MonoBehaviour {
                 yield return new WaitForSeconds(0.1f);
             }
 
+            Vector3 pos = _localPlayerObject.transform.position + 10f * Vector3.up;
             _minimapAslObject.SendAndSetClaim(() =>
             {
-                _minimapAslObject.SendAndSetWorldPosition(_localMinimapObject.transform.position);
+                _minimapAslObject.SendAndSetWorldPosition(pos);
             });
             //ASLObjectTrackingSystem.UpdateObjectTransform(_minimapAslObject, _minimapAslObject.transform);
 
