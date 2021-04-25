@@ -70,7 +70,7 @@ public class SpawnPlayer : MonoBehaviour
 
         Marker.GetComponent<ASL.ASLObject>().SendAndSetClaim(() =>
         {
-            Marker.GetComponent<ASL.ASLObject>().SendAndSetWorldPosition(pos - 0.5f * Vector3.down);
+            Marker.GetComponent<ASL.ASLObject>().SendAndSetWorldPosition(pos + 0.5f * Vector3.down);
             ASLObjectTrackingSystem.UpdateObjectTransform(Marker.GetComponent<ASL.ASLObject>(), Marker.transform);
         });
     }
