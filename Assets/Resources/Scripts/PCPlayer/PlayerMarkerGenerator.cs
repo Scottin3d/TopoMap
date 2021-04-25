@@ -103,7 +103,16 @@ public class PlayerMarkerGenerator : MonoBehaviour
                 {
                     if (Hit.collider.tag == "Chunk" && Hit.collider.transform.parent.name == "SpawnSmallMap")
                     {
-                        ASL.ASLHelper.InstantiateASLObject("PlayerMarker", Hit.point, Quaternion.identity, "", "", GetSmallMapMarker);
+                        string DropdownOpionValue = MyDropdownList.options[MyDropdownList.value].text;
+                        if (DropdownOpionValue == "Marker")
+                        {
+                            DropdownOpionValue = "PlayerMarker";
+                        }
+                        else
+                        {
+                            DropdownOpionValue = "PlayerRouteMarker";
+                        }
+                        ASL.ASLHelper.InstantiateASLObject(DropdownOpionValue, Hit.point, Quaternion.identity, "", "", GetSmallMapMarker);
                         GenerateMarkerOnLargerMap(Hit.point);
 
                     }
@@ -124,12 +133,26 @@ public class PlayerMarkerGenerator : MonoBehaviour
                 {
                     if (Hit.collider.tag == "Chunk" && Hit.collider.transform.parent.name == "SpawnSmallMap")
                     {
-                        ASL.ASLHelper.InstantiateASLObject("PlayerMarker", Hit.point, Quaternion.identity, "", "", GetSmallMapMarker);
+                        string DropdownOpionValue = MyDropdownList.options[MyDropdownList.value].text;
+                        if (DropdownOpionValue == "Marker")
+                        {
+                            DropdownOpionValue = "PlayerMarker";
+                        }
+                        else
+                        {
+                            DropdownOpionValue = "PlayerRouteMarker";
+                        }
+                        ASL.ASLHelper.InstantiateASLObject(DropdownOpionValue, Hit.point, Quaternion.identity, "", "", GetSmallMapMarker);
                         GenerateMarkerOnLargerMap(Hit.point);
                     }
                 }
             }
         }
+    }
+
+    private void SpawnRegularMarker(Vector3 HitPoint)
+    {
+
     }
 
     private static void GetSmallMapMarker(GameObject _myGameObject)

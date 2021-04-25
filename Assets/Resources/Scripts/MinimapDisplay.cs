@@ -98,7 +98,6 @@ public class MinimapDisplay : MonoBehaviour
         current.routeMarkerPool.Add(newMarker);
         ASLObjectTrackingSystem.AddObjectToTrack(newMarker.GetComponent<ASLObject>(), newMarker.transform);
         current.RouteChanged = true;
-        Debug.Log("Added marker");
     }
 
     public void RemoveRouteMarker(GameObject routeMarker)
