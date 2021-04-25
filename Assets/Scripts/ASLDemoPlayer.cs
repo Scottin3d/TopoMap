@@ -19,7 +19,7 @@ public class ASLDemoPlayer : MonoBehaviour {
 
     private GameObject miniCam;
 
-    private static readonly float UPDATES_PER_SECOND = 10.0f;
+    private static readonly float UPDATES_PER_SECOND = 5.0f;
 
     void Start() {
         _myColor = new Color(Random.Range(0, 1f), Random.Range(0, 1f), Random.Range(0, 1f), .25f);
@@ -115,6 +115,10 @@ public class ASLDemoPlayer : MonoBehaviour {
 
     private static void OnPrimitiveCreate(GameObject _gameObject) {
         MinimapDisplay.AddRouteMarker(_gameObject.transform);
+        _gameObject.GetComponent<ASLObject>().SendAndSetClaim(() =>
+        {
+            _gameObject.GetComponent<ASLObject>().SendAndSetWorldPosition(_gameObject.transform.position);
+        });
        ASLObjectTrackingSystem.AddObjectToTrack(_gameObject.GetComponent<ASLObject>(), _gameObject.transform);
     }
 }
