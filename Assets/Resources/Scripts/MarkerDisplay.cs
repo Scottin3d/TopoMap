@@ -107,4 +107,9 @@ public class MarkerDisplay : MonoBehaviour
         playerMarkerPool.Add(_gameObject);
         _gameObject.SetActive(false);
     }
+
+    public static int GetScaleFactor()
+    {
+        return current.mapScaleFactor;
+    }
 }

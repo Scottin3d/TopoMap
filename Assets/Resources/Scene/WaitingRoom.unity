@@ -864,9 +864,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   updatesPerSecond: 1
-  routeNodeMarker: {fileID: 2605839277329164192, guid: 6fd80fd765c413a419f4b47fc7302970, type: 3}
-  routePathMarker: {fileID: 6751030655008426935, guid: 8f2d774bd20be934685b26e8eb263f48, type: 3}
-  routeConnectPool: []
+  heightAboveMarker: 5
+  MapDisplay: {fileID: 0}
 --- !u!114 &302996600
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -3284,7 +3283,7 @@ GameObject:
   - component: {fileID: 1408569333}
   m_Layer: 0
   m_Name: SpawnLargerMap
-  m_TagString: Untagged
+  m_TagString: LargeMap
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -5209,7 +5208,7 @@ GameObject:
   - component: {fileID: 2118281289}
   m_Layer: 0
   m_Name: SpawnSmallMap
-  m_TagString: Untagged
+  m_TagString: SmallMap
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -5289,7 +5288,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b3c31fde37c7c22438155506a89fffb9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  mapScaleFactor: 50
+  bigMap: {fileID: 0}
+  smallMap: {fileID: 0}
   updatesPerSecond: 2
   playerMaker: {fileID: 1375720642727765894, guid: e10b86d10312ae0408de2cd61b96943a, type: 3}
   mapDisplay: {fileID: 2118281287}

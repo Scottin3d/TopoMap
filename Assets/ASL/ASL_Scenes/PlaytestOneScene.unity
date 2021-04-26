@@ -478,7 +478,7 @@ GameObject:
   - component: {fileID: 468696375}
   m_Layer: 0
   m_Name: SmallMap
-  m_TagString: Untagged
+  m_TagString: SmallMap
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -558,7 +558,7 @@ GameObject:
   - component: {fileID: 631668596}
   m_Layer: 0
   m_Name: BigMap
-  m_TagString: Untagged
+  m_TagString: LargeMap
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -989,9 +989,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   updatesPerSecond: 10
   heightAboveMarker: 5
-  routeNodeMarker: {fileID: 2605839277329164192, guid: 6fd80fd765c413a419f4b47fc7302970, type: 3}
-  routePathMarker: {fileID: 6751030655008426935, guid: 8f2d774bd20be934685b26e8eb263f48, type: 3}
-  routeConnectPool: []
+  MapDisplay: {fileID: 994805318}
 --- !u!1 &891035391
 GameObject:
   m_ObjectHideFlags: 0

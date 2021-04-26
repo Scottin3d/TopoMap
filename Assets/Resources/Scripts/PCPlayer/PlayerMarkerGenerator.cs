@@ -202,7 +202,7 @@ public class PlayerMarkerGenerator : MonoBehaviour
         if (LargerMapMarkerList.Count > 0)
         {
             GameObject LMarker = LargerMapMarkerList[LargerMapMarkerList.Count - 1];
-            MinimapDisplay.RemoveRouteMarker(LMarker.transform);
+            MinimapDisplay.RemoveRouteMarker(LMarker.transform, false);
 
             LMarker.GetComponent<ASL.ASLObject>().SendAndSetClaim(() =>
             {
