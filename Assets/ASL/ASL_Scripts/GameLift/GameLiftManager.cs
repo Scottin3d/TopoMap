@@ -317,7 +317,7 @@ namespace ASL
         {
             #if (ASL_DEBUG)
             string data = System.Text.Encoding.Default.GetString(_packet.Data);
-            Debug.Log($"[server-sent] OnDataReceived - Sender: {_packet.Sender} OpCode: {_packet.OpCode} data: {data.ToString()}");
+            //Debug.Log($"[server-sent] OnDataReceived - Sender: {_packet.Sender} OpCode: {_packet.OpCode} data: {data.ToString()}");
             #endif
             switch (_packet.OpCode)
             {

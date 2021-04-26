@@ -10,6 +10,7 @@ GameObject:
   m_Component:
   - component: {fileID: 6733205914966299070}
   - component: {fileID: 6733205914966299071}
+  - component: {fileID: -3004428391024385647}
   m_Layer: 0
   m_Name: Player
   m_TagString: Untagged
@@ -73,6 +74,18 @@ MonoBehaviour:
     m_RotationOrder: 4
   rotationLerpTime: 0.01
   invertY: 0
+--- !u!114 &-3004428391024385647
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6733205914966299040}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 387a8e79ec1a59645ab1eaab4a0f2d63, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &8264592925216615588
 GameObject:
   m_ObjectHideFlags: 0
@@ -84,6 +97,7 @@ GameObject:
   - component: {fileID: 6094128004190955469}
   - component: {fileID: 5051615936140816006}
   - component: {fileID: 2754673492762671735}
+  - component: {fileID: 803771736812171498}
   m_Layer: 0
   m_Name: Camera
   m_TagString: Untagged
@@ -136,7 +150,7 @@ Camera:
   m_Depth: 0
   m_CullingMask:
     serializedVersion: 2
-    m_Bits: 4294967295
+    m_Bits: 2147484023
   m_RenderingPath: -1
   m_TargetTexture: {fileID: 0}
   m_TargetDisplay: 0
@@ -156,6 +170,38 @@ AudioListener:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 8264592925216615588}
   m_Enabled: 1
+--- !u!114 &803771736812171498
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8264592925216615588}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a79441f348de89743a2939f4d699eac1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_RenderShadows: 1
+  m_RequiresDepthTextureOption: 2
+  m_RequiresOpaqueTextureOption: 2
+  m_CameraType: 0
+  m_Cameras: []
+  m_RendererIndex: -1
+  m_VolumeLayerMask:
+    serializedVersion: 2
+    m_Bits: 1
+  m_VolumeTrigger: {fileID: 0}
+  m_RenderPostProcessing: 0
+  m_Antialiasing: 0
+  m_AntialiasingQuality: 2
+  m_StopNaN: 0
+  m_Dithering: 0
+  m_ClearDepth: 1
+  m_AllowXRRendering: 1
+  m_RequiresDepthTexture: 0
+  m_RequiresColorTexture: 0
+  m_Version: 2
 --- !u!1001 &6733205915496456230
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -211,6 +257,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: LocalPlayer
       objectReference: {fileID: 0}
+    - target: {fileID: 1913533918692481710, guid: 024af94b256993d41a7adf64eb083b94, type: 3}
+      propertyPath: m_Materials.Array.data[0]
+      value: 
+      objectReference: {fileID: 2100000, guid: 31321ba15b8f8eb4c954353edc038b1d, type: 2}
     m_RemovedComponents:
     - {fileID: 1913533918692481708, guid: 024af94b256993d41a7adf64eb083b94, type: 3}
   m_SourcePrefab: {fileID: 100100000, guid: 024af94b256993d41a7adf64eb083b94, type: 3}
