@@ -988,6 +988,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   updatesPerSecond: 10
+  heightAboveMarker: 5
   routeNodeMarker: {fileID: 2605839277329164192, guid: 6fd80fd765c413a419f4b47fc7302970, type: 3}
   routePathMarker: {fileID: 6751030655008426935, guid: 8f2d774bd20be934685b26e8eb263f48, type: 3}
   routeConnectPool: []
