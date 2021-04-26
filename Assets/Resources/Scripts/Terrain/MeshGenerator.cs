@@ -39,10 +39,11 @@ public static class MeshGenerator {
         return meshData;
     }
 
-    public static MeshData GenerateTerrainMesh(float[,] heightmap, float heightMulitplier, AnimationCurve meshHieghtCurve, float chunkSize, int levelOfDetail, Vector2 center) {
+    //public static MeshData GenerateTerrainMesh(float[,] heightmap, float heightMulitplier, AnimationCurve meshHieghtCurve, float chunkSize, int levelOfDetail, Vector2 center) {
+    public static MeshData GenerateTerrainMesh(MapChunk chunk, float heightMulitplier, AnimationCurve meshHieghtCurve, float chunkSize, int levelOfDetail) {
         AnimationCurve heightCurve = new AnimationCurve(meshHieghtCurve.keys);
-        int width = heightmap.GetLength(0);
-        int height = heightmap.GetLength(1);
+        int width = chunk.mapData.heightValues.GetLength(0);
+        int height = chunk.mapData.heightValues.GetLength(1);
 
         int meshSimplificationIncrement = (levelOfDetail == 0) ? 1 : levelOfDetail * 2;
         int verticesPerLine = (width - 1) / meshSimplificationIncrement + 1;
@@ -62,7 +63,7 @@ public static class MeshGenerator {
 
                 //float xVal = topLeftX + (x * meshStep);
                 float xVal = quadCenter.x;
-                float yVal = heightCurve.Evaluate(heightmap[x, z]) * heightMulitplier;
+                float yVal = heightCurve.Evaluate(chunk.mapData.heightValues[x, z]) * heightMulitplier;
                 //float zVal = topLeftZ - (z * meshStep);
                 float zVal = quadCenter.y;
 

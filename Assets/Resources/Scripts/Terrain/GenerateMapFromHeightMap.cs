@@ -84,36 +84,100 @@ public class GenerateMapFromHeightMap : MonoBehaviour {
         float mapLowerLeftX = mapSize / -2f;    // constructing the map from left -> right, bottom -> top
         float mapLowerLeftZ = mapSize / -2f;
 
+        // generate map chunks
         for (int z = 0; z < numberOfChunks; z++) {
             for (int x = 0; x < numberOfChunks; x++) {
                 // find the center of the chunk
                 float halfChunk = chunkSize / 2f;
-                Vector2 chunkCenter = new Vector2(transform.position.x + mapLowerLeftX + (x  * chunkSize) + halfChunk,
+                Vector2 _chunkCenter = new Vector2(transform.position.x + mapLowerLeftX + (x * chunkSize) + halfChunk,
                                                  transform.position.z + mapLowerLeftZ + (z * chunkSize) + halfChunk);
-
-                //Vector2 chunkCenter = new Vector2(mapLowerLeftX + (x * chunkSize) + halfChunk,
-                //                                  mapLowerLeftZ + (z * chunkSize) - halfChunk);
 
                 // generate heightmap chunk
                 Texture2D _heightmap = GetPixelTest((mapWidth / numberOfChunks) * x,
                                                     (mapHeight / numberOfChunks) * z,
                                                     mapWidth / numberOfChunks);
                 // generate map data
-                MapData _mapData = GenerateMapData(chunkCenter, _heightmap);
+                MapData _mapData = GenerateMapData(_chunkCenter, _heightmap);
 
-                // generate mesh data
-                // errors most likely steming from here
-                MeshData _meshData = MeshGenerator.GenerateTerrainMesh(_mapData.heightmap, meshHeight, meshHieghtCurve, 
-                                                                       chunkSize, editorPreviewLOD, chunkCenter);
+                
 
                 // create chunk
-                mapChunks[x, z] = new MapChunk(_heightmap, chunkCenter, _mapData, _meshData);
+                mapChunks[x, z] = new MapChunk(_heightmap, _chunkCenter, _mapData);
+            }
+        }
+
+
+        // find neighbors
+        for (int z = 0; z < numberOfChunks; z++) {
+            for (int x = 0; x < numberOfChunks; x++) {
+                //==sides==
+                // Top : z + 1 <= resolution - 1
+                if (z + 1 <= numberOfChunks - 1) {
+                    mapChunks[x, z].chunkNeighbors[(int)MapChunkNeighbor.Top] = mapChunks[x, z + 1];
+                    // check corners
+                    // left
+                    bool topLeft = (x - 1 >= 0);
+                    if (topLeft) {
+                        mapChunks[x, z].chunkNeighbors[(int)MapChunkNeighbor.TopLeft] = mapChunks[x - 1, z + 1];
+                    }
+                    // right
+                    bool topRight = (x + 1 <= numberOfChunks - 1);
+                    if (topRight) {
+                        mapChunks[x, z].chunkNeighbors[(int)MapChunkNeighbor.TopRight] = mapChunks[x + 1, z + 1];
+                    }
+
+                }
+                // Right : x + 1 <= resolution - 1
+                if (x + 1 <= numberOfChunks - 1) {
+                    mapChunks[x, z].chunkNeighbors[(int)MapChunkNeighbor.Right] = mapChunks[x + 1, z];
+                }
+                // Bottom : z - 1 >= 0
+                if (z - 1 >= 0) {
+                    mapChunks[x, z].chunkNeighbors[(int)MapChunkNeighbor.Bottom] = mapChunks[x, z - 1];
+                    // check corners
+                    // left
+                    if (x - 1 >= 0) {
+                        mapChunks[x, z].chunkNeighbors[(int)MapChunkNeighbor.TopLeft] = mapChunks[x - 1, z - 1];
+                    }
+                    // right
+                    if (x + 1 <= numberOfChunks - 1) {
+                        mapChunks[x, z].chunkNeighbors[(int)MapChunkNeighbor.TopRight] = mapChunks[x + 1, z - 1];
+                    }
+
+                }
+                // Left : x - 1 >= 0
+                if (x - 1 >= 0) {
+                    mapChunks[x, z].chunkNeighbors[(int)MapChunkNeighbor.Left] = mapChunks[x - 1, z];
+                }
+
+                //==corners==
+                // Botoom Left : Left + Bottom + (Bottom - 1)
+                // Bottom Right : Right + Bottom + (Bottom + 1)
+                // Top Left : Top + (Top - 1) + Left
+                // Top Right : Top + (Top + 1) + Right
+
+
+            }
+        }
+
+        // smooth edges
+        SmoothChunkEdges();
+
+        // generate mesh
+        for (int z = 0; z < numberOfChunks; z++) {
+            for (int x = 0; x < numberOfChunks; x++) {
+                
+                // generate mesh data
+                // errors most likely steming from here
+                MeshData _meshData = MeshGenerator.GenerateTerrainMesh(mapChunks[x, z], meshHeight, meshHieghtCurve, 
+                                                                       chunkSize, editorPreviewLOD);
+
+                mapChunks[x, z].meshData = _meshData;
 
                 // create chunk mesh
                 Mesh mesh = mapChunks[x, z].meshData.CreateMesh();
-                // mesh smoothing - TODO
-                //mesh = mattatz.MeshSmoothingSystem.MeshSmoothing.LaplacianFilter(mesh, 2);
-                //mesh = mattatz.MeshSmoothingSystem.MeshSmoothing.HCFilter(mesh, 10);
+
+
 
                 // create game object of chunk
                 GameObject chunk = new GameObject();
@@ -121,11 +185,70 @@ public class GenerateMapFromHeightMap : MonoBehaviour {
                 chunk.transform.localScale = Vector3.one;
                 chunk.tag = "Chunk";
                 chunk.name = "chunk" + z + ", " + x;
-                chunk.transform.position = new Vector3(chunkCenter.x, transform.position.y, chunkCenter.y);
+                chunk.transform.position = new Vector3(mapChunks[x, z].center.x, transform.position.y, mapChunks[x, z].center.y);
                 chunk.AddComponent<MeshFilter>().sharedMesh = mesh;
                 chunk.AddComponent<MeshCollider>().sharedMesh = mesh;
                 chunk.AddComponent<MeshRenderer>().sharedMaterial = Instantiate(material);
                 chunk.GetComponent<MeshRenderer>().sharedMaterial.mainTexture = mapChunks[x, z].heightmap;
+            }
+        }
+    }
+
+    private void SmoothChunkEdges() {
+        for (int chunkz = 0; chunkz < numberOfChunks; chunkz++) {
+            for (int chunkx = 0; chunkx < numberOfChunks; chunkx++) {
+
+                int width = mapChunks[chunkx, chunkz].mapData.heightValues.GetLength(0);
+                int height = mapChunks[chunkx, chunkz].mapData.heightValues.GetLength(1);
+
+
+                // through each chunk vertices
+                for (int z = 0; z < height; z++) {
+                    for (int x = 0; x < width; x++) {
+                        float heightValue = mapChunks[chunkx, chunkz].mapData.heightValues[x, z];
+                        int valueCount = 1;
+
+                        //==sides==
+                        // Top : z + 1 <= resolution - 1
+                        // Right : x + 1 <= resolution - 1
+                        // Bottom : z - 1 >= 0
+                        if (z == 0) {
+                            // bottom left corner
+                            // check and get bottom
+                            if (mapChunks[chunkx, chunkz].chunkNeighbors[(int)MapChunkNeighbor.Bottom] != null) {
+                                heightValue += mapChunks[chunkx, chunkz].chunkNeighbors[(int)MapChunkNeighbor.Bottom].mapData.heightValues[x, z];
+                                valueCount++;
+                            }
+
+                            // Botoom Left Corner : Left + Bottom + (Bottom - 1)
+                            if (x == 0) {
+                                // left
+                                if (mapChunks[chunkx, chunkz].chunkNeighbors[(int)MapChunkNeighbor.Left] != null) {
+                                    heightValue += mapChunks[chunkx, chunkz].chunkNeighbors[(int)MapChunkNeighbor.Left].mapData.heightValues[x, z];
+                                    valueCount++;
+                                }
+                                // bottom left
+                                if (mapChunks[chunkx, chunkz].chunkNeighbors[(int)MapChunkNeighbor.BottomLeft] != null) {
+                                    heightValue += mapChunks[chunkx, chunkz].chunkNeighbors[(int)MapChunkNeighbor.BottomLeft].mapData.heightValues[x, z];
+                                    valueCount++;
+                                }
+                            }
+                        }
+                        // Left : x - 1 >= 0
+
+
+
+                        //==corners==
+                        // Bottom Right : Right + Bottom + (Bottom + 1)
+                        // Top Left : Top + (Top - 1) + Left
+                        // Top Right : Top + (Top + 1) + Right
+
+                        // average and reset value
+                        heightValue /= valueCount;
+                        mapChunks[chunkx, chunkz].mapData.heightValues[x, z] = heightValue;
+                    }
+                }
+            //mapChunks[x,z].meshData.vertices
             }
         }
     }
@@ -168,18 +291,32 @@ public class GenerateMapFromHeightMap : MonoBehaviour {
         public Color color;
     }
 
-    [System.Serializable]
-    public struct MapChunk {
-        public Texture2D heightmap;
-        public Vector2 center;
-        public MapData mapData;
-        public MeshData meshData;
+    
+}
 
-        public MapChunk(Texture2D _heightmap, Vector2 _center, MapData _mapData, MeshData _meshData) {
-            this.heightmap = _heightmap;
-            this.center = _center;
-            this.mapData = _mapData;
-            this.meshData = _meshData;
-        }
+[System.Serializable]
+public class MapChunk {
+    public Texture2D heightmap;
+    public Vector2 center;
+    public MapData mapData;
+    public MeshData meshData;
+
+    public MapChunk[] chunkNeighbors = new MapChunk[] { null, null, null, null, null, null, null, null };
+
+    public MapChunk(Texture2D _heightmap, Vector2 _center, MapData _mapData) {
+        this.heightmap = _heightmap;
+        this.center = _center;
+        this.mapData = _mapData;
     }
+}
+
+public enum MapChunkNeighbor { 
+    TopLeft,
+    Top,
+    TopRight,
+    Right,
+    BottomRight,
+    Bottom,
+    BottomLeft,
+    Left
 }
