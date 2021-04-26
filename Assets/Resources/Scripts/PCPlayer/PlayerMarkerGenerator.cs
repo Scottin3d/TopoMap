@@ -25,9 +25,10 @@ public class PlayerMarkerGenerator : MonoBehaviour
 
     void Awake()
     {
-        PlayerCamera = GameObject.Find("Player").GetComponentInChildren<Camera>();
-        PlayerTableViewCamera = GameObject.Find("PlayerTopViewCamera").GetComponentInChildren<Camera>();
-        MiniMapDisplayObject = GameObject.Find("MiniMapDisplay");
+        //Find all Camera and MiniMap Display
+        PlayerCamera = GameObject.Find("PCHandler/Player").GetComponentInChildren<Camera>();
+        PlayerTableViewCamera = GameObject.Find("PCHandler/PlayerTopViewCamera").GetComponentInChildren<Camera>();
+        MiniMapDisplayObject = GameObject.Find("PCHandler/MiniMapDisplay");
     }
 
     // Start is called before the first frame update
@@ -53,6 +54,7 @@ public class PlayerMarkerGenerator : MonoBehaviour
         }
     }
 
+    //Project a local marker to the small map
     private void ProjectMarker()
     {
         if (PlayerCamera.isActiveAndEnabled == true)
@@ -61,7 +63,7 @@ public class PlayerMarkerGenerator : MonoBehaviour
             RaycastHit Hit;
             if (Physics.Raycast(MouseRay, out Hit))
             {
-                if (Hit.collider.tag == "Chunk" && Hit.collider.transform.parent.name == "SpawnSmallMap")
+                if (Hit.collider.tag == "Chunk" && Hit.collider.transform.parent.tag == "SpawnSmallMap")
                 {
                     LocalProjectMarker.SetActive(true);
                     LocalProjectMarker.transform.position = Hit.point;
@@ -78,7 +80,7 @@ public class PlayerMarkerGenerator : MonoBehaviour
             RaycastHit Hit;
             if (Physics.Raycast(MouseRay, out Hit))
             {
-                if (Hit.collider.tag == "Chunk" && Hit.collider.transform.parent.name == "SpawnSmallMap")
+                if (Hit.collider.tag == "Chunk" && Hit.collider.transform.parent.tag == "SpawnSmallMap")
                 {
                     LocalProjectMarker.SetActive(true);
                     LocalProjectMarker.transform.position = Hit.point;
@@ -101,22 +103,14 @@ public class PlayerMarkerGenerator : MonoBehaviour
                 RaycastHit Hit;
                 if (Physics.Raycast(MouseRay, out Hit))
                 {
-                    if (Hit.collider.tag == "Chunk" && Hit.collider.transform.parent.name == "SpawnSmallMap")
+                    if (Hit.collider.tag == "Chunk" && Hit.collider.transform.parent.tag == "SpawnSmallMap")
                     {
                         string DropdownOpionValue = MyDropdownList.options[MyDropdownList.value].text;
-                        if (DropdownOpionValue == "Marker")
-                        {
-                            DropdownOpionValue = "PlayerMarker";
-                        }
-                        else
-                        {
-                            DropdownOpionValue = "PlayerRouteMarker";
-                        }
                         ASL.ASLHelper.InstantiateASLObject(DropdownOpionValue, Hit.point, Quaternion.identity, "", "", GetSmallMapMarker);
                         GenerateMarkerOnLargerMap(Hit.point);
 
                     }
-                    else if (Hit.collider.tag == "Chunk" && Hit.collider.transform.parent.name == "SpawnLargerMap")
+                    else if (Hit.collider.tag == "Chunk" && Hit.collider.transform.parent.tag == "SpawnLargerMap")
                     {
                         string DropdownOpionValue = MyDropdownList.options[MyDropdownList.value].text;
                         ASL.ASLHelper.InstantiateASLObject(DropdownOpionValue, Hit.point, Quaternion.identity, "", "", GetLargerMapMarker);
@@ -131,28 +125,15 @@ public class PlayerMarkerGenerator : MonoBehaviour
                 RaycastHit Hit;
                 if (Physics.Raycast(MouseRay, out Hit))
                 {
-                    if (Hit.collider.tag == "Chunk" && Hit.collider.transform.parent.name == "SpawnSmallMap")
+                    if (Hit.collider.tag == "Chunk" && Hit.collider.transform.parent.tag == "SpawnSmallMap")
                     {
                         string DropdownOpionValue = MyDropdownList.options[MyDropdownList.value].text;
-                        if (DropdownOpionValue == "Marker")
-                        {
-                            DropdownOpionValue = "PlayerMarker";
-                        }
-                        else
-                        {
-                            DropdownOpionValue = "PlayerRouteMarker";
-                        }
                         ASL.ASLHelper.InstantiateASLObject(DropdownOpionValue, Hit.point, Quaternion.identity, "", "", GetSmallMapMarker);
                         GenerateMarkerOnLargerMap(Hit.point);
                     }
                 }
             }
         }
-    }
-
-    private void SpawnRegularMarker(Vector3 HitPoint)
-    {
-
     }
 
     private static void GetSmallMapMarker(GameObject _myGameObject)
