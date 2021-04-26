@@ -227,6 +227,7 @@ public struct NoiseMap {
 [System.Serializable]
 public struct MapData {
     public readonly float[,] heightValues;
+    
     public readonly Color[] colorValues;
 
     public MapData(float[,] _heightValues, Color[] _colorValues) {

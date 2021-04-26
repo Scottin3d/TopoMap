@@ -64,12 +64,49 @@ public static class MeshGenerator {
                 //float xVal = topLeftX + (x * meshStep);
                 float xVal = quadCenter.x;
                 float yVal = heightCurve.Evaluate(chunk.mapData.heightValues[x, z]) * heightMulitplier;
+
+
                 //float zVal = topLeftZ - (z * meshStep);
                 float zVal = quadCenter.y;
 
                 meshData.vertices[vertexIndex] = new Vector3(xVal, yVal, zVal);
+
                 meshData.uv[vertexIndex] = new Vector2(x / (float)width, z / (float)height);
 
+                // top
+                if (z == height - 1) {
+                    chunk.topVerts.Add(vertexIndex);
+                    // top left
+                    if (x == 0) {
+                        chunk.cornerVerts.Add(vertexIndex);
+                    }
+                    // top right
+                    if (x == width - 1) {
+                        chunk.cornerVerts.Add(vertexIndex);
+                    }
+                }
+
+                // right
+                if (x == width - 1) {
+                    chunk.rightVerts.Add(vertexIndex);
+                }
+
+                // bottom
+                if (z == 0) {
+                    chunk.bottomVerts.Add(vertexIndex);
+                    // bottom left
+                    if (x == 0) {
+                        chunk.cornerVerts.Add(vertexIndex);
+                    }
+                    // bottom right
+                    if (x == width - 1) {
+                        chunk.cornerVerts.Add(vertexIndex);
+                    }
+                }
+                // left side
+                if (x == 0) {
+                    chunk.leftVerts.Add(vertexIndex);
+                }
 
                 
                 if (x < width - 1 && z < height - 1) {
@@ -85,7 +122,7 @@ public static class MeshGenerator {
                     // bottom to top
                     meshData.AddTriangle(vertexIndex,
                                          vertexIndex + verticesPerLine,
-                                          vertexIndex + 1);
+                                         vertexIndex + 1);
                     meshData.AddTriangle(vertexIndex + verticesPerLine,
                                          vertexIndex + verticesPerLine + 1,
                                          vertexIndex + 1);

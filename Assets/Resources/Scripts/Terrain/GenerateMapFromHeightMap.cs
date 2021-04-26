@@ -155,24 +155,25 @@ public class GenerateMapFromHeightMap : MonoBehaviour {
                 // Bottom Right : Right + Bottom + (Bottom + 1)
                 // Top Left : Top + (Top - 1) + Left
                 // Top Right : Top + (Top + 1) + Right
+                // generate mesh data
+                // errors most likely steming from here
 
+
+                MeshData _meshData = MeshGenerator.GenerateTerrainMesh(mapChunks[x, z], meshHeight, meshHieghtCurve,
+                                                                       chunkSize, editorPreviewLOD);
+
+                mapChunks[x, z].meshData = _meshData;
 
             }
         }
 
-        // smooth edges
         SmoothChunkEdges();
 
         // generate mesh
         for (int z = 0; z < numberOfChunks; z++) {
             for (int x = 0; x < numberOfChunks; x++) {
                 
-                // generate mesh data
-                // errors most likely steming from here
-                MeshData _meshData = MeshGenerator.GenerateTerrainMesh(mapChunks[x, z], meshHeight, meshHieghtCurve, 
-                                                                       chunkSize, editorPreviewLOD);
-
-                mapChunks[x, z].meshData = _meshData;
+                
 
                 // create chunk mesh
                 Mesh mesh = mapChunks[x, z].meshData.CreateMesh();
@@ -195,61 +196,66 @@ public class GenerateMapFromHeightMap : MonoBehaviour {
     }
 
     private void SmoothChunkEdges() {
-        for (int chunkz = 0; chunkz < numberOfChunks; chunkz++) {
-            for (int chunkx = 0; chunkx < numberOfChunks; chunkx++) {
 
-                int width = mapChunks[chunkx, chunkz].mapData.heightValues.GetLength(0);
-                int height = mapChunks[chunkx, chunkz].mapData.heightValues.GetLength(1);
+        int row = 0;
+        int col = 0;
 
-
-                // through each chunk vertices
-                for (int z = 0; z < height; z++) {
-                    for (int x = 0; x < width; x++) {
-                        float heightValue = mapChunks[chunkx, chunkz].mapData.heightValues[x, z];
-                        int valueCount = 1;
-
-                        //==sides==
-                        // Top : z + 1 <= resolution - 1
-                        // Right : x + 1 <= resolution - 1
-                        // Bottom : z - 1 >= 0
-                        if (z == 0) {
-                            // bottom left corner
-                            // check and get bottom
-                            if (mapChunks[chunkx, chunkz].chunkNeighbors[(int)MapChunkNeighbor.Bottom] != null) {
-                                heightValue += mapChunks[chunkx, chunkz].chunkNeighbors[(int)MapChunkNeighbor.Bottom].mapData.heightValues[x, z];
-                                valueCount++;
-                            }
-
-                            // Botoom Left Corner : Left + Bottom + (Bottom - 1)
-                            if (x == 0) {
-                                // left
-                                if (mapChunks[chunkx, chunkz].chunkNeighbors[(int)MapChunkNeighbor.Left] != null) {
-                                    heightValue += mapChunks[chunkx, chunkz].chunkNeighbors[(int)MapChunkNeighbor.Left].mapData.heightValues[x, z];
-                                    valueCount++;
-                                }
-                                // bottom left
-                                if (mapChunks[chunkx, chunkz].chunkNeighbors[(int)MapChunkNeighbor.BottomLeft] != null) {
-                                    heightValue += mapChunks[chunkx, chunkz].chunkNeighbors[(int)MapChunkNeighbor.BottomLeft].mapData.heightValues[x, z];
-                                    valueCount++;
-                                }
-                            }
-                        }
-                        // Left : x - 1 >= 0
-
-
-
-                        //==corners==
-                        // Bottom Right : Right + Bottom + (Bottom + 1)
-                        // Top Left : Top + (Top - 1) + Left
-                        // Top Right : Top + (Top + 1) + Right
-
-                        // average and reset value
-                        heightValue /= valueCount;
-                        mapChunks[chunkx, chunkz].mapData.heightValues[x, z] = heightValue;
-                    }
-                }
-            //mapChunks[x,z].meshData.vertices
+        for (int chunk = 0; chunk < numberOfChunks * numberOfChunks; chunk++) {
+            if (row == numberOfChunks) {
+                row = 0;
+                col++;
             }
+
+            int chunkLength = chunkResolution;
+
+            // top
+            for (int i = 0; i < chunkLength; i++) {
+                MapChunk currChunk = mapChunks[row, col];
+                MapChunk topNeighbor = currChunk.chunkNeighbors[(int)MapChunkNeighbor.Top];
+                MapChunk rightNeighbor = currChunk.chunkNeighbors[(int)MapChunkNeighbor.Right];
+                MapChunk bottomNeighbor = currChunk.chunkNeighbors[(int)MapChunkNeighbor.Bottom];
+                MapChunk leftNeighbor = currChunk.chunkNeighbors[(int)MapChunkNeighbor.Left];
+
+                // top
+                if (topNeighbor != null) {
+
+                    float yValue = currChunk.meshData.vertices[currChunk.topVerts[i]].y;
+                    yValue += topNeighbor.meshData.vertices[topNeighbor.bottomVerts[i]].y;
+
+                    topNeighbor.meshData.vertices[topNeighbor.bottomVerts[i]].y = yValue / 2f;
+                    currChunk.meshData.vertices[currChunk.topVerts[i]].y = yValue / 2f;
+                }
+
+                // right
+                if (rightNeighbor != null) {
+                    float yValue = currChunk.meshData.vertices[currChunk.rightVerts[i]].y;
+                    yValue += rightNeighbor.meshData.vertices[rightNeighbor.leftVerts[i]].y;
+
+                    rightNeighbor.meshData.vertices[rightNeighbor.leftVerts[i]].y = yValue / 2f;
+                    currChunk.meshData.vertices[currChunk.rightVerts[i]].y = yValue / 2f;
+                }
+
+                // bottom
+                if (bottomNeighbor != null) {
+                    float yValue = currChunk.meshData.vertices[currChunk.bottomVerts[i]].y;
+                    yValue += bottomNeighbor.meshData.vertices[bottomNeighbor.topVerts[i]].y;
+
+                    bottomNeighbor.meshData.vertices[bottomNeighbor.topVerts[i]].y = yValue / 2f;
+                    currChunk.meshData.vertices[currChunk.bottomVerts[i]].y = yValue / 2f;
+                }
+
+                // left
+                if (leftNeighbor != null) {
+                    float yValue = currChunk.meshData.vertices[currChunk.leftVerts[i]].y;
+                    yValue += leftNeighbor.meshData.vertices[leftNeighbor.rightVerts[i]].y;
+
+                    leftNeighbor.meshData.vertices[leftNeighbor.rightVerts[i]].y = yValue / 2f;
+                    currChunk.meshData.vertices[currChunk.leftVerts[i]].y = yValue / 2f;
+                }
+
+
+            }
+            row++;
         }
     }
 
@@ -303,10 +309,21 @@ public class MapChunk {
 
     public MapChunk[] chunkNeighbors = new MapChunk[] { null, null, null, null, null, null, null, null };
 
+    public List<int> leftVerts = new List<int>();
+    public List<int> rightVerts = new List<int>();
+    public List<int> topVerts = new List<int>();
+    public List<int> bottomVerts = new List<int>();
+    public List<int> cornerVerts = new List<int>();
+    // corner order
+    // bottom left, bottom right, top left, top right
+
+
     public MapChunk(Texture2D _heightmap, Vector2 _center, MapData _mapData) {
         this.heightmap = _heightmap;
         this.center = _center;
         this.mapData = _mapData;
+
+        
     }
 }
 
