@@ -12,6 +12,7 @@ TagManager:
   - Table
   - LargeMap
   - SmallMap
+  - A*
   layers:
   - Default
   - TransparentFX
@@ -22,7 +23,7 @@ TagManager:
   - Markers
   - Minimap
   - PostProcessing
-  - 
+  - Ground
   - 
   - 
   - 

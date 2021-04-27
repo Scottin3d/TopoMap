@@ -10,8 +10,7 @@ public class RouteDisplayV2 : MonoBehaviour
     public float updatesPerSecond = 10f;
     public float heightAboveMarker = 5f;
     public int batchSize = 20;
-    public Transform MapDisplay = null;
-
+    
     private List<GameObject> routeMarkerPool = new List<GameObject>();
     private List<GameObject> routeConnectPool = new List<GameObject>();
     private List<GameObject> smallConnectPool = new List<GameObject>();
@@ -19,8 +18,20 @@ public class RouteDisplayV2 : MonoBehaviour
     private List<Transform> linkedObj = new List<Transform>();
     int removedNdx = -1;
 
+    //Map references
+    public Transform MapDisplay = null;
+    private GameObject SmallMap;
+    private GameObject LargeMap;
+
+    //Data used in MapPath functions
+    private Mesh theMesh;
+    //private AstarData data;
+    //private PointGraph graph;
+
+    private bool DataCollected = false;
+
     //Would prefer to fetch this from the player once instantiated
-    Color myColor;
+    protected Color myColor;
 
     private void Awake()
     {
@@ -30,6 +41,9 @@ public class RouteDisplayV2 : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
+        LargeMap = GameObject.FindWithTag("LargeMap");
+        SmallMap = GameObject.FindWithTag("SmallMap");
+
         if(current.gameObject.GetComponent<ASLObject>() != null)
         {
             current.gameObject.GetComponent<ASLObject>()._LocallySetFloatCallback(SyncLists);
@@ -57,6 +71,8 @@ public class RouteDisplayV2 : MonoBehaviour
             ASLHelper.InstantiateASLObject("MinimapMarker_RoutePath", new Vector3(0, 0, 0), Quaternion.identity, "", "", SmallRouteInstantiation);
         }
     }
+
+    #region DRAW_STRAIGHT_ROUTE
 
     //Update route coroutine split for readability
     void UpdateRoute()
@@ -106,8 +122,7 @@ public class RouteDisplayV2 : MonoBehaviour
                 {
                     if (scaleFactor > 0)
                     {
-                        GameObject smMap = GameObject.FindWithTag("SmallMap");
-                        pos = smMap.transform.position + ((pos - heightAboveMarker * 0.5f * Vector3.up) / scaleFactor);
+                        pos = SmallMap.transform.position + ((pos - heightAboveMarker * 0.5f * Vector3.up) / scaleFactor);
                         //- smMap.transform.right / scaleFactor - smMap.transform.right / smMap.GetComponent<GenerateMapFromHeightMap>().mapSize;
                         scale = new Vector3(0.01f, length / scaleFactor, 0.01f);
                     }
@@ -141,12 +156,10 @@ public class RouteDisplayV2 : MonoBehaviour
         }
         else
         {
-            GameObject smallMap = GameObject.FindWithTag("SmallMap");
-            GameObject largeMap = GameObject.FindWithTag("LargeMap");
-            if (smallMap == null || largeMap == null) return -1;
+            if (SmallMap == null || LargeMap == null) return -1;
 
-            GenerateMapFromHeightMap _sm = smallMap.GetComponent<GenerateMapFromHeightMap>();
-            GenerateMapFromHeightMap _lg = largeMap.GetComponent<GenerateMapFromHeightMap>();
+            GenerateMapFromHeightMap _sm = SmallMap.GetComponent<GenerateMapFromHeightMap>();
+            GenerateMapFromHeightMap _lg = LargeMap.GetComponent<GenerateMapFromHeightMap>();
             if (_sm == null || _lg == null) return -1;
 
             return _lg.mapSize / _sm.mapSize;
@@ -163,6 +176,48 @@ public class RouteDisplayV2 : MonoBehaviour
             _g.GetComponent<ASLObject>().SendAndSetLocalRotation(_g.transform.localRotation);
         });
     }
+
+    #endregion
+
+    #region PATHFINDING
+
+    public static void ReceiveMeshData()
+    {
+        if (current.LargeMap != null && !current.DataCollected)
+        {
+            //current.data = AstarPath.active.data;
+            //current.graph = current.data.AddGraph(typeof(PointGraph)) as PointGraph;
+
+            current.theMesh = new Mesh();
+            MeshFilter[] meshes = current.LargeMap.GetComponentsInChildren<MeshFilter>();
+            CombineInstance[] combine = new CombineInstance[meshes.Length];
+            int ndx = 0;
+            while (ndx < meshes.Length)
+            {
+                combine[ndx].mesh = meshes[ndx].sharedMesh;
+                combine[ndx].transform = meshes[ndx].transform.localToWorldMatrix;
+            }
+            if (!current.DataCollected)
+            {
+                current.theMesh.CombineMeshes(combine);
+                //AstarPath.active.Scan(current.theMesh);
+                current.DataCollected = !current.DataCollected;
+            }
+        }
+    }
+
+    public static void ClearMeshData()
+    {
+        current.theMesh.Clear();
+        current.DataCollected = false;
+    }
+
+    private void DrawMapCurve()
+    {
+
+    }
+
+    #endregion
 
     #region STATIC_MUTATORS
 
