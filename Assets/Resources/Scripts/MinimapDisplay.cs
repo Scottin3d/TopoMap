@@ -57,10 +57,10 @@ public class MinimapDisplay : MonoBehaviour
             if(i+1 == routeMarkerPool.Count && routeConnectPool.Count != 0)
             {
                 //Debug.Log("End of path");
-                Debug.Log(i);
-                Debug.Log(routeConnectPool.Count);
-                Debug.Log(routeMarkerPool.Count);
-                Debug.Log(" ");
+                //Debug.Log(i);
+                //Debug.Log(routeConnectPool.Count);
+                //Debug.Log(routeMarkerPool.Count);
+                //Debug.Log(" ");
                 routeConnectPool[i].GetComponent<ASLObject>().SendAndSetClaim(() =>
                 {
                     routeConnectPool[i].GetComponent<ASLObject>().SendAndSetWorldPosition(Vector3.zero);
