@@ -105,18 +105,21 @@ public class PlayerMarkerGenerator : MonoBehaviour
                 RaycastHit Hit;
                 if (Physics.Raycast(MouseRay, out Hit))
                 {
+                    string DropdownOpionValue = MyDropdownList.options[MyDropdownList.value].text;
                     //If mouse hit the small map
                     if (Hit.collider.tag == "Chunk" && Hit.collider.transform.parent.tag == "SpawnSmallMap")
                     {
-                        string DropdownOpionValue = MyDropdownList.options[MyDropdownList.value].text;
+                        
                         ASL.ASLHelper.InstantiateASLObject(DropdownOpionValue, Hit.point, Quaternion.identity, "", "", GetSmallMapMarker);
                         GenerateMarkerOnLargerMap(Hit.point);
 
                     }
                     else if (Hit.collider.tag == "Chunk" && Hit.collider.transform.parent.tag == "SpawnLargerMap")
                     {
-                        ASL.ASLHelper.InstantiateASLObject("Marker", Hit.point, Quaternion.identity, "", "", GetLargerMapMarker);
-                        GenerateMarkerOnSmallMap(Hit.point);
+                        //ASL.ASLHelper.InstantiateASLObject("Marker", Hit.point, Quaternion.identity, "", "", GetLargerMapMarker);
+                        //GenerateMarkerOnSmallMap(Hit.point);
+                        ASL.ASLHelper.InstantiateASLObject(DropdownOpionValue, Hit.point, Quaternion.identity, "", "", GetSmallMapMarker);
+                        GenerateMarkerOnLargerMap(Hit.point);
                     }
                 }
             }
@@ -142,6 +145,9 @@ public class PlayerMarkerGenerator : MonoBehaviour
     private static void GetSmallMapMarker(GameObject _myGameObject)
     {
         SmallMapMarkerList.Add(_myGameObject);
+
+        //
+        ASLObjectTrackingSystem.AddObjectToTrack(_myGameObject.GetComponent<ASL.ASLObject>(), _myGameObject.transform);
     }
 
     //Add the large map marker into the list and add it into ASLObjectTrackingSystem
