@@ -49,6 +49,7 @@ public class SpawnPlayer : MonoBehaviour
         {
             Marker.GetComponent<ASL.ASLObject>().SendAndSetObjectColor(theColor, theColor);
         });
+        //Marker.GetComponent<MeshRenderer>().enabled = false;
         ASLObjectTrackingSystem.AddObjectToTrack(Marker.GetComponent<ASL.ASLObject>(), Marker.transform);
     }
 
