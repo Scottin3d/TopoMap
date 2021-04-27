@@ -828,8 +828,8 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 302996598}
-  - component: {fileID: 302996599}
   - component: {fileID: 302996600}
+  - component: {fileID: 302996601}
   m_Layer: 0
   m_Name: MiniMapDisplay
   m_TagString: Untagged
@@ -851,21 +851,6 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 16
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &302996599
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 302996597}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 433c004dd67177d42a84247b176ea5ad, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  updatesPerSecond: 1
-  heightAboveMarker: 5
-  MapDisplay: {fileID: 0}
 --- !u!114 &302996600
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -878,6 +863,22 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 03c58412da33e154692db87cbf8c6ff0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!114 &302996601
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 302996597}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c898ef4bf03a0c746bea49737d93341b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  updatesPerSecond: 10
+  heightAboveMarker: 5
+  batchSize: 20
+  MapDisplay: {fileID: 0}
 --- !u!1 &308766229
 GameObject:
   m_ObjectHideFlags: 0

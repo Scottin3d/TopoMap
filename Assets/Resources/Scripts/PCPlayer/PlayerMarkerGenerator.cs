@@ -21,13 +21,11 @@ public class PlayerMarkerGenerator : MonoBehaviour
     private int SmallMapSize;
 
     private GameObject LocalProjectMarker;
-    private static GameObject MiniMapDisplayObject;
 
     void Awake()
     {
         PlayerCamera = GameObject.Find("Player").GetComponentInChildren<Camera>();
         PlayerTableViewCamera = GameObject.Find("PlayerTopViewCamera").GetComponentInChildren<Camera>();
-        MiniMapDisplayObject = GameObject.Find("MiniMapDisplay");
     }
 
     // Start is called before the first frame update
@@ -164,7 +162,7 @@ public class PlayerMarkerGenerator : MonoBehaviour
     {
         ASLObjectTrackingSystem.AddObjectToTrack(_myGameObject.GetComponent<ASL.ASLObject>(), _myGameObject.transform);
         //MiniMapDisplayObject.GetComponent<MinimapDisplay>().AddRouteMarker(_myGameObject.transform.position);
-        MinimapDisplay.AddRouteMarker(_myGameObject.transform);
+        RouteDisplayV2.AddRouteMarker(_myGameObject.transform);
         LargerMapMarkerList.Add(_myGameObject);
     }
 

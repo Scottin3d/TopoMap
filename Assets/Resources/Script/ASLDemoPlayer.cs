@@ -114,7 +114,7 @@ public class ASLDemoPlayer : MonoBehaviour {
     }
 
     private static void OnPrimitiveCreate(GameObject _gameObject) {
-        MinimapDisplay.AddRouteMarker(_gameObject.transform);
+        RouteDisplayV2.AddRouteMarker(_gameObject.transform);
         _gameObject.GetComponent<ASLObject>().SendAndSetClaim(() =>
         {
             _gameObject.GetComponent<ASLObject>().SendAndSetWorldPosition(_gameObject.transform.position);
