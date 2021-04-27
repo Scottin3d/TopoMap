@@ -25,9 +25,10 @@ public class PlayerMarkerGenerator : MonoBehaviour
 
     void Awake()
     {
-        PlayerCamera = GameObject.Find("Player").GetComponentInChildren<Camera>();
-        PlayerTableViewCamera = GameObject.Find("PlayerTopViewCamera").GetComponentInChildren<Camera>();
-        MiniMapDisplayObject = GameObject.Find("MiniMapDisplay");
+        //Find all Camera and MiniMap Display
+        PlayerCamera = GameObject.Find("PCHandler/Player").GetComponentInChildren<Camera>();
+        PlayerTableViewCamera = GameObject.Find("PCHandler/PlayerTopViewCamera").GetComponentInChildren<Camera>();
+        MiniMapDisplayObject = GameObject.Find("PCHandler/MiniMapDisplay");
     }
 
     // Start is called before the first frame update
@@ -53,6 +54,7 @@ public class PlayerMarkerGenerator : MonoBehaviour
         }
     }
 
+    //Project a local marker to the small map
     private void ProjectMarker()
     {
         if (PlayerCamera.isActiveAndEnabled == true)
@@ -61,7 +63,7 @@ public class PlayerMarkerGenerator : MonoBehaviour
             RaycastHit Hit;
             if (Physics.Raycast(MouseRay, out Hit))
             {
-                if (Hit.collider.tag == "Chunk" && Hit.collider.transform.parent.name == "SpawnSmallMap")
+                if (Hit.collider.tag == "Chunk" && Hit.collider.transform.parent.tag == "SpawnSmallMap")
                 {
                     LocalProjectMarker.SetActive(true);
                     LocalProjectMarker.transform.position = Hit.point;
@@ -78,7 +80,7 @@ public class PlayerMarkerGenerator : MonoBehaviour
             RaycastHit Hit;
             if (Physics.Raycast(MouseRay, out Hit))
             {
-                if (Hit.collider.tag == "Chunk" && Hit.collider.transform.parent.name == "SpawnSmallMap")
+                if (Hit.collider.tag == "Chunk" && Hit.collider.transform.parent.tag == "SpawnSmallMap")
                 {
                     LocalProjectMarker.SetActive(true);
                     LocalProjectMarker.transform.position = Hit.point;
@@ -93,55 +95,41 @@ public class PlayerMarkerGenerator : MonoBehaviour
 
     private void SelectObjectByClick()
     {
+        //Click Left mouse
         if (Input.GetMouseButtonDown(0))
         {
+            //If player in first persion view
             if (PlayerCamera.isActiveAndEnabled == true)
             {
                 Ray MouseRay = PlayerCamera.ScreenPointToRay(Input.mousePosition);
                 RaycastHit Hit;
                 if (Physics.Raycast(MouseRay, out Hit))
                 {
-                    if (Hit.collider.tag == "Chunk" && Hit.collider.transform.parent.name == "SpawnSmallMap")
+                    //If mouse hit the small map
+                    if (Hit.collider.tag == "Chunk" && Hit.collider.transform.parent.tag == "SpawnSmallMap")
                     {
                         string DropdownOpionValue = MyDropdownList.options[MyDropdownList.value].text;
-                        if (DropdownOpionValue == "Marker")
-                        {
-                            DropdownOpionValue = "PlayerMarker";
-                        }
-                        else
-                        {
-                            DropdownOpionValue = "PlayerRouteMarker";
-                        }
                         ASL.ASLHelper.InstantiateASLObject(DropdownOpionValue, Hit.point, Quaternion.identity, "", "", GetSmallMapMarker);
                         GenerateMarkerOnLargerMap(Hit.point);
 
                     }
-                    else if (Hit.collider.tag == "Chunk" && Hit.collider.transform.parent.name == "SpawnLargerMap")
+                    else if (Hit.collider.tag == "Chunk" && Hit.collider.transform.parent.tag == "SpawnLargerMap")
                     {
-                        string DropdownOpionValue = MyDropdownList.options[MyDropdownList.value].text;
-                        ASL.ASLHelper.InstantiateASLObject(DropdownOpionValue, Hit.point, Quaternion.identity, "", "", GetLargerMapMarker);
+                        ASL.ASLHelper.InstantiateASLObject("Marker", Hit.point, Quaternion.identity, "", "", GetLargerMapMarker);
                         GenerateMarkerOnSmallMap(Hit.point);
                     }
                 }
             }
-
+            //If player in third persion view
             if (PlayerTableViewCamera.isActiveAndEnabled == true)
             {
                 Ray MouseRay = PlayerTableViewCamera.ScreenPointToRay(Input.mousePosition);
                 RaycastHit Hit;
                 if (Physics.Raycast(MouseRay, out Hit))
                 {
-                    if (Hit.collider.tag == "Chunk" && Hit.collider.transform.parent.name == "SpawnSmallMap")
+                    if (Hit.collider.tag == "Chunk" && Hit.collider.transform.parent.tag == "SpawnSmallMap")
                     {
                         string DropdownOpionValue = MyDropdownList.options[MyDropdownList.value].text;
-                        if (DropdownOpionValue == "Marker")
-                        {
-                            DropdownOpionValue = "PlayerMarker";
-                        }
-                        else
-                        {
-                            DropdownOpionValue = "PlayerRouteMarker";
-                        }
                         ASL.ASLHelper.InstantiateASLObject(DropdownOpionValue, Hit.point, Quaternion.identity, "", "", GetSmallMapMarker);
                         GenerateMarkerOnLargerMap(Hit.point);
                     }
@@ -150,25 +138,22 @@ public class PlayerMarkerGenerator : MonoBehaviour
         }
     }
 
-    private void SpawnRegularMarker(Vector3 HitPoint)
-    {
-
-    }
-
+    //Add the small map marker into the list.
     private static void GetSmallMapMarker(GameObject _myGameObject)
     {
         SmallMapMarkerList.Add(_myGameObject);
     }
 
+    //Add the large map marker into the list and add it into ASLObjectTrackingSystem
     private static void GetLargerMapMarker(GameObject _myGameObject)
     {
-        ASLObjectTrackingSystem.AddObjectToTrack(_myGameObject.GetComponent<ASL.ASLObject>(), _myGameObject.transform);
-        //MiniMapDisplayObject.GetComponent<MinimapDisplay>().AddRouteMarker(_myGameObject.transform.position);
+        //Debug.Log("123");
+        //ASLObjectTrackingSystem.AddObjectToTrack(_myGameObject.GetComponent<ASL.ASLObject>(), _myGameObject.transform);
         MinimapDisplay.AddRouteMarker(_myGameObject.transform);
         LargerMapMarkerList.Add(_myGameObject);
     }
 
-    //Get position from small map and comvert is to larger map
+    //Get position from small map and comvert is to larger map and generate a new marker on larger map
     private void GenerateMarkerOnLargerMap(Vector3 MarkerPosition)
     {
         //(MarkerPosition - SmallMapCenter) will get the math vector from smallmapcenter to marker
@@ -177,7 +162,7 @@ public class PlayerMarkerGenerator : MonoBehaviour
         ASL.ASLHelper.InstantiateASLObject("Marker", NewPositionOnLargeMap, Quaternion.identity, "", "", GetLargerMapMarker);
     }
 
-    //Get position from larger map and convert is to small map
+    //Get position from larger map and convert is to small map and generate a new marker on small map
     private void GenerateMarkerOnSmallMap(Vector3 MarkerPosition)
     {
         //(MarkerPosition - LargerMapCenter) will get the math vector from largermapcenter to marker
