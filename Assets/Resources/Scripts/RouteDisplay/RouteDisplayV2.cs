@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using Pathfinding;
 using ASL;
 
 public class RouteDisplayV2 : MonoBehaviour
@@ -24,11 +25,11 @@ public class RouteDisplayV2 : MonoBehaviour
     private GameObject LargeMap;
 
     //Data used in MapPath functions
-    private Mesh theMesh;
-    //private AstarData data;
-    //private PointGraph graph;
+    private AstarData data;
+    private ABPath myPath;
+    //private float
 
-    private bool DataCollected = false;
+    private bool DataCollected = false, DrawNewCurve = false;
 
     //Would prefer to fetch this from the player once instantiated
     protected Color myColor;
@@ -50,6 +51,7 @@ public class RouteDisplayV2 : MonoBehaviour
         }
         myColor = new Color(Random.Range(0, 1f), Random.Range(0, 1f), Random.Range(0, 1f), .25f);
         GenerateRoutePool(batchSize);
+        StartCoroutine(ReceiveMeshData());
         StartCoroutine(UpdateRoutePositions());
     }
 
@@ -70,6 +72,11 @@ public class RouteDisplayV2 : MonoBehaviour
             ASLHelper.InstantiateASLObject("MinimapMarker_RoutePath", new Vector3(0, 0, 0), Quaternion.identity, "", "", RouteInstantiation);
             ASLHelper.InstantiateASLObject("MinimapMarker_RoutePath", new Vector3(0, 0, 0), Quaternion.identity, "", "", SmallRouteInstantiation);
         }
+    }
+
+    private void GeneratePathPool()
+    {
+
     }
 
     #region DRAW_STRAIGHT_ROUTE
@@ -181,40 +188,154 @@ public class RouteDisplayV2 : MonoBehaviour
 
     #region PATHFINDING
 
-    public static void ReceiveMeshData()
+    IEnumerator ReceiveMeshData()
     {
-        if (current.LargeMap != null && !current.DataCollected)
+        if (LargeMap != null && !DataCollected)
         {
-            //current.data = AstarPath.active.data;
-            //current.graph = current.data.AddGraph(typeof(PointGraph)) as PointGraph;
-
-            current.theMesh = new Mesh();
-            MeshFilter[] meshes = current.LargeMap.GetComponentsInChildren<MeshFilter>();
-            CombineInstance[] combine = new CombineInstance[meshes.Length];
+            Debug.Log("Generating new graph");
+            data = AstarPath.active.data;
+            NavMeshGraph graph;
+            
+            MeshFilter[] meshes = LargeMap.GetComponentsInChildren<MeshFilter>();
+            while (meshes.Length < 1)
+            {
+                yield return new WaitForSeconds(0.1f);
+                meshes = LargeMap.GetComponentsInChildren<MeshFilter>();
+            }
+            Debug.Log("Chunk count: " + meshes.Length);
             int ndx = 0;
             while (ndx < meshes.Length)
             {
-                combine[ndx].mesh = meshes[ndx].sharedMesh;
-                combine[ndx].transform = meshes[ndx].transform.localToWorldMatrix;
+                Debug.Log("Adding chunk graph");
+                graph = data.AddGraph(typeof(NavMeshGraph)) as NavMeshGraph;
+                graph.sourceMesh = meshes[ndx].sharedMesh;
+                graph.offset = meshes[ndx].transform.position;
+                ndx++;
             }
-            if (!current.DataCollected)
-            {
-                current.theMesh.CombineMeshes(combine);
-                //AstarPath.active.Scan(current.theMesh);
-                current.DataCollected = !current.DataCollected;
-            }
+            
+            AstarPath.active.Scan(current.data.graphs);
+            DataCollected = !DataCollected;
         }
+        yield return new WaitForSeconds(0.1f);
     }
 
     public static void ClearMeshData()
     {
-        current.theMesh.Clear();
+        foreach(NavGraph graph in current.data.graphs)
+        {
+            current.data.RemoveGraph(graph);
+        }
         current.DataCollected = false;
     }
 
     private void DrawMapCurve()
     {
+        if (DrawNewCurve && DataCollected && data.graphs[0] != null)
+        {
+            List<Vector3> posList = new List<Vector3>();
+            List<GraphNode> nodeList = new List<GraphNode>();
+            List<GraphNode> connections = new List<GraphNode>();
 
+            Vector3 targetPos, curPos, dir;
+            NavGraph curGraph = data.graphs[0];
+            GraphNode curNode, prevNode;
+
+            for (int ndx = 0; ndx < linkedObj.Count - 1; ndx++)
+            {                
+                targetPos = linkedObj[ndx + 1].position;
+                float distCheck = float.PositiveInfinity, curDist;
+
+                if (ndx == 0)
+                {
+                    //Find graph nearest position
+                    foreach (NavGraph graphCheck in data.graphs)
+                    {
+                        curDist = ((Vector3)graphCheck.GetNearest(linkedObj[ndx].position).node.position - linkedObj[ndx].position).magnitude;
+                        if (curDist < distCheck)
+                        {
+                            curDist = distCheck;
+                            curGraph = graphCheck;
+                        }
+                    }
+                    //Find node on graph nearest position
+                    curNode = curGraph.GetNearest(linkedObj[ndx].position).node;
+                    prevNode = null;
+                    curPos = (Vector3)curNode.position;
+                    dir = (targetPos - curPos);
+
+                    posList.Add(curPos);
+                    nodeList.Add(curNode);
+                } else
+                {
+                    //Else curNode and curPos are the last items added to their respective lists
+                    curNode = nodeList[nodeList.Count - 1];
+                    curPos = posList[posList.Count - 1];
+                    curGraph = curNode.Graph;
+
+                    //if previous node in list and curNode are in the same graph, prevNode = previous node, otherwise is null
+                    if (nodeList.Count > 1)
+                    {
+                        if (curNode.GraphIndex.Equals(nodeList[nodeList.Count - 2].GraphIndex))
+                        {
+                            prevNode = nodeList[nodeList.Count - 2];
+                        } else
+                        {
+                            prevNode = null;
+                        }
+                    } else
+                    {
+                        prevNode = null;
+                    }
+
+                    if(prevNode != null)
+                    {
+                        foreach (NavGraph graphCheck in data.graphs)
+                        {
+                            //If dist from nearest node to cur pos
+                            //Add each graph that is not curGraph to tempGraphList
+                        }
+                    }                    
+                }
+                
+
+                    //while we haven't reached the target position
+                        //get the list of connected nodes
+                        //remove nodes with too large a height diff (abs value), starting with the largest unless i have 1 node
+                        //remove the previous node (if applicable) 
+
+                        //add low-energy node with largest dot product with dir
+                        //prevNode = curNode, curNode = node added
+                        //recalculate dir 
+
+                        //is there a similar position in an adjacent graph? (distance < some value from current pos)
+                            //if there is, get those nodes and their corresponding graphs (not cur graph)
+                            //calculate dir from each node
+                            //replace curNode with node that has smallest dot product, and replace curGraph with the corresponding graph; prevNode = null
+                                //additional check if distance to target from curNode is shorter than the node on the different graph
+
+                
+                    
+                    //repeat while block
+            }
+            DrawNewCurve = !DrawNewCurve;
+        }
+    }
+
+    bool GetNextGraph(ref NavGraph curGraph, ref GraphNode curNode, ref Vector3 curPos, Vector3 target)
+    {
+        List<NavGraph> tempGraph = new List<NavGraph>();
+        List<GraphNode> tempNode = new List<GraphNode>();
+
+        foreach (NavGraph graphCheck in data.graphs)
+        {
+            if (!graphCheck.graphIndex.Equals(curGraph.graphIndex))
+            {
+                //If dist from nearest node to cur pos
+                    //Add each graph that is not curGraph to tempGraphList
+            }
+        }
+
+        return false;
     }
 
     #endregion
@@ -224,6 +345,7 @@ public class RouteDisplayV2 : MonoBehaviour
     public static void AddRouteMarker(Transform _t)
     {
         current.linkedObj.Add(_t);
+        current.DrawNewCurve = true;
         if(current.linkedObj.Count > current.routeMarkerPool.Count)
         {
             Debug.Log("Instantiating new batch");
