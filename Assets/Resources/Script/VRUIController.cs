@@ -207,9 +207,6 @@ public class VRUIController : MonoBehaviour
             case VRUI_State.Movement:
                 handleMovementMenu(button);
                 break;
-            case VRUI_State.Movement_Speed_Adjustment:
-                handleMoveSpeedAdjust(button);
-                break;
             case VRUI_State.Off:
                 Debug.LogWarning("Warning: VR UI Button activated during Off UI state");
                 break;
@@ -248,99 +245,17 @@ public class VRUIController : MonoBehaviour
 
     private void handleOptionsMenu(GameObject button)
     {
-        if (button == null)
-        {
-            Debug.LogWarning("null button reference in handleMainMenu");
-        }
-        else if (button == currentUIObjects[2])
-        {
-            currentUIState = VRUI_State.Movement_Speed_Adjustment;
-            updateUIDisplay();
-            return;
-        }
-        else if (button == currentUIObjects[3])
-        {
-            currentUIState = VRUI_State.Main;
-            updateUIDisplay();
-            return;
-        }
+
     }
 
     private void handleTeleportMenu(GameObject button)
     {
-        if (button == null)
-        {
-            Debug.LogWarning("null button reference in handleMainMenu");
-        }
-        else if (button == currentUIObjects[1])
-        {
-            //teleport to table map
-            return;
-        }
-        else if (button == currentUIObjects[2])
-        {
-            //teleport to ground map
-            return;
-        }
-        else if (button == currentUIObjects[3])
-        {
-            currentUIState = VRUI_State.Main;
-            updateUIDisplay();
-            return;
-        }
+
     }
 
     private void handleMovementMenu(GameObject button)
     {
-        if (button == null)
-        {
-            Debug.LogWarning("null button reference in handleMainMenu");
-        }
-        else if (button == currentUIObjects[0])
-        {
-            //toggle collision
-            return;
-        }
-        else if (button == currentUIObjects[1])
-        {
-            //toggle gravity
-            return;
-        }
-        else if (button == currentUIObjects[2])
-        {
-            StaticVRVariables.allowVerticalVRMovement = !StaticVRVariables.allowVerticalVRMovement;
-            return;
-        }
-        else if (button == currentUIObjects[3])
-        {
-            currentUIState = VRUI_State.Main;
-            updateUIDisplay();
-            return;
-        }
-    }
 
-    private void handleMoveSpeedAdjust(GameObject button)
-    {
-        if (button == null)
-        {
-            Debug.LogWarning("null button reference in handleMainMenu");
-        }
-        else if (button == currentUIObjects[0])
-        {
-            //decrease speed
-            return;
-        }
-        else if (button == currentUIObjects[2])
-        {
-            //increase speed
-            return;
-        }
-        else if (button == currentUIObjects[3])
-        {
-            currentUIState = VRUI_State.Options;
-            updateUIDisplay();
-            return;
-        }
     }
 
 
