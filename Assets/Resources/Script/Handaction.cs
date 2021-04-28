@@ -42,6 +42,13 @@ public class Handaction : MonoBehaviour
             tempPos.x += move;
             move = Mathf.Cos((movement.y * Mathf.Deg2Rad)) * speed * Time.deltaTime;
             tempPos.z += move;
+
+            if (StaticVRVariables.allowVerticalVRMovement)
+            {
+                move = -Mathf.Sin((movement.x * Mathf.Deg2Rad)) * speed * Time.deltaTime;
+                tempPos.y += move;
+            }
+
             player.position = tempPos;
         }
     }
