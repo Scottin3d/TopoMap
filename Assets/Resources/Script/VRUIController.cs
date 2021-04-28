@@ -63,7 +63,9 @@ public class VRUIController : MonoBehaviour
     //Main->
     //      Options->
     //                Movement Speed->
-    //                                slider/knob
+    //                                increase
+    //                                changing speed
+    //                                decrease
     //      Teleport->
     //                Ground Map
     //                Table Map
@@ -78,6 +80,7 @@ public class VRUIController : MonoBehaviour
         Options,           //options is the general options menu for the player
         Teleport,          //teleport is the menu for teleporting between the two main areas of our scene (table map and big map)
         Movement,          //this is the player movement menu
+        Movement_Speed_Adjustment //this is the menu where the player is adjusting their speed
     }
 
     private static VRUI_State currentUIState;
@@ -105,8 +108,14 @@ public class VRUIController : MonoBehaviour
             case VRUI_State.Options:
                 setupOptionsMenu();
                 break;
+            case VRUI_State.Teleport:
+                setupTeleportMenu();
+                break;
             case VRUI_State.Movement:
                 setupMovementMenu();
+                break;
+            case VRUI_State.Movement_Speed_Adjustment:
+                setupMoveSpeedAdjust();
                 break;
             case VRUI_State.Off:
                 break;
@@ -117,24 +126,50 @@ public class VRUIController : MonoBehaviour
     }
 
     //these functions (removeX and setupX) are UI Setup/Removal functions designed to provide the correct UI we want to update to
+    //currently this changes the text on the buttons to reflect their current action
     private void removeCurrentUI()
     {
-
+        //currently unneeded
     }
 
     private void setupMainMenu()
     {
-
+        currentUIObjects[0].GetComponentInChildren<Text>().text = "Movement Options";
+        currentUIObjects[1].GetComponentInChildren<Text>().text = "Teleport Locations";
+        currentUIObjects[2].GetComponentInChildren<Text>().text = "Options";
+        currentUIObjects[3].GetComponentInChildren<Text>().text = "";
     }
 
     private void setupOptionsMenu()
     {
+        currentUIObjects[0].GetComponentInChildren<Text>().text = "";
+        currentUIObjects[1].GetComponentInChildren<Text>().text = "";
+        currentUIObjects[2].GetComponentInChildren<Text>().text = "Movement Speed";
+        currentUIObjects[3].GetComponentInChildren<Text>().text = "Back";
+    }
 
+    private void setupTeleportMenu()
+    {
+        currentUIObjects[0].GetComponentInChildren<Text>().text = "";
+        currentUIObjects[1].GetComponentInChildren<Text>().text = "Table Map";
+        currentUIObjects[2].GetComponentInChildren<Text>().text = "Ground Map";
+        currentUIObjects[3].GetComponentInChildren<Text>().text = "Back";
     }
 
     private void setupMovementMenu()
     {
+        currentUIObjects[0].GetComponentInChildren<Text>().text = "Toggle Collision";
+        currentUIObjects[1].GetComponentInChildren<Text>().text = "Toggle Gravity";
+        currentUIObjects[2].GetComponentInChildren<Text>().text = "Toggle Upwards Movement";
+        currentUIObjects[3].GetComponentInChildren<Text>().text = "Back";
+    }
 
+    private void setupMoveSpeedAdjust()
+    {
+        currentUIObjects[0].GetComponentInChildren<Text>().text = "Decrease";
+        currentUIObjects[1].GetComponentInChildren<Text>().text = "Movement Speed";
+        currentUIObjects[2].GetComponentInChildren<Text>().text = "Increase";
+        currentUIObjects[3].GetComponentInChildren<Text>().text = "Back";
     }
 
     //this function will spawn in a button into the given position, rotation, and scale. The new object will be in the
@@ -181,6 +216,9 @@ public class VRUIController : MonoBehaviour
         spawnButton(new Vector3(-0.1194f, 0.0701f, -0.0974f), Vector3.zero, Vector3.zero, "secondButton", 1);
         spawnButton(new Vector3(-0.1572f, 0.0842f, -0.0875f), Vector3.zero, Vector3.zero, "thirdButton", 2);
         spawnButton(new Vector3(-0.1280f, 0.0949f, -0.1676f), new Vector3(-19.516f, -74.022f, 71.847f), new Vector3(0.001f, 0.03f, 0.11006f), "backButton", 3);
+
+        currentUIState = VRUI_State.Main;
+        updateUIDisplay();
     }
 
     // Start is called before the first frame update
@@ -211,6 +249,9 @@ public class VRUIController : MonoBehaviour
             case VRUI_State.Options:
                 handleOptionsMenu(button);
                 break;
+            case VRUI_State.Teleport:
+                handleTeleportMenu(button);
+                break;
             case VRUI_State.Movement:
                 handleMovementMenu(button);
                 break;
@@ -226,10 +267,36 @@ public class VRUIController : MonoBehaviour
     //these handle functions are intended to handle the behavior of a button press based on the current UI state
     private void handleMainMenu(GameObject button)
     {
-
+        if(button == null)
+        {
+            Debug.LogWarning("null button reference in handleMainMenu");
+        }
+        else if(button == currentUIObjects[0])
+        {
+            currentUIState = VRUI_State.Movement;
+            updateUIDisplay();
+            return;
+        }
+        else if(button == currentUIObjects[1])
+        {
+            currentUIState = VRUI_State.Teleport;
+            updateUIDisplay();
+            return;
+        }
+        else if (button == currentUIObjects[2])
+        {
+            currentUIState = VRUI_State.Options;
+            updateUIDisplay();
+            return;
+        }
     }
 
     private void handleOptionsMenu(GameObject button)
+    {
+
+    }
+
+    private void handleTeleportMenu(GameObject button)
     {
 
     }
