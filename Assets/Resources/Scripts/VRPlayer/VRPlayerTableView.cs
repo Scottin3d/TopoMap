@@ -2,8 +2,13 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class PlayerTableView : MonoBehaviour
+public class VRPlayerTableView : MonoBehaviour
 {
+    //====================
+    //If VR player don't need the top-view camera, just ignore this script
+    //====================
+    //PlayerCamera is the VR player default camera
+    //PlayerTopViewCamera is a fixed camera just above the table
     public Camera PlayerCamera;
     public Camera PlayerTopViewCamera;
     private bool TableView = false;
@@ -21,6 +26,8 @@ public class PlayerTableView : MonoBehaviour
 
     private void ChangeViewMode()
     {
+        //=====================
+        //Get some VR controller key and switch the camera
         if (Input.GetKeyDown(KeyCode.V) && TableView == false)
         {
             Ray MouseRay = PlayerCamera.ScreenPointToRay(Input.mousePosition);
