@@ -56,7 +56,11 @@ public class MinimapDisplay : MonoBehaviour
         {
             if(i+1 == routeMarkerPool.Count && routeConnectPool.Count != 0)
             {
-                Debug.Log("End of path");
+                //Debug.Log("End of path");
+                //Debug.Log(i);
+                //Debug.Log(routeConnectPool.Count);
+                //Debug.Log(routeMarkerPool.Count);
+                //Debug.Log(" ");
                 routeConnectPool[i].GetComponent<ASLObject>().SendAndSetClaim(() =>
                 {
                     routeConnectPool[i].GetComponent<ASLObject>().SendAndSetWorldPosition(Vector3.zero);
@@ -66,7 +70,7 @@ public class MinimapDisplay : MonoBehaviour
             } else
             {
                 curNode = routeMarkerPool[i]; nextNode = routeMarkerPool[i + 1];
-                Debug.Log("From:" + curNode.transform.position + " to " + nextNode.transform.position);
+                //Debug.Log("From:" + curNode.transform.position + " to " + nextNode.transform.position);
                 nextDir = nextNode.transform.position - curNode.transform.position;
                 length = (nextNode.transform.position - curNode.transform.position).magnitude / 2f;
                 nextScale = new Vector3(.25f, length, .25f);
