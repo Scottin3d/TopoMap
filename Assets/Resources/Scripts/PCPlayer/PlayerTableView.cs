@@ -6,6 +6,8 @@ public class PlayerTableView : MonoBehaviour
 {
     public Camera PlayerCamera;
     public Camera PlayerTopViewCamera;
+    public GameObject PlayerCameraObject;
+    public GameObject PlayerTopViewCameraObject;
     private bool TableView = false;
     // Start is called before the first frame update
     void Start()
