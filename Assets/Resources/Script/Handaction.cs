@@ -10,7 +10,7 @@ public class Handaction : MonoBehaviour
     public Transform player; //transform of the player to move
     public Transform controlHand; //hand for movement control
     //public SteamVR_Input_Sources inputDevice; //device to pull data from
-    public float speed = 1f; //speed of player movement
+    public float speed = 5f; //speed of player movement
 
     // Start is called before the first frame update
     void Start()

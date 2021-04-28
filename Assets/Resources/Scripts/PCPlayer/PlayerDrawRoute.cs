@@ -18,8 +18,8 @@ public class PlayerDrawRoute : MonoBehaviour
     void Awake()
     {
         ThisGameObject = this.gameObject;
-        PlayerCamera = GameObject.Find("PCHandler/Player").GetComponentInChildren<Camera>();
-        PlayerTableViewCamera = GameObject.Find("PCHandler/PlayerTopViewCamera").GetComponentInChildren<Camera>();
+        PlayerCamera = GameObject.Find("Player").GetComponentInChildren<Camera>();
+        PlayerTableViewCamera = GameObject.Find("PlayerTopViewCamera").GetComponentInChildren<Camera>();
     }
 
     // Start is called before the first frame update
@@ -48,7 +48,7 @@ public class PlayerDrawRoute : MonoBehaviour
                     {
                         ASL.ASLHelper.InstantiateASLObject("Brush", Hit.point, Quaternion.identity, "", "", GetEachBrushOnWhiteBoard);
                     }
-                    if (Hit.collider.tag == "Chunk" && Hit.collider.transform.parent.tag == "SpawnSmallMap")
+                    if (Hit.collider.tag == "Chunk" && Hit.collider.transform.parent.name == "SpawnSmallMap")
                     {
                         ASL.ASLHelper.InstantiateASLObject("Brush", Hit.point, Quaternion.identity, "", "", GetEachBrushOnSmallMap);
                         int LargeMapSize = LargerMapGenerator.GetComponent<GenerateMapFromHeightMap>().mapSize;

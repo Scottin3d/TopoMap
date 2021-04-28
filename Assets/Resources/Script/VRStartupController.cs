@@ -22,6 +22,10 @@ public class VRStartupController : MonoBehaviour
     //this is the button that will switch between VR and non-VR modes
     public Button VRToggle = null;
 
+    //this is the UI controller which needs the instantiated VR Player to start up
+    //note: currently the VRUIController checks for the player object
+    //public VRUIController VRUIControl = null;
+
 
     // Start is called before the first frame update
     void Start()

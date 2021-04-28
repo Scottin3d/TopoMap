@@ -94,7 +94,7 @@ public class MapGenerator : MonoBehaviour {
     }
 
     private void MeshDataThread(MapData mapData, int lod, Action<MeshData> callback) {
-        MeshData meshData = MeshGenerator.GenerateTerrainMesh(mapData.heightValues, meshHeight, meshHieghtCurve, lod);
+        MeshData meshData = MeshGenerator.GenerateTerrainMesh(mapData.heightmap, meshHeight, meshHieghtCurve, lod);
         // locks variable until thread is finished
         lock (mapDataThreadInfoQueue) {
             meshDataThreadInfoQueue.Enqueue(new MapThreadingInfo<MeshData>(callback, meshData));
@@ -162,10 +162,10 @@ public class MapGenerator : MonoBehaviour {
         MapDisplay display = GetComponent<MapDisplay>();
         switch (drawMode) {
             case DrawMode.NoiseMap:
-                display.DrawTexture(TextureGenerator.TextureFromHeightMap(mapData.heightValues));
+                display.DrawTexture(TextureGenerator.TextureFromHeightMap(mapData.heightmap));
                 return;
             case DrawMode.ColorMap:
-                display.DrawTexture(TextureGenerator.TextureFromColorMap(mapData.colorValues, mapChunkSize, mapChunkSize));
+                display.DrawTexture(TextureGenerator.TextureFromColorMap(mapData.colorMap, mapChunkSize, mapChunkSize));
                 return;
             case DrawMode.Mesh:
                 if (useHeightmap && heightmap) {
@@ -184,8 +184,8 @@ public class MapGenerator : MonoBehaviour {
                 } else {
                     int width = (useHeightmap && heightmap != null) ? heightmap.width : mapChunkSize;
                     int height = (useHeightmap && heightmap != null) ? heightmap.height : mapChunkSize;
-                    display.DrawMesh(MeshGenerator.GenerateTerrainMesh(mapData.heightValues, meshHeight, meshHieghtCurve, editorPreviewLOD), 
-                                     TextureGenerator.TextureFromColorMap(mapData.colorValues, width, height));
+                    display.DrawMesh(MeshGenerator.GenerateTerrainMesh(mapData.heightmap, meshHeight, meshHieghtCurve, editorPreviewLOD), 
+                                     TextureGenerator.TextureFromColorMap(mapData.colorMap, width, height));
                 }
                     
                 return;
@@ -226,13 +226,16 @@ public struct NoiseMap {
 
 [System.Serializable]
 public struct MapData {
-    public readonly float[,] heightValues;
-    
-    public readonly Color[] colorValues;
+    public readonly float[,] heightmap;
+    public readonly Color[] colorMap;
 
-    public MapData(float[,] _heightValues, Color[] _colorValues) {
-        this.heightValues = _heightValues;
-        this.colorValues = _colorValues;
+    public MapData(float[,] heightmap, Color[] colorMap) {
+        this.heightmap = heightmap;
+        this.colorMap = colorMap;
+    }
+
+    public void UpdateMapDate(int[] pixelIndex) { 
+        
     }
 }
 #endregion
