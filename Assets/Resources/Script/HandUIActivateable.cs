@@ -11,6 +11,8 @@ public class HandUIActivateable : MonoBehaviour
 
     public VRUIController reciever;
 
+    public GameObject UICollider;
+
     public float triggerDistance = 0.005f; //this is the distance the other hand needs to be from the button to trigger it. (1.0f = 1 meter distance, which is why the number is so small)
 
     private bool isOn = false; //bool to know the state of the button.
@@ -25,7 +27,7 @@ public class HandUIActivateable : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        checkHandDistance();
+        //checkHandDistance();
     }
 
     public void checkHandDistance()
@@ -64,6 +66,29 @@ public class HandUIActivateable : MonoBehaviour
         if (DEBUG_COLORS)
         {
             this.GetComponent<Renderer>().material.color = new Color(255, 0, 0);
+        }
+    }
+
+    private void OnTriggerEnter(Collider other)
+    {
+        if(other.gameObject == UICollider)
+        {
+            if (!isOn)
+            {
+                triggerOnState();
+            }
+        }
+    }
+
+
+    private void OnTriggerExit(Collider other)
+    {
+        if (other.gameObject == UICollider)
+        {
+            if (isOn)
+            {
+                triggerOffState();
+            }
         }
     }
 }

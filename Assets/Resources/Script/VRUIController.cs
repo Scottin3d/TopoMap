@@ -49,6 +49,9 @@ public class VRUIController : MonoBehaviour
     //  T: -0.1280283, 0.09490927, -0.1676919
     //  R: -19.516, -74.022, 71.847
     //  S: 0.001, 0.03, 0.11006
+    //
+    //index finger tip position:
+    // 0.02905, -0.0572, -0.0038
 
 
 
@@ -162,6 +165,8 @@ public class VRUIController : MonoBehaviour
             currentUIObjects[buttonPosition].transform.localScale = scale;
         }
         currentUIObjects[buttonPosition].GetComponentInChildren<Text>().text = buttonText;
+        currentUIObjects[buttonPosition].GetComponent<HandUIActivateable>().UICollider = rightHand.transform.Find("UIInteractSphere").gameObject;
+        currentUIObjects[buttonPosition].GetComponent<HandUIActivateable>().reciever = this;
     }
 
 
