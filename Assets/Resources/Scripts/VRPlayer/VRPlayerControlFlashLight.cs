@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class PlayerControlFlashLight : MonoBehaviour
+public class VRPlayerControlFlashLight : MonoBehaviour
 {
     private Camera PlayerCamera;
     private static GameObject MyFlashLight;
@@ -11,7 +11,9 @@ public class PlayerControlFlashLight : MonoBehaviour
 
     void Awake()
     {
-        PlayerCamera = GameObject.Find("PCHandler/Player").GetComponentInChildren<Camera>();
+        //======================
+        //Find VR player camera here
+        //PlayerCamera = GameObject.Find("PCHandler/Player").GetComponentInChildren<Camera>();
     }
 
     void Start()
@@ -30,7 +32,9 @@ public class PlayerControlFlashLight : MonoBehaviour
     }
 
     private void ControlFlashLight()
-    {   
+    {
+        //===================================
+        //Get the VR Controller input key here
         if (Input.GetKeyDown(KeyCode.Y))
         {
             if (IfOn)
