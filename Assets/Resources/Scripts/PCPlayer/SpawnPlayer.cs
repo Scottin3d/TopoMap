@@ -12,6 +12,7 @@ public class SpawnPlayer : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
+        //Default
         RunUpdate = false;
         PlayerObject = GameObject.Find("Player");
         ASL.ASLHelper.InstantiateASLObject("MinimapMarker_Player", new Vector3(0, 0, 0), Quaternion.identity, "", "", PlayerMinimapInstantiation);
