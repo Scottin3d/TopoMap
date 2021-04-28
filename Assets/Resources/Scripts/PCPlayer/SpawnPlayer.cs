@@ -37,7 +37,7 @@ public class SpawnPlayer : MonoBehaviour
         Cube = _myGameObject;
         //RunUpdate = true;
         Cube.GetComponent<MeshRenderer>().enabled = false;
-        //ASLObjectTrackingSystem.AddPlayerToTrack(Cube.GetComponent<ASL.ASLObject>(), Cube.transform);
+        ASLObjectTrackingSystem.AddPlayerToTrack(Cube.GetComponent<ASL.ASLObject>(), Cube.transform);
     }
 
     private static void PlayerMinimapInstantiation(GameObject _myGameObject)
@@ -50,7 +50,7 @@ public class SpawnPlayer : MonoBehaviour
         {
             Marker.GetComponent<ASL.ASLObject>().SendAndSetObjectColor(theColor, theColor);
         });
-        //ASLObjectTrackingSystem.AddObjectToTrack(Marker.GetComponent<ASL.ASLObject>(), Marker.transform);
+        ASLObjectTrackingSystem.AddObjectToTrack(Marker.GetComponent<ASL.ASLObject>(), Marker.transform);
     }
 
     //private void SendAndSetClaimPlayer()
@@ -89,6 +89,7 @@ public class SpawnPlayer : MonoBehaviour
                 Cube.GetComponent<ASL.ASLObject>().SendAndSetWorldPosition(PlayerObject.transform.position);
                 ASLObjectTrackingSystem.UpdatePlayerTransform(Cube.GetComponent<ASL.ASLObject>(), Cube.transform);
             });
+
             Vector3 pos = PlayerObject.transform.position;
             pos.y += 10f;
             Marker.transform.position = pos + 0.5f * Vector3.down;
