@@ -2170,7 +2170,7 @@ MonoBehaviour:
   m_CorrespondingSourceObject: {fileID: 6897538589646759659, guid: 6c21f35d451268d4da0883a9980a2721, type: 3}
   m_PrefabInstance: {fileID: 6897538587877100113}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 6897538587877100114}
+  m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: c3d38cf4f0b5c6742986b55d8214045c, type: 3}
@@ -2473,10 +2473,6 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 0}
     m_Modifications:
-    - target: {fileID: 6897538588392656317, guid: 6c21f35d451268d4da0883a9980a2721, type: 3}
-      propertyPath: m_LocalPosition.y
-      value: 2
-      objectReference: {fileID: 0}
     - target: {fileID: 6897538589646759656, guid: 6c21f35d451268d4da0883a9980a2721, type: 3}
       propertyPath: m_Name
       value: VRController
@@ -2531,20 +2527,3 @@ PrefabInstance:
       objectReference: {fileID: 684022538}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 6c21f35d451268d4da0883a9980a2721, type: 3}
---- !u!1 &6897538587877100114 stripped
-GameObject:
-  m_CorrespondingSourceObject: {fileID: 6897538589646759656, guid: 6c21f35d451268d4da0883a9980a2721, type: 3}
-  m_PrefabInstance: {fileID: 6897538587877100113}
-  m_PrefabAsset: {fileID: 0}
---- !u!114 &6897538587877100115
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 6897538587877100114}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 2bf954c04b6e9d448bf6f954c4417eec, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 

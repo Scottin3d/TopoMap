@@ -322,12 +322,12 @@ public class VRUIController : MonoBehaviour
         }
         else if (button == currentUIObjects[1])
         {
-            //teleport to table map
+            VRTeleportHandler.TeleportVRPlayerToTable();
             return;
         }
         else if (button == currentUIObjects[2])
         {
-            //teleport to ground map
+            VRTeleportHandler.TeleportVRPlayerToGround();
             return;
         }
         else if (button == currentUIObjects[3])
@@ -375,12 +375,12 @@ public class VRUIController : MonoBehaviour
         }
         else if (button == currentUIObjects[0])
         {
-            //decrease speed
+            Handaction.decreaseSpeed(1f);
             return;
         }
         else if (button == currentUIObjects[2])
         {
-            //increase speed
+            Handaction.increaseSpeed(1f);
             return;
         }
         else if (button == currentUIObjects[3])
