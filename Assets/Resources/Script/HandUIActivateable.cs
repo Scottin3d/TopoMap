@@ -4,16 +4,14 @@ using UnityEngine;
 
 public class HandUIActivateable : MonoBehaviour
 {
-    private const bool DEBUG_COLORS = true;
-    //this is a component for the UI Buttons that the VR player uses. when triggered it sends itself to the VRUIController in order to activate its action
+    /*
+     * This is a short-sighted component for the buttons on the left hand in the VR demo. This script will change the color of the button when the designated hand is within close proximity to it,
+     * but this behavior should be able to be applied to other uses in the future (though likely with some changes).
+     */
 
     public Transform otherHand; //this is the hand that the button should interact with, all this transform needs to represent is the position of the hand, and does not need to be attatched to SteamVR's hand necessarily.
 
-    public VRUIController reciever;
-
-    public GameObject UICollider;
-
-    public float triggerDistance = 0.005f; //this is the distance the other hand needs to be from the button to trigger it. (1.0f = 1 meter distance, which is why the number is so small)
+    public float triggerDistance = 0.01f; //this is the distance the other hand needs to be from the button to trigger it.
 
     private bool isOn = false; //bool to know the state of the button.
 
@@ -27,7 +25,7 @@ public class HandUIActivateable : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        //checkHandDistance();
+        checkHandDistance();
     }
 
     public void checkHandDistance()
@@ -53,42 +51,12 @@ public class HandUIActivateable : MonoBehaviour
     public void triggerOnState()
     {
         isOn = true;
-        reciever.activatedUIButton(this.gameObject);
-        if (DEBUG_COLORS)
-        {
-            this.GetComponent<Renderer>().material.color = new Color(0, 255, 0);
-        }
+        this.GetComponent<Renderer>().material.color = new Color(255, 0, 0);
     }
 
     public void triggerOffState()
     {
         isOn = false;
-        if (DEBUG_COLORS)
-        {
-            this.GetComponent<Renderer>().material.color = new Color(255, 0, 0);
-        }
-    }
-
-    private void OnTriggerEnter(Collider other)
-    {
-        if(other.gameObject == UICollider)
-        {
-            if (!isOn)
-            {
-                triggerOnState();
-            }
-        }
-    }
-
-
-    private void OnTriggerExit(Collider other)
-    {
-        if (other.gameObject == UICollider)
-        {
-            if (isOn)
-            {
-                triggerOffState();
-            }
-        }
+        this.GetComponent<Renderer>().material.color = new Color(255, 255, 255);
     }
 }

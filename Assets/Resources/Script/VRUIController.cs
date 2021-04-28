@@ -1,61 +1,9 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.UI;
 
 public class VRUIController : MonoBehaviour
 {
-
-    //this class as a whole is intended to handle the entirety of the VR's User Interface as attatched to the VR Player's left hand.
-    //this class handles spawning the UI buttons, activating their behavior, and managing the state of the UI.
-    //this is a rundown of what the menu is going to look like visually:
-    /*
-     *  +-----+   +------------------------------+
-     *  |     |   |                              |
-     *  |     |   |              2               |
-     *  |     |   |                              |
-     *  |     |   +------------------------------+
-     *  |     |    
-     *  |     |   +------------------------------+
-     *  |     |   |                              |
-     *  |  3  |   |              1               |
-     *  |     |   |                              |
-     *  |     |   +------------------------------+
-     *  |     |    
-     *  |     |   +------------------------------+
-     *  |     |   |                              |
-     *  |     |   |              0               |
-     *  |     |   |                              |
-     *  +-----+   +------------------------------+
-     */
-    //where the top of the user's left wrist would be slightly below this.
-    //currently the numbers refer to the button's index in the currentUIObjects array, 0-2 are intended to be interactable buttons, while
-    //3 is intended to be the back button to return to a previous menu.
-    //
-    //hopefully the implementation of this class leaves room for further expansion if more buttons are required, although it may be difficult to implement non-button objects into this class.
-    //
-    //rotation and position information for all the buttons:
-    //
-    //0:
-    //  T: -0.0808, 0.0558, -0.1089
-    //  R: 17.044, 9.419, 69.47
-    //1:
-    //  T: -0.1194, 0.0701, -0.0974
-    //  R: 17.044, 9.419, 69.47
-    //2:
-    //  T: -0.1572, 0.0842, -0.0875
-    //  R: 17.044, 9.419, 69.47
-    //3:
-    //  T: -0.1280283, 0.09490927, -0.1676919
-    //  R: -19.516, -74.022, 71.847
-    //  S: 0.001, 0.03, 0.11006
-    //
-    //index finger tip position:
-    // 0.02905, -0.0572, -0.0038
-
-
-
-    public const int MAX_UI_OBJECTS = 3;
 
     //these are enumerators that represent the state of the VR UI. This is supposed to essentially represent what menu the VR Player is in, so that the class knows what to represent to the player.
     //Visual Representation of the UI Tree (so far):
@@ -71,20 +19,22 @@ public class VRUIController : MonoBehaviour
     //                Table Map
     //      Movement->
     //                Enable/Disable Upward Movement
-    //                Enable/Disable Gravity
-    //                Enable/Disable Collision
     private enum VRUI_State
     {
         Off,               //off means that the UI should currently not be shown to the player.
         Main,              //main is the main menu of the UI, where the player can go into more specific menus.
+<<<<<<< HEAD
         Options,           //options is the general options menu for the player
         Teleport,          //teleport is the menu for teleporting between the two main areas of our scene (table map and big map)
         Movement,          //this is the player movement menu
         Movement_Speed_Adjustment //this is the menu where the player is adjusting their speed
+=======
+        Options           //options is the general options menu for the player
+>>>>>>> parent of 8891b421 (Merge branch 'main' of https://github.com/Scottin3d/TopoMap into main)
     }
 
-    private static VRUI_State currentUIState;
 
+<<<<<<< HEAD
     //array of all current VR UI Objects
     private GameObject[] currentUIObjects;
 
@@ -220,12 +170,13 @@ public class VRUIController : MonoBehaviour
         currentUIState = VRUI_State.Main;
         updateUIDisplay();
     }
+=======
+>>>>>>> parent of 8891b421 (Merge branch 'main' of https://github.com/Scottin3d/TopoMap into main)
 
     // Start is called before the first frame update
     void Start()
     {
-        currentUIObjects = new GameObject[4];
-        StartCoroutine("waitForVRPlayer");
+        
     }
 
     // Update is called once per frame
@@ -233,6 +184,7 @@ public class VRUIController : MonoBehaviour
     {
         
     }
+<<<<<<< HEAD
 
     //this function is intended to be called by the buttons when pressed to allow for the correct behavior to be performed
     public void activatedUIButton(GameObject button)
@@ -401,4 +353,6 @@ public class VRUIController : MonoBehaviour
         }
         initialize(VRStartupController.VRPlayerObject);
     }
+=======
+>>>>>>> parent of 8891b421 (Merge branch 'main' of https://github.com/Scottin3d/TopoMap into main)
 }
