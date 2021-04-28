@@ -27,7 +27,9 @@ public class RouteDisplayV2 : MonoBehaviour
     //Data used in MapPath functions
     private AstarData data;
     private ABPath myPath;
-    //private float
+    public float scanFactor = 2f;
+    [Range(1,5)]
+    public int scaleFactor = 2;
 
     private bool DataCollected = false, DrawNewCurve = false;
 
@@ -51,7 +53,7 @@ public class RouteDisplayV2 : MonoBehaviour
         }
         myColor = new Color(Random.Range(0, 1f), Random.Range(0, 1f), Random.Range(0, 1f), .25f);
         GenerateRoutePool(batchSize);
-        StartCoroutine(ReceiveMeshData());
+        StartCoroutine(GenerateGraph());
         StartCoroutine(UpdateRoutePositions());
     }
 
@@ -79,7 +81,7 @@ public class RouteDisplayV2 : MonoBehaviour
 
     }
 
-    #region DRAW_STRAIGHT_ROUTE
+    #region DRAW_DIRECT_ROUTE
 
     //Update route coroutine split for readability
     void UpdateRoute()
@@ -188,32 +190,42 @@ public class RouteDisplayV2 : MonoBehaviour
 
     #region PATHFINDING
 
-    IEnumerator ReceiveMeshData()
+    IEnumerator GenerateGraph()
     {
         if (LargeMap != null && !DataCollected)
         {
             Debug.Log("Generating new graph");
             data = AstarPath.active.data;
-            NavMeshGraph graph;
+            GridGraph graph = data.gridGraph;
+            GenerateMapFromHeightMap heightMapData = LargeMap.GetComponent<GenerateMapFromHeightMap>();
             
             MeshFilter[] meshes = LargeMap.GetComponentsInChildren<MeshFilter>();
             while (meshes.Length < 1)
             {
-                yield return new WaitForSeconds(0.1f);
+                yield return new WaitForSeconds(1/updatesPerSecond);
                 meshes = LargeMap.GetComponentsInChildren<MeshFilter>();
             }
-            Debug.Log("Chunk count: " + meshes.Length);
+            Debug.Log("Setting " + meshes.Length + " chunks to Ground layer");
             int ndx = 0;
             while (ndx < meshes.Length)
             {
-                Debug.Log("Adding chunk graph");
-                graph = data.AddGraph(typeof(NavMeshGraph)) as NavMeshGraph;
-                graph.sourceMesh = meshes[ndx].sharedMesh;
-                graph.offset = meshes[ndx].transform.position;
+                meshes[ndx].gameObject.layer = 9;
                 ndx++;
             }
-            
-            AstarPath.active.Scan(current.data.graphs);
+            while(heightMapData == null)
+            {
+                yield return new WaitForSeconds(1 / updatesPerSecond);
+                heightMapData = LargeMap.GetComponent<GenerateMapFromHeightMap>();
+            }
+
+            //hexagonal vs grid check
+            int graphSize = heightMapData.mapSize;
+            float nodeSize = 1f / (float)scaleFactor;
+            float scanHeight = heightMapData.meshHeight;
+            graph.SetDimensions(graphSize * scaleFactor, graphSize * scaleFactor, nodeSize);
+            graph.collision.fromHeight = scanHeight * scanFactor;
+
+            AstarPath.active.Scan(graph);
             DataCollected = !DataCollected;
         }
         yield return new WaitForSeconds(0.1f);
@@ -230,9 +242,9 @@ public class RouteDisplayV2 : MonoBehaviour
 
     private void DrawMapCurve()
     {
-        if (DrawNewCurve && DataCollected && data.graphs[0] != null)
+        if (DrawNewCurve && DataCollected && data.gridGraph != null)
         {
-            List<Vector3> posList = new List<Vector3>();
+            /*List<Vector3> posList = new List<Vector3>();
             List<GraphNode> nodeList = new List<GraphNode>();
             List<GraphNode> connections = new List<GraphNode>();
 
@@ -316,12 +328,12 @@ public class RouteDisplayV2 : MonoBehaviour
                 
                     
                     //repeat while block
-            }
+            }*/
             DrawNewCurve = !DrawNewCurve;
         }
     }
 
-    bool GetNextGraph(ref NavGraph curGraph, ref GraphNode curNode, ref Vector3 curPos, Vector3 target)
+    /*bool GetNextGraph(ref NavGraph curGraph, ref GraphNode curNode, ref Vector3 curPos, Vector3 target)
     {
         List<NavGraph> tempGraph = new List<NavGraph>();
         List<GraphNode> tempNode = new List<GraphNode>();
@@ -336,7 +348,7 @@ public class RouteDisplayV2 : MonoBehaviour
         }
 
         return false;
-    }
+    }*/
 
     #endregion
 
