@@ -147,7 +147,6 @@ public class PlayerMarkerGenerator : MonoBehaviour
     //Add the large map marker into the list and add it into ASLObjectTrackingSystem
     private static void GetLargerMapMarker(GameObject _myGameObject)
     {
-        //Debug.Log("123");
         //ASLObjectTrackingSystem.AddObjectToTrack(_myGameObject.GetComponent<ASL.ASLObject>(), _myGameObject.transform);
         MinimapDisplay.AddRouteMarker(_myGameObject.transform);
         LargerMapMarkerList.Add(_myGameObject);
