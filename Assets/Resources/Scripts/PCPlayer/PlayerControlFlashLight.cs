@@ -11,7 +11,7 @@ public class PlayerControlFlashLight : MonoBehaviour
 
     void Awake()
     {
-        PlayerCamera = GameObject.Find("Player").GetComponentInChildren<Camera>();
+        PlayerCamera = GameObject.Find("PCHandler/Player").GetComponentInChildren<Camera>();
     }
 
     void Start()
@@ -30,7 +30,7 @@ public class PlayerControlFlashLight : MonoBehaviour
     }
 
     private void ControlFlashLight()
-    {
+    {   
         if (Input.GetKeyDown(KeyCode.Y))
         {
             if (IfOn)

@@ -97,6 +97,9 @@ public class GenerateMapFromHeightMap : MonoBehaviour {
                 Vector2 _chunkCenter = new Vector2(transform.position.x + mapLowerLeftX + (x * chunkSize) + halfChunk,
                                                  transform.position.z + mapLowerLeftZ + (z * chunkSize) + halfChunk);
 
+                //Vector2 chunkCenter = new Vector2(mapLowerLeftX + (x * chunkSize) + halfChunk,
+                //                                  mapLowerLeftZ + (z * chunkSize) - halfChunk);
+
                 // generate heightmap chunk
                 Texture2D _heightmap = GetPixelMap((mapWidth / numberOfChunks) * x,
                                                     (mapHeight / numberOfChunks) * z,
@@ -152,6 +155,11 @@ public class GenerateMapFromHeightMap : MonoBehaviour {
                 }
 
                 // generate mesh data
+                // errors most likely steming from here
+                MeshData _meshData = MeshGenerator.GenerateTerrainMesh(_mapData.heightmap, meshHeight, meshHieghtCurve, 
+                                                                       chunkSize, editorPreviewLOD, chunkCenter);
+
+
                 MeshData _meshData = MeshGenerator.GenerateTerrainMesh(mapChunks[x, z], meshHeight, meshHieghtCurve,
                                                                        chunkSize, editorPreviewLOD);
                 mapChunks[x, z].meshData = _meshData;
