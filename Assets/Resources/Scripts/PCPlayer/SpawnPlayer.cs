@@ -12,30 +12,15 @@ public class SpawnPlayer : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        RunUpdate = false;
         PlayerObject = GameObject.Find("PCHandler/Player");
         ASL.ASLHelper.InstantiateASLObject("MinimapMarker_Player", new Vector3(0, 0, 0), Quaternion.identity, "", "", PlayerMinimapInstantiation);
         ASL.ASLHelper.InstantiateASLObject("PlayerCube", new Vector3(0, 0, 0), Quaternion.identity, "", "", PlayerInstantiation);
         StartCoroutine(UpdatePlayerBody());
     }
 
-    //void Update()
-    //{
-    //    if (RunUpdate)
-    //    {
-    //        UpdateTimer -= Time.deltaTime;
-    //        if (UpdateTimer <= 0)
-    //        {
-    //            SendAndSetClaimPlayer();
-    //            UpdateTimer = 0.1f;
-    //        }
-    //    }
-    //}
-
     private static void PlayerInstantiation(GameObject _myGameObject)
     {
         Cube = _myGameObject;
-        RunUpdate = true;
         Cube.GetComponent<MeshRenderer>().enabled = false;
         ASLObjectTrackingSystem.AddPlayerToTrack(Cube.GetComponent<ASL.ASLObject>(), Cube.transform);
     }
@@ -79,7 +64,7 @@ public class SpawnPlayer : MonoBehaviour
     {
         while (true)
         {
-            yield return new WaitForSeconds(0.4f);
+            yield return new WaitForSeconds(0.5f);
             Cube.transform.position = PlayerObject.transform.position;
             Cube.transform.rotation = PlayerObject.transform.rotation;
 
