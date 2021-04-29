@@ -17,7 +17,7 @@ public class PlayerControlInWaitingRoom : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        this.transform.position = new Vector3(8, 60, 8);
+        this.transform.position = new Vector3(8, 30, 8);
         WalkSpeed = 5;
         JumpSpeed = 3;
     }
@@ -28,14 +28,19 @@ public class PlayerControlInWaitingRoom : MonoBehaviour
         ChangePosition();
     }
 
+    //private void FixedUpdate()
+    //{
+    //    ChangePosition();
+    //}
+
     private void ChangePosition()
     {
         float XDirection, ZDirection;
 
         if (PlayerController.isGrounded)
         {
-            XDirection = Input.GetAxis("Horizontal");
-            ZDirection = Input.GetAxis("Vertical");
+            XDirection = Input.GetAxisRaw("Horizontal");
+            ZDirection = Input.GetAxisRaw("Vertical");
             NewMove = transform.right * XDirection + transform.forward * ZDirection;
             if (Input.GetAxis("Jump") == 1)
             {
