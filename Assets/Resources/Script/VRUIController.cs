@@ -91,7 +91,6 @@ public class VRUIController : MonoBehaviour
     //references to the VR Player's hands
     private GameObject leftHand;
     private GameObject rightHand;
-    VRUI_State currentUIState;
 
     private void updateUIDisplay()
     {

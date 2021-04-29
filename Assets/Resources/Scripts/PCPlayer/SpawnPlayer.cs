@@ -51,7 +51,7 @@ public class SpawnPlayer : MonoBehaviour
             Marker.GetComponent<ASL.ASLObject>().SendAndSetObjectColor(theColor, theColor);
         });
         //Marker.GetComponent<MeshRenderer>().enabled = false;
-        ASLObjectTrackingSystem.AddObjectToTrack(Marker.GetComponent<ASL.ASLObject>(), Marker.transform);
+        //ASLObjectTrackingSystem.AddObjectToTrack(Marker.GetComponent<ASL.ASLObject>(), Marker.transform);
     }
 
     private void SendAndSetClaimPlayer()
@@ -72,7 +72,7 @@ public class SpawnPlayer : MonoBehaviour
         Marker.GetComponent<ASL.ASLObject>().SendAndSetClaim(() =>
         {
             Marker.GetComponent<ASL.ASLObject>().SendAndSetWorldPosition(pos + 0.5f * Vector3.down);
-            ASLObjectTrackingSystem.UpdateObjectTransform(Marker.GetComponent<ASL.ASLObject>(), Marker.transform);
+            //ASLObjectTrackingSystem.UpdateObjectTransform(Marker.GetComponent<ASL.ASLObject>(), Marker.transform);
         });
     }
 }

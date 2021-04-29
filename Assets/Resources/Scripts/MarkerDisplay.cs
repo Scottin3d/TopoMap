@@ -77,7 +77,7 @@ public class MarkerDisplay : MonoBehaviour
                 ASLObject marker = playerMarkerPool[i].GetComponent<ASLObject>();
                 marker.SendAndSetClaim(() => {
                     marker.SendAndSetWorldPosition(playerMarkerPool[i].transform.position);
-                    marker.SendAndIncrementWorldRotation(rotation);
+                    //marker.SendAndIncrementWorldRotation(rotation);
                 });
 
             } else if (o < numObjects) {
@@ -96,7 +96,7 @@ public class MarkerDisplay : MonoBehaviour
 
                 o++;
             } else { 
-                        playerMarkerPool[i].SetActive(false);
+               playerMarkerPool[i].SetActive(false);
             
             }
             
