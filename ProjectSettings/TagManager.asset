@@ -10,9 +10,8 @@ TagManager:
   - Plane
   - WhiteBoard
   - Table
-  - LargeMap
-  - SmallMap
-  - A*
+  - SpawnSmallMap
+  - SpawnLargerMap
   layers:
   - Default
   - TransparentFX

@@ -10,7 +10,7 @@ public class Handaction : MonoBehaviour
     public Transform player; //transform of the player to move
     public Transform controlHand; //hand for movement control
     //public SteamVR_Input_Sources inputDevice; //device to pull data from
-    public float speed = 1f; //speed of player movement
+    public static float speed = 5f; //speed of player movement
 
     // Start is called before the first frame update
     void Start()
@@ -42,8 +42,25 @@ public class Handaction : MonoBehaviour
             tempPos.x += move;
             move = Mathf.Cos((movement.y * Mathf.Deg2Rad)) * speed * Time.deltaTime;
             tempPos.z += move;
+
+            if (StaticVRVariables.allowVerticalVRMovement)
+            {
+                move = -Mathf.Sin((movement.x * Mathf.Deg2Rad)) * speed * Time.deltaTime;
+                tempPos.y += move;
+            }
+
             player.position = tempPos;
         }
+    }
+
+    public static void increaseSpeed(float increaseAmount)
+    {
+        speed += increaseAmount;
+    }
+
+    public static void decreaseSpeed(float decreaseAmount)
+    {
+        speed -= decreaseAmount;
     }
 
 
