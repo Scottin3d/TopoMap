@@ -12,30 +12,15 @@ public class SpawnPlayer : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        //Default
-        RunUpdate = false;
-        PlayerObject = GameObject.Find("Player");
+        PlayerObject = GameObject.Find("PCHandler/Player");
         ASL.ASLHelper.InstantiateASLObject("MinimapMarker_Player", new Vector3(0, 0, 0), Quaternion.identity, "", "", PlayerMinimapInstantiation);
-        ASL.ASLHelper.InstantiateASLObject("PlayerCube", new Vector3(0,0,0), Quaternion.identity, "", "", PlayerInstantiation);
-    }
-
-    void Update()
-    {
-        if (RunUpdate)
-        {
-            UpdateTimer -= Time.deltaTime;
-            if (UpdateTimer <= 0)
-            {
-                SendAndSetClaimPlayer();
-                UpdateTimer = 0.1f;
-            }
-        }
+        ASL.ASLHelper.InstantiateASLObject("PlayerCube", new Vector3(0, 0, 0), Quaternion.identity, "", "", PlayerInstantiation);
+        StartCoroutine(UpdatePlayerBody());
     }
 
     private static void PlayerInstantiation(GameObject _myGameObject)
     {
         Cube = _myGameObject;
-        RunUpdate = true;
         Cube.GetComponent<MeshRenderer>().enabled = false;
         ASLObjectTrackingSystem.AddPlayerToTrack(Cube.GetComponent<ASL.ASLObject>(), Cube.transform);
     }
@@ -51,28 +36,55 @@ public class SpawnPlayer : MonoBehaviour
             Marker.GetComponent<ASL.ASLObject>().SendAndSetObjectColor(theColor, theColor);
         });
         //Marker.GetComponent<MeshRenderer>().enabled = false;
-        ASLObjectTrackingSystem.AddObjectToTrack(Marker.GetComponent<ASL.ASLObject>(), Marker.transform);
+        //ASLObjectTrackingSystem.AddObjectToTrack(Marker.GetComponent<ASL.ASLObject>(), Marker.transform);
     }
 
-    private void SendAndSetClaimPlayer()
+    //private void SendAndSetClaimPlayer()
+    //{
+    //    Cube.transform.position = PlayerObject.transform.position;
+    //    Cube.transform.rotation = PlayerObject.transform.rotation;
+
+    //    Cube.GetComponent<ASL.ASLObject>().SendAndSetClaim(() =>
+    //    {
+    //        Cube.GetComponent<ASL.ASLObject>().SendAndSetWorldRotation(PlayerObject.transform.rotation);
+    //        Cube.GetComponent<ASL.ASLObject>().SendAndSetWorldPosition(PlayerObject.transform.position);
+    //        ASLObjectTrackingSystem.UpdatePlayerTransform(Cube.GetComponent<ASL.ASLObject>(), Cube.transform);
+    //    });
+    //    Vector3 pos = PlayerObject.transform.position;
+    //    pos.y += 10f;
+    //    Marker.transform.position = pos + 0.5f * Vector3.down;
+
+    //    Marker.GetComponent<ASL.ASLObject>().SendAndSetClaim(() =>
+    //    {
+    //        Marker.GetComponent<ASL.ASLObject>().SendAndSetWorldPosition(pos + 0.5f * Vector3.down);
+    //        ASLObjectTrackingSystem.UpdateObjectTransform(Marker.GetComponent<ASL.ASLObject>(), Marker.transform);
+    //    });
+    //}
+
+    IEnumerator UpdatePlayerBody()
     {
-        Cube.transform.position = PlayerObject.transform.position;
-        Cube.transform.rotation = PlayerObject.transform.rotation;
-
-        Cube.GetComponent<ASL.ASLObject>().SendAndSetClaim(() =>
+        while (true)
         {
-            Cube.GetComponent<ASL.ASLObject>().SendAndSetWorldRotation(PlayerObject.transform.rotation);
-            Cube.GetComponent<ASL.ASLObject>().SendAndSetWorldPosition(PlayerObject.transform.position);
-            ASLObjectTrackingSystem.UpdatePlayerTransform(Cube.GetComponent<ASL.ASLObject>(), Cube.transform);
-        });
-        Vector3 pos = PlayerObject.transform.position;
-        pos.y += 10f;
-        Marker.transform.position = pos + 0.5f * Vector3.down;
+            yield return new WaitForSeconds(0.5f);
+            Cube.transform.position = PlayerObject.transform.position;
+            Cube.transform.rotation = PlayerObject.transform.rotation;
 
-        Marker.GetComponent<ASL.ASLObject>().SendAndSetClaim(() =>
-        {
-            Marker.GetComponent<ASL.ASLObject>().SendAndSetWorldPosition(pos + 0.5f * Vector3.down);
-            ASLObjectTrackingSystem.UpdateObjectTransform(Marker.GetComponent<ASL.ASLObject>(), Marker.transform);
-        });
+            Cube.GetComponent<ASL.ASLObject>().SendAndSetClaim(() =>
+            {
+                Cube.GetComponent<ASL.ASLObject>().SendAndSetWorldRotation(PlayerObject.transform.rotation);
+                Cube.GetComponent<ASL.ASLObject>().SendAndSetWorldPosition(PlayerObject.transform.position);
+                ASLObjectTrackingSystem.UpdatePlayerTransform(Cube.GetComponent<ASL.ASLObject>(), Cube.transform);
+            });
+
+            Vector3 pos = PlayerObject.transform.position;
+            pos.y += 10f;
+            Marker.transform.position = pos + 0.5f * Vector3.down;
+
+            Marker.GetComponent<ASL.ASLObject>().SendAndSetClaim(() =>
+            {
+                Marker.GetComponent<ASL.ASLObject>().SendAndSetWorldPosition(pos + 0.5f * Vector3.down);
+                //ASLObjectTrackingSystem.UpdateObjectTransform(Marker.GetComponent<ASL.ASLObject>(), Marker.transform);
+            });
+        }
     }
 }

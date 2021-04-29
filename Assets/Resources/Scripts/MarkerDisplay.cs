@@ -18,6 +18,7 @@ public class MarkerDisplay : MonoBehaviour
 
 
     private static List<GameObject> playerMarkerPool = new List<GameObject>();
+    private bool expanding = false;
 
     private void Awake() {
         current = this;
@@ -32,7 +33,7 @@ public class MarkerDisplay : MonoBehaviour
 
         mapScaleFactor = bigMap.mapSize / smallMap.mapSize;
 
-        GeneratePlayerPool();
+        GeneratePlayerPool(20);
 
         StartCoroutine(UpdatePlayerPositions());
     }
@@ -55,6 +56,12 @@ public class MarkerDisplay : MonoBehaviour
         int numPlayers = playerTransforms.Count;
         int numObjects = objectTransforms.Count;
 
+        // check and update pool of objects
+        if (numPlayers + numObjects >= (playerMarkerPool.Count * 0.8f) && !expanding) {
+            expanding = true;
+            GeneratePlayerPool(20);
+        }
+
         for (int i = 0, o = 0; i < playerMarkerPool.Count; i++) {
             if (i < numPlayers) {
                 playerMarkerPool[i].SetActive(true);
@@ -70,7 +77,7 @@ public class MarkerDisplay : MonoBehaviour
                 ASLObject marker = playerMarkerPool[i].GetComponent<ASLObject>();
                 marker.SendAndSetClaim(() => {
                     marker.SendAndSetWorldPosition(playerMarkerPool[i].transform.position);
-                    marker.SendAndIncrementWorldRotation(rotation);
+                    //marker.SendAndIncrementWorldRotation(rotation);
                 });
 
             } else if (o < numObjects) {
@@ -89,22 +96,23 @@ public class MarkerDisplay : MonoBehaviour
 
                 o++;
             } else { 
-                        playerMarkerPool[i].SetActive(false);
+               playerMarkerPool[i].SetActive(false);
             
             }
             
         }
     }
 
-    private void GeneratePlayerPool() {
-        for (int i = 0; i < 20; i++) {
+    private void GeneratePlayerPool(int count) {
+        for (int i = 0; i < count; i++) {
             ASLHelper.InstantiateASLObject(playerMaker.name, Vector3.zero, Quaternion.identity, null, null, OnMarkerCreate);
         }
-        
+        expanding = false;
     }
 
     private static void OnMarkerCreate(GameObject _gameObject) {
         playerMarkerPool.Add(_gameObject);
         _gameObject.SetActive(false);
+        _gameObject.transform.parent = current.transform;
     }
 }

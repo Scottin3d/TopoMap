@@ -11,7 +11,7 @@ public class PlayerControlICameraWaitingRoom : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        MouseSpeed = 250;
+        MouseSpeed = 100;
     }
 
     // Update is called once per frame
@@ -20,11 +20,16 @@ public class PlayerControlICameraWaitingRoom : MonoBehaviour
         ChangeCameraDirection();
     }
 
+    //private void FixedUpdate()
+    //{
+    //    ChangeCameraDirection();
+    //}
+
     private void ChangeCameraDirection()
     {
         float XDirection, YDirection;
-        XDirection = Input.GetAxis("Mouse X") * MouseSpeed * Time.deltaTime;
-        YDirection = Input.GetAxis("Mouse Y") * MouseSpeed * Time.deltaTime;
+        XDirection = Input.GetAxisRaw("Mouse X") * MouseSpeed * Time.fixedDeltaTime;
+        YDirection = Input.GetAxisRaw("Mouse Y") * MouseSpeed * Time.fixedDeltaTime;
         XMove = XMove - YDirection;
         XMove = Mathf.Clamp(XMove, -90, 90);
         this.transform.localRotation = Quaternion.Euler(XMove, 0, 0);
