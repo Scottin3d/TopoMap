@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class VRUIController : MonoBehaviour
 {
@@ -23,25 +24,18 @@ public class VRUIController : MonoBehaviour
     {
         Off,               //off means that the UI should currently not be shown to the player.
         Main,              //main is the main menu of the UI, where the player can go into more specific menus.
-<<<<<<< HEAD
         Options,           //options is the general options menu for the player
         Teleport,          //teleport is the menu for teleporting between the two main areas of our scene (table map and big map)
         Movement,          //this is the player movement menu
         Movement_Speed_Adjustment //this is the menu where the player is adjusting their speed
-=======
-        Options           //options is the general options menu for the player
->>>>>>> parent of 8891b421 (Merge branch 'main' of https://github.com/Scottin3d/TopoMap into main)
     }
-
-
-<<<<<<< HEAD
     //array of all current VR UI Objects
     private GameObject[] currentUIObjects;
 
     //references to the VR Player's hands
     private GameObject leftHand;
     private GameObject rightHand;
-    
+    VRUI_State currentUIState;
 
     private void updateUIDisplay()
     {
@@ -150,8 +144,8 @@ public class VRUIController : MonoBehaviour
             currentUIObjects[buttonPosition].transform.localScale = scale;
         }
         currentUIObjects[buttonPosition].GetComponentInChildren<Text>().text = buttonText;
-        currentUIObjects[buttonPosition].GetComponent<HandUIActivateable>().UICollider = rightHand.transform.Find("UIInteractSphere").gameObject;
-        currentUIObjects[buttonPosition].GetComponent<HandUIActivateable>().reciever = this;
+        //currentUIObjects[buttonPosition].GetComponent<HandUIActivateable>().UICollider = rightHand.transform.Find("UIInteractSphere").gameObject;
+        //currentUIObjects[buttonPosition].GetComponent<HandUIActivateable>().reciever = this;
     }
 
 
@@ -170,8 +164,6 @@ public class VRUIController : MonoBehaviour
         currentUIState = VRUI_State.Main;
         updateUIDisplay();
     }
-=======
->>>>>>> parent of 8891b421 (Merge branch 'main' of https://github.com/Scottin3d/TopoMap into main)
 
     // Start is called before the first frame update
     void Start()
@@ -184,7 +176,6 @@ public class VRUIController : MonoBehaviour
     {
         
     }
-<<<<<<< HEAD
 
     //this function is intended to be called by the buttons when pressed to allow for the correct behavior to be performed
     public void activatedUIButton(GameObject button)
@@ -268,6 +259,4 @@ public class VRUIController : MonoBehaviour
         }
         initialize(VRStartupController.VRPlayerObject);
     }
-=======
->>>>>>> parent of 8891b421 (Merge branch 'main' of https://github.com/Scottin3d/TopoMap into main)
 }
