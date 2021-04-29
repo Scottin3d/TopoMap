@@ -76,7 +76,7 @@ public class BezierSplineInspector : Editor
 	{
 		GUILayout.Label("Selected Point");
 		EditorGUI.BeginChangeCheck();
-		Vector3 point = EditorGUILayout.Vector3Field("Position", spline.GetControlPoint(selectedIndex));
+		Vector3 point = EditorGUILayout.Vector3Field("Position " + selectedIndex, spline.GetControlPoint(selectedIndex));
 		if (EditorGUI.EndChangeCheck())
 		{
 			Undo.RecordObject(spline, "Move Point");

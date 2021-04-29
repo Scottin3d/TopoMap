@@ -58,6 +58,11 @@ public class BezierSpline : MonoBehaviour
 		return GetVelocity(t).normalized;
 	}
 
+	public int CurveCount
+	{
+		get { return (points.Length - 1) / 3; }
+	}
+
 	public void AddCurve()
 	{
 		Vector3 point = points[points.Length - 1];
@@ -81,9 +86,14 @@ public class BezierSpline : MonoBehaviour
 		}
 	}
 
-	public int CurveCount
+	public void SetPoint(int ndx, Vector3 position)
     {
-        get { return (points.Length - 1) / 3; }
+		if(ndx >= 0)
+        {
+			ndx = ndx * 3;
+			if (ndx > points.Length - 1) AddCurve();
+			points[ndx] = position;
+        }
     }
 
 	public bool Loop
