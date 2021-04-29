@@ -35,7 +35,7 @@ public class SpawnPlayer : MonoBehaviour
     private static void PlayerInstantiation(GameObject _myGameObject)
     {
         Cube = _myGameObject;
-        //RunUpdate = true;
+        RunUpdate = true;
         Cube.GetComponent<MeshRenderer>().enabled = false;
         ASLObjectTrackingSystem.AddPlayerToTrack(Cube.GetComponent<ASL.ASLObject>(), Cube.transform);
     }
