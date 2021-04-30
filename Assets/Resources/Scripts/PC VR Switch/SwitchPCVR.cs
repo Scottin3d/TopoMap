@@ -11,11 +11,11 @@ public class SwitchPCVR : MonoBehaviour
     {
         if (SystemInfo.deviceType == DeviceType.Desktop)
         {
-            VR.SetActive(false);
+            //VR.SetActive(false);
         }
         else
         {
-            PC.SetActive(false);
+            //PC.SetActive(false);
         }
     }
     // Start is called before the first frame update

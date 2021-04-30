@@ -555,7 +555,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!114 &432528924
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2438,6 +2438,18 @@ GameObject:
   m_CorrespondingSourceObject: {fileID: 6897538589646759656, guid: 6c21f35d451268d4da0883a9980a2721, type: 3}
   m_PrefabInstance: {fileID: 6897538587877100113}
   m_PrefabAsset: {fileID: 0}
+--- !u!114 &1549362512
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1549362511}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0dd7cde2e6f975e4fb64c64e8e547763, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &1617973111 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 104566836559545783, guid: f67aff4e87b056049a333247ad6f5f99, type: 3}
@@ -3084,7 +3096,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &2011085201
 Transform:
   m_ObjectHideFlags: 0
@@ -3414,5 +3426,9 @@ PrefabInstance:
       propertyPath: VRToggle
       value: 
       objectReference: {fileID: 684022538}
+    - target: {fileID: 6897538589646759659, guid: 6c21f35d451268d4da0883a9980a2721, type: 3}
+      propertyPath: PlayerToTurnOff
+      value: 
+      objectReference: {fileID: 465473460}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 6c21f35d451268d4da0883a9980a2721, type: 3}
