@@ -253,62 +253,6 @@ PrefabInstance:
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: f67aff4e87b056049a333247ad6f5f99, type: 3}
---- !u!1001 &365287916
-PrefabInstance:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 351636257}
-  - component: {fileID: 351636256}
-  m_Layer: 0
-  m_Name: Spline
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!114 &351636256
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 351636255}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 21652c86832018640b233f3fb916517a, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  points:
-  - {x: 1, y: 3.573857, z: 0}
-  - {x: 2, y: 3.573857, z: 0}
-  - {x: 5.448903, y: 0.26902807, z: 0}
-  - {x: 6.4489036, y: 0.26902807, z: 0}
-  - {x: 7.4489036, y: 0.26902807, z: 0}
-  - {x: 8.37935, y: -0.53175163, z: -0.1604538}
-  - {x: 9.448904, y: 0.26902807, z: 0}
-  - {x: 10.243685, y: 0.864084, z: 0.11923253}
-  - {x: 9.888522, y: 1.9080436, z: -0.26852083}
-  - {x: 10.888522, y: 1.9080436, z: -0.26852083}
-  modes: 01000000010000000100000001000000
-  loop: 0
---- !u!4 &351636257
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 351636255}
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_Children: []
-  m_Father: {fileID: 0}
-  m_RootOrder: 13
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1001 &390922066
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -638,7 +582,6 @@ GameObject:
   m_Component:
   - component: {fileID: 631668595}
   - component: {fileID: 631668596}
-  - component: {fileID: 631668597}
   m_Layer: 9
   m_Name: BigMap
   m_TagString: SpawnLargerMap
@@ -1294,11 +1237,11 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   updatesPerSecond: 10
   heightAboveMarker: 5
-  batchSize: 20
+  batchSize: 10
   MapDisplay: {fileID: 0}
   scanFactor: 2
   scaleFactor: 2
-  mySpline: {fileID: 351636256}
+  mySpline: {fileID: 1714597436}
 --- !u!1 &891035391
 GameObject:
   m_ObjectHideFlags: 0
@@ -2605,6 +2548,56 @@ Transform:
   - {fileID: 785958413}
   m_Father: {fileID: 0}
   m_RootOrder: 4
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &1714597435
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1714597437}
+  - component: {fileID: 1714597436}
+  m_Layer: 0
+  m_Name: Spline
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &1714597436
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1714597435}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 21652c86832018640b233f3fb916517a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  points:
+  - {x: 1, y: 0, z: 0}
+  - {x: 2, y: 0, z: 0}
+  - {x: 3, y: 0, z: 0}
+  - {x: 4, y: 0, z: 0}
+  modes: 0000000000000000
+  loop: 0
+--- !u!4 &1714597437
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1714597435}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_RootOrder: 13
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1726578754
 GameObject:

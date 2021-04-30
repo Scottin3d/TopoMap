@@ -25,6 +25,8 @@ public class RouteDisplayV2 : MonoBehaviour
     private GameObject SmallMap;
     private GameObject LargeMap;
 
+    private bool DonePooling = false;
+
     //Data used in MapPath functions
     private AstarData data;
     public ABPath myPath;
@@ -77,6 +79,7 @@ public class RouteDisplayV2 : MonoBehaviour
             ASLHelper.InstantiateASLObject("MinimapMarker_RoutePath", new Vector3(0, 0, 0), Quaternion.identity, "", "", RouteInstantiation);
             ASLHelper.InstantiateASLObject("MinimapMarker_RoutePath", new Vector3(0, 0, 0), Quaternion.identity, "", "", SmallRouteInstantiation);
         }
+        DonePooling = true;
     }
 
     private void GeneratePathPool(int toAdd)
@@ -103,6 +106,7 @@ public class RouteDisplayV2 : MonoBehaviour
         float length;
         while (true)
         {
+            while (!DonePooling) yield return new WaitForSeconds(0.1f);
             yield return new WaitForSeconds(1f / updatesPerSecond);
 
             for (ndx = 0; ndx < linkedObj.Count; ndx++)
@@ -390,6 +394,7 @@ public class RouteDisplayV2 : MonoBehaviour
         if (current.linkedObj.Count > current.routeMarkerPool.Count)
         {
             Debug.Log("Instantiating new batch");
+            current.DonePooling = false;
             current.GenerateRoutePool(current.batchSize);
         }
     }

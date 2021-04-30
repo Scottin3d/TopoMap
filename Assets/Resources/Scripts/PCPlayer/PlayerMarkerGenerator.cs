@@ -103,7 +103,7 @@ public class PlayerMarkerGenerator : MonoBehaviour
                 RaycastHit Hit;
                 if (Physics.Raycast(MouseRay, out Hit))
                 {
-                    
+                    string DropdownOpionValue = "";
                     //If mouse hit the small map
                     if (Hit.collider.tag == "Chunk" && Hit.collider.transform.parent.tag == "SpawnSmallMap")
                     {
@@ -116,6 +116,7 @@ public class PlayerMarkerGenerator : MonoBehaviour
                         {
                             DropdownOpionValue = "PlayerRouteMarker";
                         }*/
+                        DropdownOpionValue = "PlayerMarker";
 
                         Vector3 CenterToMarker = (Hit.point - SmallMapCenter) * (LargeMapSize / SmallMapSize);
                         Vector3 NewPositionOnLargeMap = CenterToMarker + LargerMapCenter;
@@ -126,7 +127,8 @@ public class PlayerMarkerGenerator : MonoBehaviour
                     }
                     else if (Hit.collider.tag == "Chunk" && Hit.collider.transform.parent.tag == "SpawnLargerMap")
                     {
-                        string DropdownOpionValue = MyDropdownList.options[MyDropdownList.value].text;
+                        //string DropdownOpionValue = MyDropdownList.options[MyDropdownList.value].text;
+                        DropdownOpionValue = "PlayerMarker";
                         ASL.ASLHelper.InstantiateASLObject(DropdownOpionValue, Hit.point, Quaternion.identity, "", "", GetLargerMapMarker);
                         //GenerateMarkerOnSmallMap(Hit.point);
                     }
