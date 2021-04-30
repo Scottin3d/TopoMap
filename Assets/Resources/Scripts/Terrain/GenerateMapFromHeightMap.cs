@@ -160,8 +160,8 @@ public class GenerateMapFromHeightMap : MonoBehaviour {
                 // Top Right : Top + (Top + 1) + Right
                 // generate mesh data
                 // errors most likely steming from here
-                MeshData _meshData = MeshGenerator.GenerateTerrainMesh(_mapData.heightmap, meshHeight, meshHieghtCurve, 
-                                                                       chunkSize, editorPreviewLOD, chunkCenter);
+                /*MeshData _meshData = MeshGenerator.GenerateTerrainMesh(_mapData.heightmap, meshHeight, meshHieghtCurve, 
+                                                                       chunkSize, editorPreviewLOD, _chunkCenter);*/
 
 
                 MeshData _meshData = MeshGenerator.GenerateTerrainMesh(mapChunks[x, z], meshHeight, meshHieghtCurve,

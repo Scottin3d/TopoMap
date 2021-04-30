@@ -29,7 +29,6 @@ public class VRPlayerMarkerGenerator : MonoBehaviour
     private int SmallMapSize;
 
     private GameObject LocalProjectMarker;
-    private static GameObject MiniMapDisplayObject;
 
     void Awake()
     {
@@ -38,7 +37,6 @@ public class VRPlayerMarkerGenerator : MonoBehaviour
         //VR player need to find the Camera here
         PlayerCamera = GameObject.Find("PCHandler/Player").GetComponentInChildren<Camera>();
         PlayerTableViewCamera = GameObject.Find("PCHandler/PlayerTopViewCamera").GetComponentInChildren<Camera>();
-        MiniMapDisplayObject = GameObject.Find("PCHandler/MiniMapDisplay");
     }
 
     // Start is called before the first frame update
@@ -216,7 +214,7 @@ public class VRPlayerMarkerGenerator : MonoBehaviour
         if (LargerMapMarkerList.Count > 0)
         {
             GameObject LMarker = LargerMapMarkerList[LargerMapMarkerList.Count - 1];
-            MinimapDisplay.RemoveRouteMarker(LMarker.transform);
+            RouteDisplayV2.RemoveRouteMarker(LMarker.transform, false);
 
             LMarker.GetComponent<ASL.ASLObject>().SendAndSetClaim(() =>
             {

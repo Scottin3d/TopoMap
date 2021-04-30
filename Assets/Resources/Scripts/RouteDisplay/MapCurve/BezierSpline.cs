@@ -86,13 +86,41 @@ public class BezierSpline : MonoBehaviour
 		}
 	}
 
-	public void SetPoint(int ndx, Vector3 position)
+	public void SetCurvePoint(int ndx, Vector3 position)
     {
 		if(ndx >= 0)
         {
-			ndx = ndx * 3;
 			if (ndx > points.Length - 1) AddCurve();
-			points[ndx] = position;
+			SetControlPoint(ndx, position);
+        }
+		for (int odx = 0; odx < points.Length; odx += 3)
+		{
+			SetControlPointMode(odx, BezierControlPointMode.Mirrored);
+		}
+		SmoothCurve();
+    }
+
+	public bool IsEnd(Vector3 p)
+    {
+		return (p.Equals(points.Length - 1));
+    }
+
+	void SmoothCurve()
+    {
+		Vector3 dir;
+		for(int ndx = 0; ndx < points.Length; ndx += 3)
+        {
+			//dir = Vector3.zero;
+			if(ndx < points.Length - 1)
+            {
+				dir = (points[ndx + 3] - points[ndx]).normalized;
+				SetControlPoint(ndx + 1, points[ndx] + dir);
+            } 
+			if(ndx == points.Length - 1)
+            {
+				dir = (points[ndx] - points[ndx - 3]).normalized;
+				SetControlPoint(ndx - 1, points[ndx] - dir);
+            }
         }
     }
 
@@ -132,6 +160,11 @@ public class BezierSpline : MonoBehaviour
 	{
 		return points[index];
 	}
+
+	public Vector3 GetLastControlPoint()
+    {
+		return points[points.Length - 1];
+    }
 
 	public void SetControlPoint(int index, Vector3 point)
 	{

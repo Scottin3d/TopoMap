@@ -106,7 +106,7 @@ public class PlayerMarkerGenerator : MonoBehaviour
                     //If mouse hit the small map
                     if (Hit.collider.tag == "Chunk" && Hit.collider.transform.parent.tag == "SpawnSmallMap")
                     {
-                        string DropdownOpionValue = MyDropdownList.options[MyDropdownList.value].text;
+                        /*string DropdownOpionValue = MyDropdownList.options[MyDropdownList.value].text;
                         if (DropdownOpionValue == "Marker")
                         {
                             DropdownOpionValue = "PlayerMarker";
@@ -115,14 +115,16 @@ public class PlayerMarkerGenerator : MonoBehaviour
                         {
                             DropdownOpionValue = "PlayerRouteMarker";
                         }
-                        ASL.ASLHelper.InstantiateASLObject(DropdownOpionValue, Hit.point, Quaternion.identity, "", "", GetSmallMapMarker);
+                        ASL.ASLHelper.InstantiateASLObject(DropdownOpionValue, Hit.point, Quaternion.identity, "", "", GetSmallMapMarker);*/
+                        ASL.ASLHelper.InstantiateASLObject("PlayerMarker", Hit.point, Quaternion.identity, "", "", GetSmallMapMarker);
                         GenerateMarkerOnLargerMap(Hit.point);
 
                     }
                     else if (Hit.collider.tag == "Chunk" && Hit.collider.transform.parent.tag == "SpawnLargerMap")
                     {
-                        string DropdownOpionValue = MyDropdownList.options[MyDropdownList.value].text;
-                        ASL.ASLHelper.InstantiateASLObject(DropdownOpionValue, Hit.point, Quaternion.identity, "", "", GetLargerMapMarker);
+                        /*string DropdownOpionValue = MyDropdownList.options[MyDropdownList.value].text;
+                        ASL.ASLHelper.InstantiateASLObject(DropdownOpionValue, Hit.point, Quaternion.identity, "", "", GetLargerMapMarker);*/
+                        ASL.ASLHelper.InstantiateASLObject("Marker", Hit.point, Quaternion.identity, "", "", GetLargerMapMarker);
                         GenerateMarkerOnSmallMap(Hit.point);
                     }
                 }
@@ -136,7 +138,7 @@ public class PlayerMarkerGenerator : MonoBehaviour
                 {
                     if (Hit.collider.tag == "Chunk" && Hit.collider.transform.parent.tag == "SpawnSmallMap")
                     {
-                        string DropdownOpionValue = MyDropdownList.options[MyDropdownList.value].text;
+                        /*string DropdownOpionValue = MyDropdownList.options[MyDropdownList.value].text;
                         if (DropdownOpionValue == "Marker")
                         {
                             DropdownOpionValue = "PlayerMarker";
@@ -145,7 +147,8 @@ public class PlayerMarkerGenerator : MonoBehaviour
                         {
                             DropdownOpionValue = "PlayerRouteMarker";
                         }
-                        ASL.ASLHelper.InstantiateASLObject(DropdownOpionValue, Hit.point, Quaternion.identity, "", "", GetSmallMapMarker);
+                        ASL.ASLHelper.InstantiateASLObject(DropdownOpionValue, Hit.point, Quaternion.identity, "", "", GetSmallMapMarker);*/
+                        ASL.ASLHelper.InstantiateASLObject("PlayerMarker", Hit.point, Quaternion.identity, "", "", GetSmallMapMarker);
                         GenerateMarkerOnLargerMap(Hit.point);
                     }
                 }

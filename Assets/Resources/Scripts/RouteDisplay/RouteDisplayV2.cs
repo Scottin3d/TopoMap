@@ -10,12 +10,12 @@ public class RouteDisplayV2 : MonoBehaviour
 
     public float updatesPerSecond = 10f;
     public float heightAboveMarker = 5f;
-    public int batchSize = 20;
+    public int batchSize = 10;
     
     private List<GameObject> routeMarkerPool = new List<GameObject>();
     private List<GameObject> routeConnectPool = new List<GameObject>();
     private List<GameObject> smallConnectPool = new List<GameObject>();
-    //private List<ShowPath> pathDisplayPool = new List<ShowPath>();
+    private List<SplineWalker> pathDisplayPool = new List<SplineWalker>();
 
     private List<Transform> linkedObj = new List<Transform>();
     int removedNdx = -1;
@@ -40,6 +40,7 @@ public class RouteDisplayV2 : MonoBehaviour
     public BezierSpline mySpline = null;
 
     private const int gridRes = 16;    //Node resolution of the graph
+    private const float traceSpeed = 0.1f;
 
     //Would prefer to fetch this from the player once instantiated
     private Color myColor;
@@ -52,8 +53,8 @@ public class RouteDisplayV2 : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        LargeMap = GameObject.FindWithTag("LargeMap");
-        SmallMap = GameObject.FindWithTag("SmallMap");
+        LargeMap = GameObject.FindWithTag("SpawnLargerMap");
+        SmallMap = GameObject.FindWithTag("SpawnSmallMap");
 
         if(current.gameObject.GetComponent<ASLObject>() != null)
         {
@@ -61,10 +62,11 @@ public class RouteDisplayV2 : MonoBehaviour
         }
         myColor = new Color(Random.Range(0, 1f), Random.Range(0, 1f), Random.Range(0, 1f), .25f);
         GenerateRoutePool(batchSize);
-        GeneratePathPool();
+        GeneratePathPool(batchSize);
         StartCoroutine(GenerateGraph());
         StartCoroutine(UpdateRoute());
         StartCoroutine(DrawMapCurve());
+        StartCoroutine(RetimeTrace());
     }
 
     private void GenerateRoutePool(int toAdd)
@@ -77,9 +79,12 @@ public class RouteDisplayV2 : MonoBehaviour
         }
     }
 
-    private void GeneratePathPool()
+    private void GeneratePathPool(int toAdd)
     {
-        //ASLHelper.InstantiateASLObject("ShowsPathing", new Vector3(0, 0, 0), Quaternion.identity, "", "", PathTraceInstantiation);
+        for (int i = 0; i < toAdd; i++)
+        {
+            ASLHelper.InstantiateASLObject("Pathwalker", new Vector3(0, 0, 0), Quaternion.identity, "", "", PathTraceInstantiation);
+        }        
     }
 
     public Color GetColor()
@@ -251,13 +256,15 @@ public class RouteDisplayV2 : MonoBehaviour
 
         graph.center = LargeMap.transform.position;
         graph.neighbours = NumNeighbours.Six;
+        graph.maxClimb = 0f;
 
         graph.SetDimensions(size, size, nodeSize);
         graph.collision.fromHeight = scanHeight * scanFactor;
         graph.collision.heightMask = LayerMask.GetMask("Ground");
-        graph.maxClimb = 0.5f;
 
         //Set penalties
+        graph.penaltyAngle = true;
+        graph.penaltyPosition = true;
 
         GraphSet = true;
         yield return new WaitForSeconds(0.1f);
@@ -300,7 +307,6 @@ public class RouteDisplayV2 : MonoBehaviour
 
                 for (int ndx = 0; ndx < linkedObj.Count - 1; ndx++)
                 {
-                    //TODO: apply path smoothing?
                     tempPath = ABPath.Construct(linkedObj[ndx].position, linkedObj[ndx + 1].position);
                     AstarPath.StartPath(tempPath);
                     tempPath.BlockUntilCalculated();
@@ -332,15 +338,45 @@ public class RouteDisplayV2 : MonoBehaviour
             mySpline.Reset();
             if (posNodes.Count > 1)
             {
-                mySpline.SetPoint(0, posNodes[0]);
+                mySpline.SetCurvePoint(0, posNodes[0]);
                 int ndx;
                 for (ndx = 3; ndx < posNodes.Count; ndx += 3)
                 {
-                    mySpline.SetPoint(ndx, posNodes[ndx]);
+                    mySpline.SetCurvePoint(ndx, posNodes[ndx]);
                 }
-                //set additional point if close to the end
+                if(posNodes.Count % 3 != 0 && ((mySpline.GetLastControlPoint() - posNodes[posNodes.Count - 1]).magnitude > 0.5f))
+                {
+                    mySpline.SetCurvePoint(ndx, posNodes[posNodes.Count - 1]);
+                }
+            }
+
+            foreach(SplineWalker _s in pathDisplayPool)
+            {               
+                _s.spline = mySpline;
+                if(mySpline != null) _s.duration = traceSpeed * mySpline.CurveCount;
             }
         }
+    }
+
+    IEnumerator RetimeTrace()
+    {
+        yield return new WaitForSeconds(0.001f);
+        float curDuration = 0f;
+        while(pathDisplayPool.Count < 0)
+        {
+            yield return new WaitForSeconds(0.1f);
+        }
+        float duration = pathDisplayPool[0].duration;
+        for(int i = 0; i < pathDisplayPool.Count; i++)
+        {
+            pathDisplayPool[i].Reset();
+            if(curDuration < duration)
+            {
+                pathDisplayPool[i].gameObject.GetComponent<MeshRenderer>().enabled = true;
+            }
+            yield return new WaitForSeconds(1f);
+            curDuration++;
+        }        
     }
 
     #endregion
@@ -444,11 +480,21 @@ public class RouteDisplayV2 : MonoBehaviour
 
     private static void PathTraceInstantiation(GameObject _myGameObject)
     {
-        _myGameObject.GetComponent<ASLObject>().SendAndSetClaim(() =>
+        if(_myGameObject.GetComponent<SplineWalker>() != null)
         {
-            _myGameObject.GetComponent<ASLObject>().SendAndSetObjectColor(current.myColor, current.myColor);
-        });
-        _myGameObject.SetActive(false);
+            current.pathDisplayPool.Add(_myGameObject.GetComponent<SplineWalker>());
+            _myGameObject.GetComponent<ASLObject>().SendAndSetClaim(() =>
+            {
+                _myGameObject.GetComponent<ASLObject>().SendAndSetObjectColor(current.myColor, current.myColor);
+            });
+            _myGameObject.GetComponent<MeshRenderer>().enabled = false;
+        } else
+        {
+            _myGameObject.GetComponent<ASLObject>().SendAndSetClaim(() =>
+            {
+                _myGameObject.GetComponent<ASLObject>().DeleteObject();
+            });
+        }        
     }
 
     //For reference in the event we need to pass ASLObject ids (which are strings) to the other players
