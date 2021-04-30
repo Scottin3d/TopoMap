@@ -71,8 +71,7 @@ public class VRUIController : MonoBehaviour
     //                Table Map
     //      Movement->
     //                Enable/Disable Upward Movement
-    //                Enable/Disable Gravity
-    //                Enable/Disable Collision
+    //                Enable/Disable Free-Fly Mode
     private enum VRUI_State
     {
         Off,               //off means that the UI should currently not be shown to the player.
@@ -157,8 +156,8 @@ public class VRUIController : MonoBehaviour
 
     private void setupMovementMenu()
     {
-        currentUIObjects[0].GetComponentInChildren<Text>().text = "Toggle Collision";
-        currentUIObjects[1].GetComponentInChildren<Text>().text = "Toggle Gravity";
+        currentUIObjects[0].GetComponentInChildren<Text>().text = "";
+        currentUIObjects[1].GetComponentInChildren<Text>().text = "Toggle Free Flight";
         currentUIObjects[2].GetComponentInChildren<Text>().text = "Toggle Upwards Movement";
         currentUIObjects[3].GetComponentInChildren<Text>().text = "Back";
     }
@@ -199,8 +198,8 @@ public class VRUIController : MonoBehaviour
             currentUIObjects[buttonPosition].transform.localScale = scale;
         }
         currentUIObjects[buttonPosition].GetComponentInChildren<Text>().text = buttonText;
-        //currentUIObjects[buttonPosition].GetComponent<HandUIActivateable>().UICollider = rightHand.transform.Find("UIInteractSphere").gameObject;
-        //currentUIObjects[buttonPosition].GetComponent<HandUIActivateable>().reciever = this;
+        currentUIObjects[buttonPosition].GetComponent<HandUIActivateable>().UICollider = rightHand.transform.Find("UIInteractSphere").gameObject;
+        currentUIObjects[buttonPosition].GetComponent<HandUIActivateable>().reciever = this;
     }
 
 
@@ -345,12 +344,13 @@ public class VRUIController : MonoBehaviour
         }
         else if (button == currentUIObjects[0])
         {
-            //toggle collision
+            //currently unused
             return;
         }
         else if (button == currentUIObjects[1])
         {
-            //toggle gravity
+            StaticVRVariables.inVRFreeFlight = !StaticVRVariables.inVRFreeFlight;
+            VRFreeFlyHandler.updateFreeFly();
             return;
         }
         else if (button == currentUIObjects[2])
