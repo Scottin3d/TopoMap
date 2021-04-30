@@ -115,4 +115,9 @@ public class MarkerDisplay : MonoBehaviour
         _gameObject.SetActive(false);
         _gameObject.transform.parent = current.transform;
     }
+
+    public static int GetScaleFactor()
+    {
+        return current.mapScaleFactor;
+    }
 }

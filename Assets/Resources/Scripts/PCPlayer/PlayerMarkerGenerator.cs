@@ -21,14 +21,12 @@ public class PlayerMarkerGenerator : MonoBehaviour
     private int SmallMapSize;
 
     private GameObject LocalProjectMarker;
-    private static GameObject MiniMapDisplayObject;
 
     void Awake()
     {
         //Find all Camera and MiniMap Display
         PlayerCamera = GameObject.Find("PCHandler/Player").GetComponentInChildren<Camera>();
         PlayerTableViewCamera = GameObject.Find("PCHandler/PlayerTopViewCamera").GetComponentInChildren<Camera>();
-        MiniMapDisplayObject = GameObject.Find("PCHandler/MiniMapDisplay");
     }
 
     // Start is called before the first frame update
@@ -105,11 +103,11 @@ public class PlayerMarkerGenerator : MonoBehaviour
                 RaycastHit Hit;
                 if (Physics.Raycast(MouseRay, out Hit))
                 {
-                    
+                    string DropdownOpionValue = "";
                     //If mouse hit the small map
                     if (Hit.collider.tag == "Chunk" && Hit.collider.transform.parent.tag == "SpawnSmallMap")
                     {
-                        string DropdownOpionValue = MyDropdownList.options[MyDropdownList.value].text;
+                        DropdownOpionValue = MyDropdownList.options[MyDropdownList.value].text;
                         if (DropdownOpionValue == "Marker")
                         {
                             DropdownOpionValue = "PlayerMarker";
@@ -128,7 +126,7 @@ public class PlayerMarkerGenerator : MonoBehaviour
                     }
                     else if (Hit.collider.tag == "Chunk" && Hit.collider.transform.parent.tag == "SpawnLargerMap")
                     {
-                        string DropdownOpionValue = MyDropdownList.options[MyDropdownList.value].text;
+                        DropdownOpionValue = MyDropdownList.options[MyDropdownList.value].text;
                         ASL.ASLHelper.InstantiateASLObject(DropdownOpionValue, Hit.point, Quaternion.identity, "", "", GetLargerMapMarker);
                         //GenerateMarkerOnSmallMap(Hit.point);
                     }
@@ -143,7 +141,7 @@ public class PlayerMarkerGenerator : MonoBehaviour
                 {
                     if (Hit.collider.tag == "Chunk" && Hit.collider.transform.parent.tag == "SpawnSmallMap")
                     {
-                        string DropdownOpionValue = MyDropdownList.options[MyDropdownList.value].text;
+                        /*string DropdownOpionValue = MyDropdownList.options[MyDropdownList.value].text;
                         if (DropdownOpionValue == "Marker")
                         {
                             DropdownOpionValue = "PlayerMarker";
@@ -152,7 +150,8 @@ public class PlayerMarkerGenerator : MonoBehaviour
                         {
                             DropdownOpionValue = "PlayerRouteMarker";
                         }
-                        ASL.ASLHelper.InstantiateASLObject(DropdownOpionValue, Hit.point, Quaternion.identity, "", "", GetSmallMapMarker);
+                        ASL.ASLHelper.InstantiateASLObject(DropdownOpionValue, Hit.point, Quaternion.identity, "", "", GetSmallMapMarker);*/
+                        ASL.ASLHelper.InstantiateASLObject("PlayerMarker", Hit.point, Quaternion.identity, "", "", GetSmallMapMarker);
                         GenerateMarkerOnLargerMap(Hit.point);
                     }
                 }
@@ -176,7 +175,7 @@ public class PlayerMarkerGenerator : MonoBehaviour
     {
         ASLObjectTrackingSystem.AddObjectToTrack(_myGameObject.GetComponent<ASL.ASLObject>(), _myGameObject.transform);
         //MiniMapDisplayObject.GetComponent<MinimapDisplay>().AddRouteMarker(_myGameObject.transform.position);
-        MinimapDisplay.AddRouteMarker(_myGameObject.transform);
+        RouteDisplayV2.AddRouteMarker(_myGameObject.transform);
         LargerMapMarkerList.Add(_myGameObject);
     }
 
@@ -215,7 +214,7 @@ public class PlayerMarkerGenerator : MonoBehaviour
         if (LargerMapMarkerList.Count > 0)
         {
             GameObject LMarker = LargerMapMarkerList[LargerMapMarkerList.Count - 1];
-            MinimapDisplay.RemoveRouteMarker(LMarker.transform);
+            RouteDisplayV2.RemoveRouteMarker(LMarker.transform, false);
 
             LMarker.GetComponent<ASL.ASLObject>().SendAndSetClaim(() =>
             {
