@@ -91,7 +91,6 @@ public class VRUIController : MonoBehaviour
     //references to the VR Player's hands
     private GameObject leftHand;
     private GameObject rightHand;
-    
 
     private void updateUIDisplay()
     {
@@ -200,8 +199,8 @@ public class VRUIController : MonoBehaviour
             currentUIObjects[buttonPosition].transform.localScale = scale;
         }
         currentUIObjects[buttonPosition].GetComponentInChildren<Text>().text = buttonText;
-        currentUIObjects[buttonPosition].GetComponent<HandUIActivateable>().UICollider = rightHand.transform.Find("UIInteractSphere").gameObject;
-        currentUIObjects[buttonPosition].GetComponent<HandUIActivateable>().reciever = this;
+        //currentUIObjects[buttonPosition].GetComponent<HandUIActivateable>().UICollider = rightHand.transform.Find("UIInteractSphere").gameObject;
+        //currentUIObjects[buttonPosition].GetComponent<HandUIActivateable>().reciever = this;
     }
 
 

@@ -4,18 +4,19 @@ using System.Collections.Generic;
 using UnityEngine;
 
 /// <summary>
-/// 
+/// GenerateMapFromHeightMap will read in a heightmap of size greater than 32px x 32px and power of 2 and create meshes based on the input heightmap.
+/// Each mesh has a chunk resolution of 64x64 triangles.
 /// </summary>
 public class GenerateMapFromHeightMap : MonoBehaviour {
     [Header("Heightmap Properties")]
     [Tooltip("The heightmap used to generate the terrain.")]
-    public Texture2D heightmap;                 // base heightmap
+    public Texture2D heightmap;                             // base heightmap
     [Tooltip("The size of the map in meters.")]
-    public int mapSize = 10;                    // the total size of the map
-    private const int chunkResolution = 32;     // the texture resolution of each chunk
-    private int numberOfChunks;                 // the number of chunks (width, height) the heightmap is made of. heightmap resolution / chunkResolution
-    private float chunkSize;                      // the world unit size of each chunk. mapSize / numberOf Chunks 
-    private  MapChunk[,] mapChunks;             // map chunk container
+    public int mapSize = 10;                                // the total size of the map
+    private const int chunkResolution = 32;                 // the texture resolution of each chunk
+    private int numberOfChunks;                             // the number of chunks (width, height) the heightmap is made of. heightmap resolution / chunkResolution
+    private float chunkSize;                                // the world unit size of each chunk. mapSize / numberOf Chunks 
+    private  MapChunk[,] mapChunks;                         // map chunk container
 
     [Header("Mesh Properties")]
     [Tooltip("This material will be instances on each chunk.")]
@@ -27,9 +28,10 @@ public class GenerateMapFromHeightMap : MonoBehaviour {
     public const int mapChunkSize = 241;
     //[Range(0, 6)]
     private int editorPreviewLOD = 0;
-    [Tooltip("The algorithm used to blend the seam of the chunks.")]
-    public NormalizeMode normalizeMode;
+    //[Tooltip("The algorithm used to blend the seam of the chunks.")]
+    //public NormalizeMode normalizeMode;
 
+    /*
     [Header("Noise Properties - Inactive")]
     [Range(0.5f, 100f)]
     public float noiseScale = 0.3f;
@@ -41,50 +43,53 @@ public class GenerateMapFromHeightMap : MonoBehaviour {
     public float lacunarity = 1f;
     public int seed = 69;
     public Vector2 offset = new Vector2(0, 0);
-
+    */
     
 
-    private DrawMode drawMode = DrawMode.Mesh;
-    [Header("Color Properties")]
-    public TerrainType[] regions;
+    //private DrawMode drawMode = DrawMode.Mesh;
+    //[Header("Color Properties")]
+    //public TerrainType[] regions;
 
     /// <summary>
-    /// 
+    /// Assigns class variables.
     /// </summary>
     private void Awake() {
         Debug.Assert(heightmap != null && heightmap.width >= 32 && heightmap.width % 2 == 0, "Missing or invalid heightmap.");
-        //heightMapChunks = (heightMapChunks % 2 == 0) ? heightMapChunks : 32;
+
         numberOfChunks = heightmap.width / chunkResolution;
         chunkSize = (float)mapSize / numberOfChunks;
-        chunkSize = (chunkSize > 0) ? chunkSize : 1;
+        chunkSize = (chunkSize > 0) ? chunkSize : 1;            // the minimum chunk size is 1
 
         if (useDefaultMeshHeight) {
             meshHeight = mapSize / 10;
             meshHeight = (meshHeight > 0) ? meshHeight : 0.1f;
         }
-        
     }
 
     /// <summary>
-    /// 
+    /// Generate the mehses at run time.
     /// </summary>
     private void Start() {
-        //StartCoroutine(GenerateMap());
         GenerateMap();
     }
+
     /// <summary>
-    /// 
+    /// The core logic to generating the terrain meshes by doing the following:
+    /// 1. generate the chunk data of the terrain by dividing the heightmap into 32px X 32px textures
+    /// 2. finds the neighboring chunks for fixing the seams later on
+    /// 3. smooth the edges of the terrain chunks
+    /// 4. generate the chunk meshes
     /// </summary>
     public void GenerateMap() {
         mapChunks = new MapChunk[numberOfChunks, numberOfChunks];   // set map chunk container
 
-        int mapWidth = heightmap.width;         // full heightmap resolution, min 32
-        int mapHeight = heightmap.height;       // full heightmap resolution, min 32
+        int mapWidth = heightmap.width;                             // full heightmap resolution, min 32
+        int mapHeight = heightmap.height;                           // full heightmap resolution, min 32
 
-        float mapLowerLeftX = mapSize / -2f;    // constructing the map from left -> right, bottom -> top
+        float mapLowerLeftX = mapSize / -2f;                        // constructing the map from left -> right, bottom -> top
         float mapLowerLeftZ = mapSize / -2f;
 
-        // generate map chunks
+        // 1. generate map chunks
         for (int z = 0; z < numberOfChunks; z++) {
             for (int x = 0; x < numberOfChunks; x++) {
                 // find the center of the chunk
@@ -96,21 +101,18 @@ public class GenerateMapFromHeightMap : MonoBehaviour {
                 //                                  mapLowerLeftZ + (z * chunkSize) - halfChunk);
 
                 // generate heightmap chunk
-                Texture2D _heightmap = GetPixelTest((mapWidth / numberOfChunks) * x,
+                Texture2D _heightmap = GetPixelMap((mapWidth / numberOfChunks) * x,
                                                     (mapHeight / numberOfChunks) * z,
                                                     mapWidth / numberOfChunks);
                 // generate map data
-                MapData _mapData = GenerateMapData(_chunkCenter, _heightmap);
-
-                
+                MapData _mapData = GenerateMapData(_heightmap);
 
                 // create chunk
                 mapChunks[x, z] = new MapChunk(_heightmap, _chunkCenter, _mapData);
             }
         }
 
-
-        // find neighbors
+        // 2. find neighbors
         for (int z = 0; z < numberOfChunks; z++) {
             for (int x = 0; x < numberOfChunks; x++) {
                 //==sides==
@@ -128,7 +130,6 @@ public class GenerateMapFromHeightMap : MonoBehaviour {
                     if (topRight) {
                         mapChunks[x, z].chunkNeighbors[(int)MapChunkNeighbor.TopRight] = mapChunks[x + 1, z + 1];
                     }
-
                 }
                 // Right : x + 1 <= resolution - 1
                 if (x + 1 <= numberOfChunks - 1) {
@@ -153,45 +154,29 @@ public class GenerateMapFromHeightMap : MonoBehaviour {
                     mapChunks[x, z].chunkNeighbors[(int)MapChunkNeighbor.Left] = mapChunks[x - 1, z];
                 }
 
-                //==corners==
-                // Botoom Left : Left + Bottom + (Bottom - 1)
-                // Bottom Right : Right + Bottom + (Bottom + 1)
-                // Top Left : Top + (Top - 1) + Left
-                // Top Right : Top + (Top + 1) + Right
                 // generate mesh data
-                // errors most likely steming from here
-                /*MeshData _meshData = MeshGenerator.GenerateTerrainMesh(_mapData.heightmap, meshHeight, meshHieghtCurve, 
-                                                                       chunkSize, editorPreviewLOD, _chunkCenter);*/
-
-
                 MeshData _meshData = MeshGenerator.GenerateTerrainMesh(mapChunks[x, z], meshHeight, meshHieghtCurve,
                                                                        chunkSize, editorPreviewLOD);
-
                 mapChunks[x, z].meshData = _meshData;
-
             }
         }
 
+        // 3. smooth the edges
         SmoothChunkEdges();
 
-        // generate mesh
+        // 4. generate mesh
         for (int z = 0; z < numberOfChunks; z++) {
             for (int x = 0; x < numberOfChunks; x++) {
-                
-                
 
                 // create chunk mesh
                 Mesh mesh = mapChunks[x, z].meshData.CreateMesh();
-                // mesh smoothing - TODO
-                //mesh = mattatz.MeshSmoothingSystem.MeshSmoothing.LaplacianFilter(mesh, 2);
-                //mesh = mattatz.MeshSmoothingSystem.MeshSmoothing.HCFilter(mesh, 10);
 
                 // create game object of chunk
                 GameObject chunk = new GameObject();
                 chunk.transform.parent = transform;
                 chunk.transform.localScale = Vector3.one;
                 chunk.tag = "Chunk";
-                chunk.name = "chunk" + z + ", " + x;
+                chunk.name = "Chunk" + z + ", " + x;
                 chunk.transform.position = new Vector3(mapChunks[x, z].center.x, transform.position.y, mapChunks[x, z].center.y);
                 chunk.AddComponent<MeshFilter>().sharedMesh = mesh;
                 chunk.AddComponent<MeshCollider>().sharedMesh = mesh;
@@ -201,18 +186,22 @@ public class GenerateMapFromHeightMap : MonoBehaviour {
         }
     }
 
+    /// <summary>
+    /// SmoothChunkEdges: Smooths the edges of the chunks so that there are no seams between meshes.
+    /// This is done by sampling the edge vertices and normalizing them with the adjacent neighboring 
+    /// verticies.
+    /// </summary>
     private void SmoothChunkEdges() {
-
         int row = 0;
         int col = 0;
+        int chunkLength = chunkResolution;
 
         for (int chunk = 0; chunk < numberOfChunks * numberOfChunks; chunk++) {
+            // check and reset row
             if (row == numberOfChunks) {
                 row = 0;
                 col++;
             }
-
-            int chunkLength = chunkResolution;
 
             // top
             for (int i = 0; i < chunkLength; i++) {
@@ -258,54 +247,41 @@ public class GenerateMapFromHeightMap : MonoBehaviour {
                     leftNeighbor.meshData.vertices[leftNeighbor.rightVerts[i]].y = yValue / 2f;
                     currChunk.meshData.vertices[currChunk.leftVerts[i]].y = yValue / 2f;
                 }
-
-
             }
             row++;
         }
     }
 
-    public Texture2D GetPixelTest(int width, int height, int size) {
-        //int mapWidth = heightmap.width;
-        //int mapHeight = heightmap.height;
+    /// <summary>
+    /// GetPixelMap: Extracts a portion of a larger texture map.
+    /// </summary>
+    /// <param name="width">The width of the map to extract.</param>
+    /// <param name="height">The height of the map to extract.</param>
+    /// <param name="size">The pixel size of the map to return.</param>
+    /// <returns></returns>
+    public Texture2D GetPixelMap(int width, int height, int size) {
         Color[] pixelColors = new Color[size * size];
         pixelColors = heightmap.GetPixels(width, height, size, size);
         return TextureGenerator.TextureFromColorMap(pixelColors, size, size);
 
     }
 
-    public MapData GenerateMapData(Vector2 center, Texture2D heightmap) {
+    /// <summary>
+    /// GenerateMapData: Creates a MapData object that contains the relavent chunk information.
+    /// </summary>
+    /// <param name="center">The center of the chunk in world space units.</param>
+    /// <param name="heightmap">The heightmap of the chunk.</param>
+    /// <returns></returns>
+    public MapData GenerateMapData(Texture2D heightmap) {
         // use hegihtmap
-        float[,] noiseMap = Noise.GenerateNoiseMapFromHeightmap(heightmap, meshHeight, normalizeMode);
-        int mapWidth = heightmap.width;
-
-        Color[] colorMap = new Color[mapWidth * mapWidth];
-        for (int z = 0; z < mapWidth; z++) {
-            for (int x = 0; x < mapWidth; x++) {
-                float currHeight = noiseMap[x, z];
-
-                for (int i = 0; i < regions.Length; i++) {
-                    if (currHeight >= regions[i].height) {
-                        colorMap[z * mapWidth + x] = regions[i].color;
-                    } else {
-                        break;
-                    }
-                }
-            }
-        }
-        return new MapData(noiseMap, colorMap);
+        float[,] noiseMap = Noise.GenerateNoiseMapFromHeightmap(heightmap);
+        return new MapData(noiseMap);
     }
-
-    [System.Serializable]
-    public struct TerrainType {
-        public string name;
-        public float height;
-        public Color color;
-    }
-
-    
 }
 
+/// <summary>
+/// MapChunk: The object that contains all data for a map chunk.
+/// </summary>
 [System.Serializable]
 public class MapChunk {
     public Texture2D heightmap;
@@ -320,19 +296,33 @@ public class MapChunk {
     public List<int> topVerts = new List<int>();
     public List<int> bottomVerts = new List<int>();
     public List<int> cornerVerts = new List<int>();
+
     // corner order
     // bottom left, bottom right, top left, top right
-
-
     public MapChunk(Texture2D _heightmap, Vector2 _center, MapData _mapData) {
         this.heightmap = _heightmap;
         this.center = _center;
         this.mapData = _mapData;
-
-        
     }
 }
 
+[System.Serializable]
+public struct MapData {
+    public readonly float[,] heightValues;
+
+    public MapData(float[,] _heightValues) {
+        this.heightValues = _heightValues;
+    }
+}
+
+[System.Serializable]
+public struct NoiseMap {
+    public float[,] heightValues;
+}
+
+/// <summary>
+/// Public enum of neighbor directions for clarity of use.
+/// </summary>
 public enum MapChunkNeighbor { 
     TopLeft,
     Top,
@@ -343,3 +333,5 @@ public enum MapChunkNeighbor {
     BottomLeft,
     Left
 }
+
+
