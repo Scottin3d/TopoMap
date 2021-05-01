@@ -103,6 +103,9 @@ public class PlayerMarkerGenerator : MonoBehaviour
                 RaycastHit Hit;
                 if (Physics.Raycast(MouseRay, out Hit))
                 {
+                    //Test select of path display
+                    PathDisplay.Select(Hit.transform);
+
                     string DropdownOpionValue = "";
                     //If mouse hit the small map
                     if (Hit.collider.tag == "Chunk" && Hit.collider.transform.parent.tag == "SpawnSmallMap")
