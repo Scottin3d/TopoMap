@@ -42,7 +42,7 @@ public class RouteDisplayV2 : MonoBehaviour
     public BezierSpline mySpline = null;
 
     private const int gridRes = 16;    //Node resolution of the graph
-    private const float traceSpeed = 0.5f;    //Approximate time to trace 3 path nodes
+    private const float traceSpeed = 0.3f;    //inverse Approximate time to trace 3 path nodes
 
     //Would prefer to fetch this from the player once instantiated
     private Color myColor;

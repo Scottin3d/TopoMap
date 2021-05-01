@@ -78,6 +78,7 @@ public static class PathDisplay //: MonoBehaviour
         {
             cam.transform.localRotation = camRot;
             cam.transform.localPosition = camOffset;
+            cam.transform.localScale = Vector3.one;
             foreach(SplineWalker _s in walkers)
             {
                 _s.gameObject.GetComponent<ASLObject>().SendAndSetClaim(() =>
