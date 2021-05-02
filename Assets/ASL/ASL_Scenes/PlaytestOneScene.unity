@@ -306,6 +306,56 @@ PrefabInstance:
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 62f1e4a62529cfb40840301779b677db, type: 3}
+--- !u!1 &139236884
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 139236886}
+  - component: {fileID: 139236885}
+  m_Layer: 0
+  m_Name: OldSpline
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &139236885
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 139236884}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 21652c86832018640b233f3fb916517a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  points:
+  - {x: 1, y: 0, z: 0}
+  - {x: 2, y: 0, z: 0}
+  - {x: 3, y: 0, z: 0}
+  - {x: 4, y: 0, z: 0}
+  modes: 0000000000000000
+  loop: 0
+--- !u!4 &139236886
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 139236884}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_RootOrder: 14
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1001 &226718089
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -1219,7 +1269,7 @@ GameObject:
   - component: {fileID: 711780711}
   - component: {fileID: 711780713}
   - component: {fileID: 711780712}
-  m_Layer: 0
+  m_Layer: 11
   m_Name: LocText
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1243,7 +1293,7 @@ RectTransform:
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
   m_AnchoredPosition: {x: 0, y: 1}
-  m_SizeDelta: {x: 10, y: 1}
+  m_SizeDelta: {x: 20, y: 2}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &711780712
 MonoBehaviour:
@@ -1265,7 +1315,9 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: (x,y,z)
+  m_text: '(x,y,z)
+
+    dist'
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
   m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
@@ -1274,8 +1326,8 @@ MonoBehaviour:
   m_fontMaterials: []
   m_fontColor32:
     serializedVersion: 2
-    rgba: 4294967295
-  m_fontColor: {r: 1, g: 1, b: 1, a: 1}
+    rgba: 4278190080
+  m_fontColor: {r: 0, g: 0, b: 0, a: 1}
   m_enableVertexGradient: 0
   m_colorMode: 3
   m_fontColorGradient:
@@ -1605,6 +1657,8 @@ MonoBehaviour:
   scanFactor: 2
   scaleFactor: 2
   mySpline: {fileID: 1714597436}
+  oldSpline: {fileID: 139236885}
+  traceSpeed: 2
 --- !u!1 &891035391
 GameObject:
   m_ObjectHideFlags: 0
@@ -2788,7 +2842,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 2800132393438457105, guid: 0fbcb4297ffb1e24cafa5c7f0f1a2852, type: 3}
       propertyPath: m_CullingMask.m_Bits
-      value: 2147485559
+      value: 2147487607
       objectReference: {fileID: 0}
     - target: {fileID: 2800132393471200378, guid: 0fbcb4297ffb1e24cafa5c7f0f1a2852, type: 3}
       propertyPath: PlayerTopViewCamera
@@ -2798,6 +2852,10 @@ PrefabInstance:
       propertyPath: PlayerTopViewCameraObject
       value: 
       objectReference: {fileID: 1239241914}
+    - target: {fileID: 6903507919317994316, guid: 0fbcb4297ffb1e24cafa5c7f0f1a2852, type: 3}
+      propertyPath: m_CullingMask.m_Bits
+      value: 2147485687
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 0fbcb4297ffb1e24cafa5c7f0f1a2852, type: 3}
 --- !u!4 &1627242948 stripped
@@ -3694,7 +3752,7 @@ Transform:
   m_Children:
   - {fileID: 711780711}
   m_Father: {fileID: 0}
-  m_RootOrder: 14
+  m_RootOrder: 15
   m_LocalEulerAnglesHint: {x: -20, y: 0, z: 0}
 --- !u!20 &1615903297451745427
 Camera:

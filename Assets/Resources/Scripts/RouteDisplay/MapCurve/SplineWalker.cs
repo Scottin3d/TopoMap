@@ -25,8 +25,6 @@ public class SplineWalker : MonoBehaviour
 
         if (spline != null)
         {
-            gameObject.GetComponent<MeshRenderer>().enabled = true;
-            gameObject.GetComponent<MeshCollider>().enabled = true;
             Vector3 position = spline.GetPoint(progress);
             transform.localPosition = position + walkOffset;
             if (lookForward)
@@ -34,19 +32,12 @@ public class SplineWalker : MonoBehaviour
                 transform.LookAt(position + spline.GetDirection(progress));
             }
         }
-        else
-        {
-            gameObject.GetComponent<MeshRenderer>().enabled = false;
-            gameObject.GetComponent<MeshCollider>().enabled = false;
-        }
 	}
 
-    public void Begin(bool shouldRender, float startProg)
+    public void Begin(float startProg)
     {
         goingForward = true;
         progress = startProg;
-        gameObject.GetComponent<MeshRenderer>().enabled = shouldRender;
-        gameObject.GetComponent<MeshCollider>().enabled = shouldRender;
     }
 
     public void Increment(float incProg)
@@ -82,6 +73,17 @@ public class SplineWalker : MonoBehaviour
                 //loopedOnce = true;
             }
         }
+    }
+
+    public void ToggleRender(bool toRender)
+    {
+        gameObject.GetComponent<MeshRenderer>().enabled = toRender;
+        gameObject.GetComponent<MeshCollider>().enabled = toRender;
+    }
+
+    public float GetProgress()
+    {
+        return progress;
     }
 
 	public void Reset()

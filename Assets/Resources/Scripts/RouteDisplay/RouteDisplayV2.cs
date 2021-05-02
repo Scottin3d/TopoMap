@@ -39,10 +39,11 @@ public class RouteDisplayV2 : MonoBehaviour
         GraphSet = false,
         DrawPath = false;
 
-    public BezierSpline mySpline = null;
+    public BezierSpline mySpline = null, oldSpline = null;
 
     private const int gridRes = 16;    //Node resolution of the graph
-    private const float traceSpeed = 0.3f;    //inverse Approximate time to trace 3 path nodes
+    [Range(0.1f,10f)]
+    public float traceSpeed = 0.3f;    //inverse Approximate time to trace 3 path nodes
 
     //Would prefer to fetch this from the player once instantiated
     private Color myColor;
@@ -50,6 +51,7 @@ public class RouteDisplayV2 : MonoBehaviour
     private void Awake()
     {
         current = this;
+        MyController.Initialize();
     }
 
     // Start is called before the first frame update
@@ -295,7 +297,7 @@ public class RouteDisplayV2 : MonoBehaviour
     #endregion
 
     #region TRACE_PATH
-    //TODO: Move to PathDisplay
+    //TODO: Move to PathDisplay?
 
     IEnumerator DrawMapCurve()
     {
@@ -336,48 +338,27 @@ public class RouteDisplayV2 : MonoBehaviour
 
     private void BezierTrace()
     {
-        if (myPath != null && mySpline != null)
+        BezierSpline _bs = mySpline;
+        if (_bs != null) _bs.Reset();
+        if (myPath != null && _bs != null)
         {
             List<Vector3> posNodes = myPath.vectorPath;
-            mySpline.Reset();
             if (posNodes.Count > 1)
             {
-                mySpline.SetCurvePoint(0, posNodes[0]);
+                _bs.SetCurvePoint(0, posNodes[0]);
                 int ndx;
-                for (ndx = 3; ndx < posNodes.Count; ndx += 3)
+                for (ndx = 3; ndx * 2 < posNodes.Count; ndx += 3)
                 {
-                    mySpline.SetCurvePoint(ndx, posNodes[ndx]);
+                    _bs.SetCurvePoint(ndx, posNodes[ndx * 2]);
                 }
-                if(posNodes.Count % 3 != 0 && ((mySpline.GetLastControlPoint() - posNodes[posNodes.Count - 1]).magnitude > 0.5f))
+                if(posNodes.Count % 3 != 0 && ((_bs.GetLastControlPoint() - posNodes[posNodes.Count - 1]).magnitude > 0.5f))
                 {
-                    mySpline.SetCurvePoint(ndx, posNodes[posNodes.Count - 1]);
+                    _bs.SetCurvePoint(ndx, posNodes[posNodes.Count - 1]);
                 }
             }
-
-            PathDisplay.SetSpline(mySpline);
+            mySpline = _bs;
         }
     }
-
-    /*IEnumerator RetimeTrace()
-    {
-        yield return new WaitForSeconds(0.001f);
-        float curDuration = 0f;
-        while(pathDisplayPool.Count < 0)
-        {
-            yield return new WaitForSeconds(0.1f);
-        }
-        float duration = pathDisplayPool[0].duration;
-        for(int i = 0; i < pathDisplayPool.Count; i++)
-        {
-            pathDisplayPool[i].Reset();
-            if(curDuration < duration)
-            {
-                pathDisplayPool[i].gameObject.GetComponent<MeshRenderer>().enabled = true;
-            }
-            yield return new WaitForSeconds(1f);
-            curDuration++;
-        }        
-    }*/
 
     #endregion
 
@@ -405,6 +386,8 @@ public class RouteDisplayV2 : MonoBehaviour
             GameObject smallToRemove = current.smallConnectPool[current.removedNdx];
 
             current.linkedObj.Remove(_t);
+            if (current.linkedObj.Count < 2) PathDisplay.ClearNotRender();
+
             current.routeMarkerPool.RemoveAt(current.removedNdx);
             current.routeConnectPool.RemoveAt(current.removedNdx);
             current.smallConnectPool.RemoveAt(current.removedNdx);
@@ -429,6 +412,7 @@ public class RouteDisplayV2 : MonoBehaviour
     public static void ClearRoute()
     {
         current.linkedObj.Clear();
+        PathDisplay.ClearNotRender();
         current.DrawPath = true;
     }
 
@@ -446,7 +430,8 @@ public class RouteDisplayV2 : MonoBehaviour
 
     public static void ShowPath()
     {
-        PathDisplay.SetSpline(current.mySpline);
+        current.oldSpline.Copy(current.mySpline);
+        PathDisplay.SetSpline(current.oldSpline);
     }
 
     #endregion
