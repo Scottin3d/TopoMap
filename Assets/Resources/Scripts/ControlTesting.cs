@@ -51,15 +51,15 @@ public class ControlTesting : MonoBehaviour
         }
         else
         {   //keyboard + mouse
-            if (Input.GetKeyDown(KeyCode.Alpha2))
+            if (Input.GetKeyDown(KeyCode.Alpha2))   //Switch to new path
             {
                 RouteDisplayV2.ShowPath();
             }
-            if (Input.GetKeyDown(KeyCode.Alpha3))
+            if (Input.GetKeyDown(KeyCode.Alpha3))   //Disable camera
             {
                 PathDisplay.DetatchPathCam();
             }
-            if (Input.GetKeyDown(KeyCode.Alpha4))
+            if (Input.GetKeyDown(KeyCode.Alpha4))   //Toggle ability to see path
             {
                 PathDisplay.ToggleNotRender();
             }

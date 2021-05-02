@@ -34,8 +34,8 @@ public static class PathDisplay //: MonoBehaviour
     {
         cam = GameObject.Find("PathCam");
         Debug.Assert(cam != null, "Missing path camera");
-        cam.SetActive(false);
-        DeactivatePathCam();
+        //cam.SetActive(false);
+        //DeactivatePathCam();
 
         myColor = _c;
         updatesPerSecond = ups;
@@ -115,6 +115,11 @@ public static class PathDisplay //: MonoBehaviour
             foreach(SplineWalker _s in walkers)
             {
                 _s.ToggleRender(!DoNotRender);
+                if(_s.GetComponentInChildren<PathCam>() != null)
+                {
+                    _s.GetComponentInChildren<PathCam>().SetRender(!DoNotRender);
+                }
+
                 _s.gameObject.GetComponent<ASLObject>().SendAndSetClaim(() =>
                 {
                     _s.gameObject.GetComponent<ASLObject>().SendAndSetLocalPosition(_s.gameObject.transform.position);
@@ -128,11 +133,11 @@ public static class PathDisplay //: MonoBehaviour
     public static void ToggleNotRender()
     {
         DoNotRender = !DoNotRender;
-        if(cam.transform.parent != null)
+        /*if(cam.transform.parent != null)
         {
-            cam.SetActive(!DoNotRender);
+            //cam.GetComponent<DeactivatePathCam>().SetRender
         }
-        //if (DoNotRender) DeactivatePathCam();
+        //if (DoNotRender) DeactivatePathCam();*/
     }
 
     public static void ClearNotRender()
@@ -157,34 +162,16 @@ public static class PathDisplay //: MonoBehaviour
             if (cam.transform.parent != null) cam.transform.parent.DetachChildren();
             cam.transform.SetParent(_t, false);
         }
-        else if(_t.gameObject.layer != 9 )
+        /*else if(_t.gameObject.layer != 9 )
         {
             Debug.Log("detatching path cam...");
-            DeactivatePathCam();
-        }
+            DetatchPathCam();
+        }*/
     }
 
     public static void DetatchPathCam()
     {
-        if(cam.transform.parent != null && cam.activeInHierarchy) cam.transform.parent.DetachChildren();
-        cam.SetActive(false);
-        DeactivatePathCam();
-    }
-
-    private static void DeactivatePathCam()
-    {
-        GameObject _pathTex = GameObject.FindWithTag("PathCam");
-        RawImage raw = (_pathTex != null) ? _pathTex.GetComponent<RawImage>() : null;
-        RenderTexture _render = (raw != null) ? raw.texture as RenderTexture : null;
-        
-        if (_render != null)
-        {
-            //From https://forum.unity.com/threads/how-to-clear-a-render-texture-to-transparent-color-all-bytes-at-0.147431/
-            RenderTexture rt = RenderTexture.active;
-            RenderTexture.active = _render;
-            GL.Clear(true, true, Color.clear);
-            RenderTexture.active = rt; 
-        }
+        if(cam.transform.parent != null) cam.transform.parent.DetachChildren();
     }
 
     #endregion

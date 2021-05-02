@@ -430,8 +430,11 @@ public class RouteDisplayV2 : MonoBehaviour
 
     public static void ShowPath()
     {
-        current.oldSpline.Copy(current.mySpline);
-        PathDisplay.SetSpline(current.oldSpline);
+        if(current.linkedObj.Count > 1)
+        {
+            current.oldSpline.Copy(current.mySpline);
+            PathDisplay.SetSpline(current.oldSpline);
+        }
     }
 
     #endregion
