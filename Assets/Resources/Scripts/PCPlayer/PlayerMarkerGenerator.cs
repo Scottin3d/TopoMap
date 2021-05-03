@@ -126,7 +126,7 @@ public class PlayerMarkerGenerator : MonoBehaviour
                         DropdownOpionValue = MyDropdownList.options[MyDropdownList.value].text;
                         if (DropdownOpionValue == "Marker")
                         {
-                            DropdownOpionValue = "PlayerMarker";
+                            DropdownOpionValue = "Marker";
                         }
                         else
                         {
@@ -136,10 +136,11 @@ public class PlayerMarkerGenerator : MonoBehaviour
                         Vector3 CenterToMarker = (Hit.point - SmallMapCenter) * (LargeMapSize / SmallMapSize);
                         Vector3 NewPositionOnLargeMap = CenterToMarker + LargerMapCenter;
 
-                        if (Input.GetKey(KeyCode.LeftShift)) ASL.ASLHelper.InstantiateASLObject(DropdownOpionValue, NewPositionOnLargeMap, Quaternion.identity, "", "", GetSmallMapMarker);
+                        if (Input.GetKey(KeyCode.LeftShift)) ASL.ASLHelper.InstantiateASLObject(DropdownOpionValue, NewPositionOnLargeMap, Quaternion.identity, "", "", GetLargerMapMarker);
                         //GenerateMarkerOnLargerMap(Hit.point);
 
                     }
+                    //If mouse hit the large map
                     else if (Hit.collider.tag == "Chunk" && Hit.collider.transform.parent.tag == "SpawnLargerMap")
                     {
                         DropdownOpionValue = MyDropdownList.options[MyDropdownList.value].text;
@@ -166,18 +167,24 @@ public class PlayerMarkerGenerator : MonoBehaviour
                 {
                     if (Hit.collider.tag == "Chunk" && Hit.collider.transform.parent.tag == "SpawnSmallMap")
                     {
-                        /*string DropdownOpionValue = MyDropdownList.options[MyDropdownList.value].text;
+                        string DropdownOpionValue = MyDropdownList.options[MyDropdownList.value].text;
                         if (DropdownOpionValue == "Marker")
                         {
-                            DropdownOpionValue = "PlayerMarker";
+                            DropdownOpionValue = "Marker";
                         }
                         else
                         {
                             DropdownOpionValue = "PlayerRouteMarker";
                         }
-                        ASL.ASLHelper.InstantiateASLObject(DropdownOpionValue, Hit.point, Quaternion.identity, "", "", GetSmallMapMarker);*/
-                        ASL.ASLHelper.InstantiateASLObject("PlayerMarker", Hit.point, Quaternion.identity, "", "", GetSmallMapMarker);
-                        GenerateMarkerOnLargerMap(Hit.point);
+
+                        Vector3 CenterToMarker = (Hit.point - SmallMapCenter) * (LargeMapSize / SmallMapSize);
+                        Vector3 NewPositionOnLargeMap = CenterToMarker + LargerMapCenter;
+                        if (Input.GetKey(KeyCode.LeftShift)) ASL.ASLHelper.InstantiateASLObject(DropdownOpionValue, NewPositionOnLargeMap, Quaternion.identity, "", "", GetLargerMapMarker);
+
+                        //ASL.ASLHelper.InstantiateASLObject(DropdownOpionValue, Hit.point, Quaternion.identity, "", "", GetSmallMapMarker);
+
+                        //ASL.ASLHelper.InstantiateASLObject("PlayerMarker", Hit.point, Quaternion.identity, "", "", GetSmallMapMarker);
+                        //GenerateMarkerOnLargerMap(Hit.point);
                     }
                 }
             }
@@ -249,14 +256,10 @@ public class PlayerMarkerGenerator : MonoBehaviour
         }
     }
 
-    private void SpawnRegularMarker(Vector3 HitPoint)
-    {
-
-    }
-
     private static void GetSmallMapMarker(GameObject _myGameObject)
     {
         ASLObjectTrackingSystem.AddObjectToTrack(_myGameObject.GetComponent<ASL.ASLObject>(), _myGameObject.transform);
+        RouteDisplayV2.AddRouteMarker(_myGameObject.transform);
         SmallMapMarkerList.Add(_myGameObject);
     }
 
@@ -290,22 +293,22 @@ public class PlayerMarkerGenerator : MonoBehaviour
 
     private void RemoveLastMarker()
     {
-        if (SmallMapMarkerList.Count > 0)
-        {
-            GameObject SMarker = SmallMapMarkerList[SmallMapMarkerList.Count - 1];
+        //if (SmallMapMarkerList.Count > 0)
+        //{
+        //    GameObject SMarker = SmallMapMarkerList[SmallMapMarkerList.Count - 1];
+        //    ASLObjectTrackingSystem.RemoveObjectToTrack(SMarker.GetComponent<ASL.ASLObject>());
+        //    SMarker.GetComponent<ASL.ASLObject>().SendAndSetClaim(() =>
+        //    {
+        //        SMarker.GetComponent<ASL.ASLObject>().DeleteObject();
+        //    });
 
-            SMarker.GetComponent<ASL.ASLObject>().SendAndSetClaim(() =>
-            {
-                SMarker.GetComponent<ASL.ASLObject>().DeleteObject();
-            });
-
-            SmallMapMarkerList.RemoveAt(SmallMapMarkerList.Count - 1);
-        }
+        //    SmallMapMarkerList.RemoveAt(SmallMapMarkerList.Count - 1);
+        //}
         if (LargerMapMarkerList.Count > 0)
         {
             GameObject LMarker = LargerMapMarkerList[LargerMapMarkerList.Count - 1];
             RouteDisplayV2.RemoveRouteMarker(LMarker.transform, false);
-
+            ASLObjectTrackingSystem.RemoveObjectToTrack(LMarker.GetComponent<ASL.ASLObject>());
             LMarker.GetComponent<ASL.ASLObject>().SendAndSetClaim(() =>
             {
                 LMarker.GetComponent<ASL.ASLObject>().DeleteObject();
