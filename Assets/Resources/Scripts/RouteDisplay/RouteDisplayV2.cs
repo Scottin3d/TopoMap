@@ -199,7 +199,6 @@ public class RouteDisplayV2 : MonoBehaviour
         }
     }
 
-    //Intended to replace the SendAndSetClaim blocks used to draw the routes, but causes route segments to pile on each other sometimes
     private void DrawRoute(GameObject _g, Vector3 pos, Vector3 scale)
     {
         _g.GetComponent<ASLObject>().SendAndSetClaim(() =>
@@ -373,6 +372,25 @@ public class RouteDisplayV2 : MonoBehaviour
             Debug.Log("Instantiating new batch");
             current.DonePooling = false;
             current.GenerateRoutePool(current.batchSize);
+        }
+    }
+
+    public static void InsertMarkerAt(Transform _target, Transform _t)
+    {
+        int ndx = (_target != null) ? current.linkedObj.IndexOf(_target) : -1;
+        if(ndx < 0)
+        {
+            AddRouteMarker(_t);
+        } else
+        {
+            current.linkedObj.Insert(ndx, _t);
+            current.DrawPath = true;
+            if (current.linkedObj.Count > current.routeMarkerPool.Count)
+            {
+                Debug.Log("Instantiating new batch");
+                current.DonePooling = false;
+                current.GenerateRoutePool(current.batchSize);
+            }
         }
     }
 

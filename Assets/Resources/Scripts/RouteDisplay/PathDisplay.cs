@@ -32,7 +32,7 @@ public static class PathDisplay //: MonoBehaviour
 
     public static IEnumerator Initialize(Color _c, float tSpeed, float ups)
     {
-        cam = GameObject.Find("PathCam");
+        cam = GameObject.Find("PathCamera");
         Debug.Assert(cam != null, "Missing path camera");
         //cam.SetActive(false);
         //DeactivatePathCam();
