@@ -2450,6 +2450,20 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0dd7cde2e6f975e4fb64c64e8e547763, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!114 &1549362513
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1549362511}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ec930ec347a012448ac278b490e77a85, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  leftHandLocalNS: {fileID: 0}
+  rightHandLocalNS: {fileID: 0}
 --- !u!1 &1617973111 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 104566836559545783, guid: f67aff4e87b056049a333247ad6f5f99, type: 3}
@@ -3430,5 +3444,9 @@ PrefabInstance:
       propertyPath: PlayerToTurnOff
       value: 
       objectReference: {fileID: 465473460}
+    - target: {fileID: 6897538589646759661, guid: 6c21f35d451268d4da0883a9980a2721, type: 3}
+      propertyPath: m_Enabled
+      value: 1
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 6c21f35d451268d4da0883a9980a2721, type: 3}

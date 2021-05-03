@@ -23,11 +23,7 @@ public class ASLVRTrack : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        leftHandLocal = leftHandLocalNS;
-        rightHandLocal = rightHandLocalNS;
-        ASL.ASLHelper.InstantiateASLObject("ASLVRHand", new Vector3(0,0,0), Quaternion.identity, "", "", SetLeftTrackedHand);
-        ASL.ASLHelper.InstantiateASLObject("ASLVRHand", new Vector3(0, 0, 0), Quaternion.identity, "", "", SetRightTrackedHand);
-        StartCoroutine("UpdatePositions");
+        StartCoroutine("delayInitialization");
     }
 
     // Update is called once per frame
@@ -36,18 +32,40 @@ public class ASLVRTrack : MonoBehaviour
         
     }
 
+    private void Startup()
+    {
+        leftHandLocalNS = VRStartupController.VRPlayerObject.transform.Find("SteamVRObjects/LeftHand").gameObject;
+        rightHandLocalNS = VRStartupController.VRPlayerObject.transform.Find("SteamVRObjects/RightHand").gameObject;
+        leftHandLocal = leftHandLocalNS;
+        rightHandLocal = rightHandLocalNS;
+        ASL.ASLHelper.InstantiateASLObject("ASLVRHand", new Vector3(0, 0, 0), Quaternion.identity, "", "", SetLeftTrackedHand);
+        ASL.ASLHelper.InstantiateASLObject("ASLVRHand", new Vector3(0, 0, 0), Quaternion.identity, "", "", SetRightTrackedHand);
+        StartCoroutine("UpdatePositions");
+    }
+
+    //coroutine to wait for VR to start up, and then to push in the hand objects to be tracked
+    IEnumerator delayInitialization()
+    {
+        while(VRStartupController.VRPlayerObject == null)
+        {
+            yield return new WaitForSeconds(0.1f);
+        }
+        Startup();
+    }
+
     IEnumerator UpdatePositions()
     {
-        yield return new WaitForSeconds(0.5f); //very hack-ey but even the calls in the while loops were causing a null reference exception,
-                                               //so until I can find a fix for this the .5s wait will have to suffice
-        while (lHandStore.GetComponent<ASLObject>() == null)
+
+        while (lHandStore == null)
         {
             yield return new WaitForSeconds(0.5f);
         }
-        while (rHandStore.GetComponent<ASLObject>() == null)
+        while (rHandStore == null)
         {
             yield return new WaitForSeconds(0.5f);
         }
+        lHandStore.GetComponent<Renderer>().enabled = false;
+        rHandStore.GetComponent<Renderer>().enabled = false;
         while (true)
         {
             //Debug.Log(leftHand.transform.position);
@@ -55,7 +73,7 @@ public class ASLVRTrack : MonoBehaviour
             //handToTrack.SendAndSetClaim(SendAndSetLocalPosition(this.transform.position));
             lHandStore.GetComponent<ASLObject>().SendAndSetClaim(() => { lHandStore.GetComponent<ASLObject>().SendAndSetLocalPosition(leftHandLocal.transform.position); lHandStore.GetComponent<ASLObject>().SendAndSetLocalRotation(leftHandLocal.transform.rotation); });
             rHandStore.GetComponent<ASLObject>().SendAndSetClaim(() => { rHandStore.GetComponent<ASLObject>().SendAndSetLocalPosition(rightHandLocal.transform.position); rHandStore.GetComponent<ASLObject>().SendAndSetLocalRotation(rightHandLocal.transform.rotation); });
-            yield return new WaitForSeconds(0.5f); //update twice per second
+            yield return new WaitForSeconds(0.1f); //update ten times per second
                                                    //.SendAndSetClaim(() =>{Cube.GetComponent<ASL.ASLObject>().SendAndSetWorldRotation(PlayerObject.transform.rotation);Cube.GetComponent<ASL.ASLObject>().SendAndSetWorldPosition(PlayerObject.transform.position);
         }
     }
