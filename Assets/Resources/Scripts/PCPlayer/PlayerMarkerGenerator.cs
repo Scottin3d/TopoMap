@@ -136,7 +136,7 @@ public class PlayerMarkerGenerator : MonoBehaviour
                         Vector3 CenterToMarker = (Hit.point - SmallMapCenter) * (LargeMapSize / SmallMapSize);
                         Vector3 NewPositionOnLargeMap = CenterToMarker + LargerMapCenter;
 
-                        if (Input.GetKey(KeyCode.LeftShift)) ASL.ASLHelper.InstantiateASLObject(DropdownOpionValue, NewPositionOnLargeMap, Quaternion.identity, "", "", GetSmallMapMarker);
+                        if (Input.GetKey(KeyCode.LeftShift)) ASL.ASLHelper.InstantiateASLObject(DropdownOpionValue, NewPositionOnLargeMap, Quaternion.identity, "", "", GetLargerMapMarker);
                         //GenerateMarkerOnLargerMap(Hit.point);
 
                     }
@@ -305,7 +305,7 @@ public class PlayerMarkerGenerator : MonoBehaviour
         {
             GameObject LMarker = LargerMapMarkerList[LargerMapMarkerList.Count - 1];
             RouteDisplayV2.RemoveRouteMarker(LMarker.transform, false);
-
+            ASLObjectTrackingSystem.RemoveObjectToTrack(LMarker.GetComponent<ASL.ASLObject>());
             LMarker.GetComponent<ASL.ASLObject>().SendAndSetClaim(() =>
             {
                 LMarker.GetComponent<ASL.ASLObject>().DeleteObject();
