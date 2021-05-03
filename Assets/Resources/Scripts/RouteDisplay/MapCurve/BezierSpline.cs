@@ -15,7 +15,9 @@ public class BezierSpline : MonoBehaviour
 	[SerializeField]
 	private bool loop;
 
-	public Vector3 GetPoint(float t)
+    #region ACCESSORS
+
+    public Vector3 GetPoint(float t)
 	{
 		int i;
 		if (t >= 1f)
@@ -63,7 +65,25 @@ public class BezierSpline : MonoBehaviour
 		get { return (points.Length - 1) / 3; }
 	}
 
-	public void AddCurve()
+	public bool IsEnd(Vector3 p)
+	{
+		return (p.Equals(points.Length - 1));
+	}
+
+	public float GetSplineLength()
+    {
+		/*for(int i = 0; i < points.Length - 1; i += 3)
+        {
+
+        }*/
+		return -1f;
+    }
+
+    #endregion
+
+    #region MUTATORS
+
+    public void AddCurve()
 	{
 		Vector3 point = points[points.Length - 1];
 		Array.Resize(ref points, points.Length + 3);
@@ -98,11 +118,6 @@ public class BezierSpline : MonoBehaviour
 			SetControlPointMode(odx, BezierControlPointMode.Mirrored);
 		}
 		SmoothCurve();
-    }
-
-	public bool IsEnd(Vector3 p)
-    {
-		return (p.Equals(points.Length - 1));
     }
 
 	void SmoothCurve()
@@ -141,9 +156,31 @@ public class BezierSpline : MonoBehaviour
 		}
 	}
 
-	#region CONTROL_POINTS
+	public void Copy(BezierSpline _bs)
+    {
+		Vector3[] copyPoints = new Vector3[_bs.points.Length];
+		BezierControlPointMode[] copyModes = new BezierControlPointMode[_bs.modes.Length];
 
-	public BezierControlPointMode GetControlPointMode(int index)
+		for(int i = 0; i < copyPoints.Length; i++)
+        {
+			//Debug.Log("ndx" + i);
+			copyPoints[i] = _bs.points[i];
+        }
+
+		for(int i = 0; i < copyModes.Length; i++)
+        {
+			copyModes[i] = _bs.modes[i];
+		}
+		
+		points = copyPoints;
+		modes = copyModes;
+    }
+
+    #endregion
+
+    #region CONTROL_POINTS
+
+    public BezierControlPointMode GetControlPointMode(int index)
 	{
 		return modes[(index + 1) / 3];
 	}

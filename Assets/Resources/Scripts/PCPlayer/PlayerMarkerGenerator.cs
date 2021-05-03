@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.EventSystems;
 
 public class PlayerMarkerGenerator : MonoBehaviour
 {
@@ -22,6 +23,10 @@ public class PlayerMarkerGenerator : MonoBehaviour
 
     private GameObject LocalProjectMarker;
 
+    private GameObject DrawLineMarker;
+    private GameObject DrawLine;
+    private GameObject DrawOrigin;
+
     void Awake()
     {
         //Find all Camera and MiniMap Display
@@ -38,6 +43,12 @@ public class PlayerMarkerGenerator : MonoBehaviour
         SmallMapSize = SmallMapGenerator.GetComponent<GenerateMapFromHeightMap>().mapSize;
         LocalProjectMarker = Instantiate(Resources.Load("MyPrefabs/PlayerMarker") as GameObject);
         LocalProjectMarker.SetActive(false);
+
+        DrawLine = GameObject.CreatePrimitive(PrimitiveType.Cylinder);
+        Destroy(DrawLine.GetComponent<CapsuleCollider>());
+        DrawLine.GetComponent<MeshRenderer>().material.color = Color.cyan;
+        DrawLine.layer = 11;
+        DrawLine.SetActive(false);
     }
 
     // Update is called once per frame
@@ -45,6 +56,8 @@ public class PlayerMarkerGenerator : MonoBehaviour
     {
         ProjectMarker();
         SelectObjectByClick();
+        WhileClickDown();
+        ClickRelease();
 
         if (Input.GetKeyDown(KeyCode.Backspace))
         {
@@ -103,6 +116,9 @@ public class PlayerMarkerGenerator : MonoBehaviour
                 RaycastHit Hit;
                 if (Physics.Raycast(MouseRay, out Hit))
                 {
+                    //Test select of path display
+                    PathDisplay.Select(Hit.transform);
+
                     string DropdownOpionValue = "";
                     //If mouse hit the small map
                     if (Hit.collider.tag == "Chunk" && Hit.collider.transform.parent.tag == "SpawnSmallMap")
@@ -120,15 +136,24 @@ public class PlayerMarkerGenerator : MonoBehaviour
                         Vector3 CenterToMarker = (Hit.point - SmallMapCenter) * (LargeMapSize / SmallMapSize);
                         Vector3 NewPositionOnLargeMap = CenterToMarker + LargerMapCenter;
 
-                        ASL.ASLHelper.InstantiateASLObject(DropdownOpionValue, NewPositionOnLargeMap, Quaternion.identity, "", "", GetSmallMapMarker);
+                        if (Input.GetKey(KeyCode.LeftShift)) ASL.ASLHelper.InstantiateASLObject(DropdownOpionValue, NewPositionOnLargeMap, Quaternion.identity, "", "", GetSmallMapMarker);
                         //GenerateMarkerOnLargerMap(Hit.point);
 
                     }
                     else if (Hit.collider.tag == "Chunk" && Hit.collider.transform.parent.tag == "SpawnLargerMap")
                     {
                         DropdownOpionValue = MyDropdownList.options[MyDropdownList.value].text;
-                        ASL.ASLHelper.InstantiateASLObject(DropdownOpionValue, Hit.point, Quaternion.identity, "", "", GetLargerMapMarker);
+                        if(Input.GetKey(KeyCode.LeftShift)) ASL.ASLHelper.InstantiateASLObject(DropdownOpionValue, Hit.point, Quaternion.identity, "", "", GetLargerMapMarker);
                         //GenerateMarkerOnSmallMap(Hit.point);
+                    }
+                    else if (Hit.collider.gameObject.layer == 6 /*&& DrawLineMarker == null*/)  //If we don't hit either map but do hit a marker
+                    {
+                        DrawLineMarker = Instantiate(Hit.collider.gameObject) as GameObject;
+                        
+                        Destroy(DrawLineMarker.GetComponent<ASL.ASLObject>());
+                        Destroy(DrawLineMarker.GetComponent<BoxCollider>());
+                        DrawLineMarker.layer = 11;
+                        DrawOrigin = Hit.collider.gameObject;
                     }
                 }
             }
@@ -155,6 +180,71 @@ public class PlayerMarkerGenerator : MonoBehaviour
                         GenerateMarkerOnLargerMap(Hit.point);
                     }
                 }
+            }
+        }
+    }
+
+    private void WhileClickDown()
+    {
+        if (Input.GetMouseButton(0))
+        {
+            if(PlayerCamera.isActiveAndEnabled)
+            {
+                Ray mouseRay = PlayerCamera.ScreenPointToRay(Input.mousePosition);
+                RaycastHit hit;
+
+                int layerMask = LayerMask.GetMask("Ground");
+                //Debug.Log(layerMask);
+
+                if (Physics.Raycast(mouseRay, out hit, 1000f, layerMask))
+                {
+                    if (EventSystem.current.IsPointerOverGameObject(-1)) return;
+                    DrawLine.SetActive(true);
+                    if (DrawLineMarker != null) {
+                        DrawLineMarker.SetActive(true);
+                        DrawLineMarker.transform.position = hit.point;
+
+                        Vector3 line = (DrawLineMarker.transform.position - DrawOrigin.transform.position);
+                        DrawLine.transform.localScale = new Vector3(0.25f, line.magnitude * 0.5f, 0.25f);
+                        DrawLine.transform.position = DrawOrigin.transform.position + 0.5f * line;
+                        DrawLine.transform.up = line;
+                    }
+                } else
+                {
+                    DrawLine.SetActive(false);
+                    if (DrawLineMarker != null) DrawLineMarker.SetActive(false);
+                }
+            }
+        }
+    }
+
+    private void ClickRelease()
+    {
+        if (Input.GetMouseButtonUp(0))
+        {
+            if(DrawLineMarker != null)
+            {
+                if (PlayerCamera.isActiveAndEnabled)
+                {
+                    Ray mouseRay = PlayerCamera.ScreenPointToRay(Input.mousePosition);
+                    RaycastHit hit;
+
+                    int layerMask = LayerMask.GetMask("Ground");
+
+                    if (Physics.Raycast(mouseRay, out hit, 1000f, layerMask))
+                    {
+                        if (EventSystem.current.IsPointerOverGameObject(-1)) return;
+
+                        string DropdownOpionValue = MyDropdownList.options[MyDropdownList.value].text;
+                        ASL.ASLHelper.InstantiateASLObject(DropdownOpionValue, hit.point, Quaternion.identity, "", "", GetLargerMapMarker);
+                    }
+                }
+                //check if DrawLineMarker is on large map
+                //if yes, instantiate a new marker
+                //will need to refactor to support object pooling
+
+                DrawLine.SetActive(false);
+                Destroy(DrawLineMarker);
             }
         }
     }

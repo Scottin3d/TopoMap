@@ -11,63 +11,86 @@ public class SplineWalker : MonoBehaviour
 	public float duration;
 	private float progress;
 
-	public bool lookForward;
+	public bool lookForward, propelSelf = true;
 	private bool goingForward = true;
 
 	public Vector3 walkOffset = Vector3.zero;
 
 	private void Update()
 	{
-			if (goingForward)
-			{
-				progress += Time.deltaTime / duration;
-				if (progress > 1f)
-				{
-					if (mode == SplineWalkerMode.Once)
-					{
-						progress = 1f;
-					}
-					else if (mode == SplineWalkerMode.Loop)
-					{
-						progress -= 1f;
-					}
-					else
-					{
-						progress = 2f - progress;
-						goingForward = false;
-					}
-				}
-			}
-			else
-			{
-				progress -= Time.deltaTime / duration;
-				if (progress < 0f)
-				{
-					progress = -progress;
-					goingForward = true;
-				}
-			}
+        if (propelSelf)
+        {
+            Increment((duration > 0) ? Time.deltaTime / duration : 0);
+        }
 
-		if(spline != null)
+        if (spline != null)
         {
-			gameObject.GetComponent<MeshRenderer>().enabled = true;
-			Vector3 position = spline.GetPoint(progress);
-			transform.localPosition = position + walkOffset;
-			if (lookForward)
-			{
-				//transform.LookAt(position + spline.GetDirection(progress));
-				transform.up = spline.GetDirection(progress);
-			}
-		} else
-        {
-			gameObject.GetComponent<MeshRenderer>().enabled = false;
-		}
+            Vector3 position = spline.GetPoint(progress);
+            transform.localPosition = position + walkOffset;
+            if (lookForward)
+            {
+                transform.LookAt(position + spline.GetDirection(progress));
+            }
+        }
 	}
+
+    public void Begin(float startProg)
+    {
+        goingForward = true;
+        progress = startProg;
+    }
+
+    public void Increment(float incProg)
+    {
+        if (goingForward)
+        {
+            progress += incProg;
+            if (progress > 1f)
+            {
+                if (mode == SplineWalkerMode.Once)
+                {
+                    progress = 1f;
+                }
+                else if (mode == SplineWalkerMode.Loop)
+                {
+                    progress -= 1f;
+                    //loopedOnce = true;
+                }
+                else
+                {
+                    progress = 2f - progress;
+                    goingForward = false;
+                }
+            }
+        }
+        else
+        {
+            progress -= incProg;
+            if (progress < 0f)
+            {
+                progress = -progress;
+                goingForward = true;
+                //loopedOnce = true;
+            }
+        }
+    }
+
+    public void ToggleRender(bool toRender)
+    {
+        gameObject.GetComponent<MeshRenderer>().enabled = toRender;
+        gameObject.GetComponent<MeshCollider>().enabled = toRender;
+    }
+
+    public float GetProgress()
+    {
+        return progress;
+    }
 
 	public void Reset()
     {
 		progress = 0f;
-		goingForward = true;
+		goingForward = true; //IsStarted = false; loopedOnce = false;
 		gameObject.GetComponent<MeshRenderer>().enabled = false;
+        gameObject.GetComponent<MeshCollider>().enabled = false;
     }
 }
