@@ -1480,7 +1480,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   updatesPerSecond: 10
-  heightAboveMarker: 5
+  heightAboveMarker: 10
   batchSize: 10
   MapDisplay: {fileID: 0}
   scanFactor: 2
@@ -2671,7 +2671,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 2800132393438457105, guid: 0fbcb4297ffb1e24cafa5c7f0f1a2852, type: 3}
       propertyPath: m_CullingMask.m_Bits
-      value: 2147487607
+      value: 2147499895
       objectReference: {fileID: 0}
     - target: {fileID: 2800132393471200378, guid: 0fbcb4297ffb1e24cafa5c7f0f1a2852, type: 3}
       propertyPath: PlayerTopViewCamera
@@ -2683,7 +2683,7 @@ PrefabInstance:
       objectReference: {fileID: 1239241914}
     - target: {fileID: 6903507919317994316, guid: 0fbcb4297ffb1e24cafa5c7f0f1a2852, type: 3}
       propertyPath: m_CullingMask.m_Bits
-      value: 2147485687
+      value: 2147493879
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 0fbcb4297ffb1e24cafa5c7f0f1a2852, type: 3}
@@ -3622,6 +3622,10 @@ PrefabInstance:
     - target: {fileID: 5315759313811836049, guid: 898a4e82d9cf98f4dacbd802f73c8b62, type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5442932645766013347, guid: 898a4e82d9cf98f4dacbd802f73c8b62, type: 3}
+      propertyPath: m_CullingMask.m_Bits
+      value: 2147484471
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 898a4e82d9cf98f4dacbd802f73c8b62, type: 3}
