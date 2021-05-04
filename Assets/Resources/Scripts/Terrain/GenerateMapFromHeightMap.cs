@@ -7,7 +7,11 @@ using UnityEngine;
 /// GenerateMapFromHeightMap will read in a heightmap of size greater than 32px x 32px and power of 2 and create meshes based on the input heightmap.
 /// Each mesh has a chunk resolution of 64x64 triangles.
 /// </summary>
-public class GenerateMapFromHeightMap : MonoBehaviour {
+public partial class GenerateMapFromHeightMap : MonoBehaviour {
+    public static float worldMaxHeight = float.MinValue;
+    public static float worldMinHeight = float.MaxValue;
+
+
     [Header("Heightmap Properties")]
     [Tooltip("The heightmap used to generate the terrain.")]
     public Texture2D heightmap;                             // base heightmap
@@ -16,7 +20,7 @@ public class GenerateMapFromHeightMap : MonoBehaviour {
     private const int chunkResolution = 32;                 // the texture resolution of each chunk
     private int numberOfChunks;                             // the number of chunks (width, height) the heightmap is made of. heightmap resolution / chunkResolution
     private float chunkSize;                                // the world unit size of each chunk. mapSize / numberOf Chunks 
-    private  MapChunk[,] mapChunks;                         // map chunk container
+    private MapChunk[,] mapChunks;                         // map chunk container
 
     [Header("Mesh Properties")]
     [Tooltip("This material will be instances on each chunk.")]
@@ -26,15 +30,15 @@ public class GenerateMapFromHeightMap : MonoBehaviour {
     public float meshHeight = 1f;
     public AnimationCurve meshHieghtCurve = new AnimationCurve(new Keyframe(0, 0), new Keyframe(1, 1));
     public const int mapChunkSize = 241;
-    //[Range(0, 6)]
+    [Range(0, 6)]
     private int editorPreviewLOD = 0;
-    //[Tooltip("The algorithm used to blend the seam of the chunks.")]
-    //public NormalizeMode normalizeMode;
 
-    /*
-    [Header("Noise Properties - Inactive")]
-    [Range(0.5f, 100f)]
-    public float noiseScale = 0.3f;
+    private NoiseProperties noiseProperties;
+    [Header("Noise Properties")]
+    [Range(0f, 1f)]
+    public float noiseInfluence = 0.25f;
+    [Range(0.5f, 10f)]
+    public float noiseScale = 1f;
     [Range(1, 8)]
     public int octaves = 4;
     [Range(0f, 1f)]
@@ -42,13 +46,6 @@ public class GenerateMapFromHeightMap : MonoBehaviour {
     [Range(0.01f, 5f)]
     public float lacunarity = 1f;
     public int seed = 69;
-    public Vector2 offset = new Vector2(0, 0);
-    */
-    
-
-    //private DrawMode drawMode = DrawMode.Mesh;
-    //[Header("Color Properties")]
-    //public TerrainType[] regions;
 
     /// <summary>
     /// Assigns class variables.
@@ -64,13 +61,19 @@ public class GenerateMapFromHeightMap : MonoBehaviour {
             meshHeight = mapSize / 10;
             meshHeight = (meshHeight > 0) ? meshHeight : 0.1f;
         }
+
+        noiseProperties = new NoiseProperties(noiseInfluence, noiseScale, octaves, persistence, lacunarity, seed);
     }
 
     /// <summary>
     /// Generate the mehses at run time.
     /// </summary>
     private void Start() {
-        GenerateMap();
+        if (demoMode) {
+            GenDemo();
+        } else {
+            GenerateMap();
+        }
     }
 
     /// <summary>
@@ -81,6 +84,7 @@ public class GenerateMapFromHeightMap : MonoBehaviour {
     /// 4. generate the chunk meshes
     /// </summary>
     public void GenerateMap() {
+
         mapChunks = new MapChunk[numberOfChunks, numberOfChunks];   // set map chunk container
 
         int mapWidth = heightmap.width;                             // full heightmap resolution, min 32
@@ -89,107 +93,135 @@ public class GenerateMapFromHeightMap : MonoBehaviour {
         float mapLowerLeftX = mapSize / -2f;                        // constructing the map from left -> right, bottom -> top
         float mapLowerLeftZ = mapSize / -2f;
 
+        int row = 0;
+        int col = 0;
         // 1. generate map chunks
-        for (int z = 0; z < numberOfChunks; z++) {
-            for (int x = 0; x < numberOfChunks; x++) {
-                // find the center of the chunk
-                float halfChunk = chunkSize / 2f;
-                Vector2 _chunkCenter = new Vector2(transform.position.x + mapLowerLeftX + (x * chunkSize) + halfChunk,
-                                                 transform.position.z + mapLowerLeftZ + (z * chunkSize) + halfChunk);
-
-                //Vector2 chunkCenter = new Vector2(mapLowerLeftX + (x * chunkSize) + halfChunk,
-                //                                  mapLowerLeftZ + (z * chunkSize) - halfChunk);
-
-                // generate heightmap chunk
-                Texture2D _heightmap = GetPixelMap((mapWidth / numberOfChunks) * x,
-                                                    (mapHeight / numberOfChunks) * z,
-                                                    mapWidth / numberOfChunks);
-                // generate map data
-                MapData _mapData = GenerateMapData(_heightmap);
-
-                // create chunk
-                mapChunks[x, z] = new MapChunk(_heightmap, _chunkCenter, _mapData);
+        for (int c = 0; c < numberOfChunks * numberOfChunks; c++) {
+            if (row == numberOfChunks) {
+                row = 0;
+                col++;
             }
+            // find the center of the chunk
+            float halfChunk = chunkSize / 2f;
+            Vector2 _chunkCenter = new Vector2(transform.position.x + mapLowerLeftX + (row * chunkSize) + halfChunk,
+                                             transform.position.z + mapLowerLeftZ + (col * chunkSize) + halfChunk);
+
+            // generate heightmap chunk
+            Texture2D _heightmap = TextureGenerator.GetPixelMap(heightmap, (mapWidth / numberOfChunks) * row,
+                                                (mapHeight / numberOfChunks) * col,
+                                                mapWidth / numberOfChunks);
+            // generate map data
+            MapData _mapData = GenerateMapData(_heightmap);
+
+            // create chunk
+            mapChunks[row, col] = new MapChunk(_heightmap, _chunkCenter, _mapData);
+
+            row++;
         }
 
+
+        row = 0;
+        col = 0;
         // 2. find neighbors
-        for (int z = 0; z < numberOfChunks; z++) {
-            for (int x = 0; x < numberOfChunks; x++) {
-                //==sides==
-                // Top : z + 1 <= resolution - 1
-                if (z + 1 <= numberOfChunks - 1) {
-                    mapChunks[x, z].chunkNeighbors[(int)MapChunkNeighbor.Top] = mapChunks[x, z + 1];
-                    // check corners
-                    // left
-                    bool topLeft = (x - 1 >= 0);
-                    if (topLeft) {
-                        mapChunks[x, z].chunkNeighbors[(int)MapChunkNeighbor.TopLeft] = mapChunks[x - 1, z + 1];
-                    }
-                    // right
-                    bool topRight = (x + 1 <= numberOfChunks - 1);
-                    if (topRight) {
-                        mapChunks[x, z].chunkNeighbors[(int)MapChunkNeighbor.TopRight] = mapChunks[x + 1, z + 1];
-                    }
-                }
-                // Right : x + 1 <= resolution - 1
-                if (x + 1 <= numberOfChunks - 1) {
-                    mapChunks[x, z].chunkNeighbors[(int)MapChunkNeighbor.Right] = mapChunks[x + 1, z];
-                }
-                // Bottom : z - 1 >= 0
-                if (z - 1 >= 0) {
-                    mapChunks[x, z].chunkNeighbors[(int)MapChunkNeighbor.Bottom] = mapChunks[x, z - 1];
-                    // check corners
-                    // left
-                    if (x - 1 >= 0) {
-                        mapChunks[x, z].chunkNeighbors[(int)MapChunkNeighbor.TopLeft] = mapChunks[x - 1, z - 1];
-                    }
-                    // right
-                    if (x + 1 <= numberOfChunks - 1) {
-                        mapChunks[x, z].chunkNeighbors[(int)MapChunkNeighbor.TopRight] = mapChunks[x + 1, z - 1];
-                    }
-
-                }
-                // Left : x - 1 >= 0
-                if (x - 1 >= 0) {
-                    mapChunks[x, z].chunkNeighbors[(int)MapChunkNeighbor.Left] = mapChunks[x - 1, z];
-                }
-
-                // generate mesh data
-                MeshData _meshData = MeshGenerator.GenerateTerrainMesh(mapChunks[x, z], meshHeight, meshHieghtCurve,
-                                                                       chunkSize, editorPreviewLOD);
-                mapChunks[x, z].meshData = _meshData;
+        for (int c = 0; c < numberOfChunks * numberOfChunks; c++) {
+            if (row == numberOfChunks) {
+                row = 0;
+                col++;
             }
+            //==sides==
+            // Top : z + 1 <= resolution - 1
+            if (col + 1 <= numberOfChunks - 1) {
+                mapChunks[row, col].chunkNeighbors[(int)MapChunkNeighbor.Top] = mapChunks[row, col + 1];
+                // check corners
+                // left
+                bool topLeft = (row - 1 >= 0);
+                if (topLeft) {
+                    mapChunks[row, col].chunkNeighbors[(int)MapChunkNeighbor.TopLeft] = mapChunks[row - 1, col + 1];
+                }
+                // right
+                bool topRight = (row + 1 <= numberOfChunks - 1);
+                if (topRight) {
+                    mapChunks[row, col].chunkNeighbors[(int)MapChunkNeighbor.TopRight] = mapChunks[row + 1, col + 1];
+                }
+            }
+
+            // Right : x + 1 <= resolution - 1
+            if (row + 1 <= numberOfChunks - 1) {
+                mapChunks[row, col].chunkNeighbors[(int)MapChunkNeighbor.Right] = mapChunks[row + 1, col];
+            }
+
+            // Bottom : z - 1 >= 0
+            if (col - 1 >= 0) {
+                mapChunks[row, col].chunkNeighbors[(int)MapChunkNeighbor.Bottom] = mapChunks[row, col - 1];
+                // check corners
+                // left
+                if (row - 1 >= 0) {
+                    mapChunks[row, col].chunkNeighbors[(int)MapChunkNeighbor.TopLeft] = mapChunks[row - 1, col - 1];
+                }
+                // right
+                if (row + 1 <= numberOfChunks - 1) {
+                    mapChunks[row, col].chunkNeighbors[(int)MapChunkNeighbor.TopRight] = mapChunks[row + 1, col - 1];
+                }
+            }
+
+            // Left : x - 1 >= 0
+            if (row - 1 >= 0) {
+                mapChunks[row, col].chunkNeighbors[(int)MapChunkNeighbor.Left] = mapChunks[row - 1, col];
+            }
+
+            // generate mesh data
+            MeshData _meshData = MeshGenerator.GenerateTerrainMesh(mapChunks[row, col], meshHeight, meshHieghtCurve,
+                                                                   chunkSize, editorPreviewLOD);
+            mapChunks[row, col].meshData = _meshData;
+            mapChunks[row, col].meshData.CreateMesh();
+            mapChunks[row, col].meshData.RecalulateNormals();
+
+            row++;
         }
 
-        // 3. smooth the edges
+        // 3. smooth the edges and merge normals
         SmoothChunkEdges();
 
-        // 4. generate mesh
-        for (int z = 0; z < numberOfChunks; z++) {
-            for (int x = 0; x < numberOfChunks; x++) {
+        // 4. set material min max values
+        material.SetFloat("_WorldMax", worldMaxHeight);
+        material.SetFloat("_WorldMin", worldMinHeight);
 
-                // create chunk mesh
-                Mesh mesh = mapChunks[x, z].meshData.CreateMesh();
 
-                // create game object of chunk
-                GameObject chunk = new GameObject();
-                chunk.transform.parent = transform;
-                chunk.transform.localScale = Vector3.one;
-                chunk.tag = "Chunk";
-                chunk.name = "Chunk" + z + ", " + x;
-                chunk.transform.position = new Vector3(mapChunks[x, z].center.x, transform.position.y, mapChunks[x, z].center.y);
-                chunk.AddComponent<MeshFilter>().sharedMesh = mesh;
-                chunk.AddComponent<MeshCollider>().sharedMesh = mesh;
-                chunk.AddComponent<MeshRenderer>().sharedMaterial = Instantiate(material);
-                chunk.GetComponent<MeshRenderer>().sharedMaterial.mainTexture = mapChunks[x, z].heightmap;
+        row = 0;
+        col = 0;
+        // 5. generate mesh
+        for (int c = 0; c < numberOfChunks * numberOfChunks; c++) {
+            if (row == numberOfChunks) {
+                row = 0;
+                col++;
             }
+
+            // create chunk mesh
+            Mesh mesh = mapChunks[row, col].meshData.CreateMesh();
+
+            // create game object of chunk
+            GameObject chunk = new GameObject();
+            chunk.transform.parent = transform;
+            chunk.transform.localScale = Vector3.one;
+            chunk.tag = "Chunk";
+            chunk.name = "Chunk" + row + ", " + col;
+            chunk.transform.position = new Vector3(mapChunks[row, col].center.x, transform.position.y, mapChunks[row, col].center.y);
+            chunk.AddComponent<MeshFilter>().sharedMesh = mesh;
+            chunk.AddComponent<MeshCollider>().sharedMesh = mesh;
+            chunk.AddComponent<MeshRenderer>().sharedMaterial = material;
+            chunk.GetComponent<MeshRenderer>().sharedMaterial.mainTexture = mapChunks[row, col].heightmap;
+
+            row++;
         }
+
+
     }
 
     /// <summary>
     /// SmoothChunkEdges: Smooths the edges of the chunks so that there are no seams between meshes.
     /// This is done by sampling the edge vertices and normalizing them with the adjacent neighboring 
     /// verticies.
+    /// Reference for normals: https://answers.unity.com/questions/1293825/how-to-calculate-normal-direction-for-shared-verte.html
     /// </summary>
     private void SmoothChunkEdges() {
         int row = 0;
@@ -203,66 +235,90 @@ public class GenerateMapFromHeightMap : MonoBehaviour {
                 col++;
             }
 
+            MapChunk currChunk = mapChunks[row, col];
+            MapChunk topNeighbor = currChunk.chunkNeighbors[(int)MapChunkNeighbor.Top];
+            MapChunk rightNeighbor = currChunk.chunkNeighbors[(int)MapChunkNeighbor.Right];
+            MapChunk bottomNeighbor = currChunk.chunkNeighbors[(int)MapChunkNeighbor.Bottom];
+            MapChunk leftNeighbor = currChunk.chunkNeighbors[(int)MapChunkNeighbor.Left];
+
+
             // top
             for (int i = 0; i < chunkLength; i++) {
-                MapChunk currChunk = mapChunks[row, col];
-                MapChunk topNeighbor = currChunk.chunkNeighbors[(int)MapChunkNeighbor.Top];
-                MapChunk rightNeighbor = currChunk.chunkNeighbors[(int)MapChunkNeighbor.Right];
-                MapChunk bottomNeighbor = currChunk.chunkNeighbors[(int)MapChunkNeighbor.Bottom];
-                MapChunk leftNeighbor = currChunk.chunkNeighbors[(int)MapChunkNeighbor.Left];
-
                 // top
                 if (topNeighbor != null) {
-
+                    // smooth vertex heights
                     float yValue = currChunk.meshData.vertices[currChunk.topVerts[i]].y;
                     yValue += topNeighbor.meshData.vertices[topNeighbor.bottomVerts[i]].y;
 
                     topNeighbor.meshData.vertices[topNeighbor.bottomVerts[i]].y = yValue / 2f;
                     currChunk.meshData.vertices[currChunk.topVerts[i]].y = yValue / 2f;
+
+                    // average normals
+                    Vector3 currNormal = currChunk.meshData.normals[currChunk.topVerts[i]];
+                    Vector3 neighborNormal = topNeighbor.meshData.normals[topNeighbor.bottomVerts[i]];
+                    Vector3 vertexNormal = (currNormal + neighborNormal).normalized;
+
+                    currChunk.meshData.normals[currChunk.topVerts[i]] = vertexNormal;
+                    topNeighbor.meshData.normals[topNeighbor.bottomVerts[i]] = vertexNormal;
                 }
 
                 // right
                 if (rightNeighbor != null) {
+                    // smooth vertex heights
                     float yValue = currChunk.meshData.vertices[currChunk.rightVerts[i]].y;
                     yValue += rightNeighbor.meshData.vertices[rightNeighbor.leftVerts[i]].y;
 
                     rightNeighbor.meshData.vertices[rightNeighbor.leftVerts[i]].y = yValue / 2f;
                     currChunk.meshData.vertices[currChunk.rightVerts[i]].y = yValue / 2f;
+
+                    // average normals
+                    Vector3 currNormal = currChunk.meshData.normals[currChunk.rightVerts[i]];
+                    Vector3 neighborNormal = rightNeighbor.meshData.normals[rightNeighbor.leftVerts[i]];
+                    Vector3 vertexNormal = (currNormal + neighborNormal).normalized;
+
+                    currChunk.meshData.normals[currChunk.rightVerts[i]] = vertexNormal;
+                    rightNeighbor.meshData.normals[rightNeighbor.leftVerts[i]] = vertexNormal;
                 }
 
                 // bottom
                 if (bottomNeighbor != null) {
+                    // smooth vertex heights
                     float yValue = currChunk.meshData.vertices[currChunk.bottomVerts[i]].y;
                     yValue += bottomNeighbor.meshData.vertices[bottomNeighbor.topVerts[i]].y;
 
                     bottomNeighbor.meshData.vertices[bottomNeighbor.topVerts[i]].y = yValue / 2f;
                     currChunk.meshData.vertices[currChunk.bottomVerts[i]].y = yValue / 2f;
+
+                    // average normals
+                    Vector3 currNormal = currChunk.meshData.normals[currChunk.bottomVerts[i]];
+                    Vector3 neighborNormal = bottomNeighbor.meshData.normals[bottomNeighbor.topVerts[i]];
+                    Vector3 vertexNormal = (currNormal + neighborNormal).normalized;
+
+                    currChunk.meshData.normals[currChunk.bottomVerts[i]] = vertexNormal;
+                    bottomNeighbor.meshData.normals[bottomNeighbor.topVerts[i]] = vertexNormal;
                 }
 
                 // left
                 if (leftNeighbor != null) {
+                    // smooth vertex heights
                     float yValue = currChunk.meshData.vertices[currChunk.leftVerts[i]].y;
                     yValue += leftNeighbor.meshData.vertices[leftNeighbor.rightVerts[i]].y;
 
                     leftNeighbor.meshData.vertices[leftNeighbor.rightVerts[i]].y = yValue / 2f;
                     currChunk.meshData.vertices[currChunk.leftVerts[i]].y = yValue / 2f;
+
+                    // average normals
+                    Vector3 currNormal = currChunk.meshData.normals[currChunk.leftVerts[i]];
+                    Vector3 neighborNormal = leftNeighbor.meshData.normals[leftNeighbor.rightVerts[i]];
+                    Vector3 vertexNormal = (currNormal + neighborNormal).normalized;
+
+                    currChunk.meshData.normals[currChunk.leftVerts[i]] = vertexNormal;
+                    leftNeighbor.meshData.normals[leftNeighbor.rightVerts[i]] = vertexNormal;
                 }
             }
+
             row++;
         }
-    }
-
-    /// <summary>
-    /// GetPixelMap: Extracts a portion of a larger texture map.
-    /// </summary>
-    /// <param name="width">The width of the map to extract.</param>
-    /// <param name="height">The height of the map to extract.</param>
-    /// <param name="size">The pixel size of the map to return.</param>
-    /// <returns></returns>
-    public Texture2D GetPixelMap(int width, int height, int size) {
-        Color[] pixelColors = new Color[size * size];
-        pixelColors = heightmap.GetPixels(width, height, size, size);
-        return TextureGenerator.TextureFromColorMap(pixelColors, size, size);
 
     }
 
@@ -274,8 +330,8 @@ public class GenerateMapFromHeightMap : MonoBehaviour {
     /// <returns></returns>
     public MapData GenerateMapData(Texture2D heightmap) {
         // use hegihtmap
-        float[,] noiseMap = Noise.GenerateNoiseMapFromHeightmap(heightmap);
-        return new MapData(noiseMap);
+        float[,] noiseMap = Noise.GenerateNoiseMapFromHeightmap(heightmap, noiseProperties);
+        return new MapData(noiseMap, noiseProperties);
     }
 }
 
@@ -309,9 +365,10 @@ public class MapChunk {
 [System.Serializable]
 public struct MapData {
     public readonly float[,] heightValues;
-
-    public MapData(float[,] _heightValues) {
+    public readonly NoiseProperties noiseProperties;
+    public MapData(float[,] _heightValues, NoiseProperties _noiseProperties) {
         this.heightValues = _heightValues;
+        this.noiseProperties = _noiseProperties;
     }
 }
 
@@ -320,10 +377,29 @@ public struct NoiseMap {
     public float[,] heightValues;
 }
 
+[System.Serializable]
+public struct NoiseProperties {
+    public readonly float noiseInfluence;
+    public readonly float noiseScale;
+    public readonly int octaves;
+    public readonly float persistence;
+    public readonly float lacunarity;
+    public readonly int seed;
+
+    public NoiseProperties(float _noiseInfluence, float _noiseScale, int _octaves, float _persistence, float _lacunarity, int _seed) {
+        noiseInfluence = _noiseInfluence;
+        noiseScale = _noiseScale;
+        octaves = _octaves;
+        persistence = _persistence;
+        lacunarity = _lacunarity;
+        seed = _seed;
+    }
+}
+
 /// <summary>
 /// Public enum of neighbor directions for clarity of use.
 /// </summary>
-public enum MapChunkNeighbor { 
+public enum MapChunkNeighbor {
     TopLeft,
     Top,
     TopRight,
@@ -333,5 +409,7 @@ public enum MapChunkNeighbor {
     BottomLeft,
     Left
 }
+
+
 
 

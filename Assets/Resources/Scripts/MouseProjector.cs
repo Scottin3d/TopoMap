@@ -12,7 +12,7 @@ public class MouseProjector : MonoBehaviour
     public GameObject point = null;
 
     private void Start() {
-        Debug.Assert(mouseProjector != null);
+        //Debug.Assert(mouseProjector != null);
     }
 
     // Update is called once per frame

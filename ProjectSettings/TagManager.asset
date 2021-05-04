@@ -12,6 +12,7 @@ TagManager:
   - Table
   - SpawnSmallMap
   - SpawnLargerMap
+  - Marker
   layers:
   - Default
   - TransparentFX
