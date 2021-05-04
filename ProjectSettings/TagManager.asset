@@ -12,7 +12,8 @@ TagManager:
   - Table
   - SpawnSmallMap
   - SpawnLargerMap
-  - Marker
+  - A*
+  - PathCam
   layers:
   - Default
   - TransparentFX
@@ -23,9 +24,9 @@ TagManager:
   - Markers
   - Minimap
   - PostProcessing
-  - 
-  - 
-  - 
+  - Ground
+  - Path
+  - IgnoreMinimap
   - 
   - 
   - 

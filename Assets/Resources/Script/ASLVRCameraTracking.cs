@@ -40,6 +40,7 @@ public class ASLVRCameraTracking : MonoBehaviour
             yield return new WaitForSeconds(0.1f);
         }
         ASLObjectTrackingSystem.AddPlayerToTrack(VRCameraToTrack.GetComponent<ASLObject>(), VRCameraToTrack.transform);
+        VRCameraToTrack.GetComponent<Renderer>().enabled = false;
         while (true)
         {
             yield return new WaitForSeconds(0.1f);

@@ -22,9 +22,13 @@ public class VRStartupController : MonoBehaviour
     //this is the button that will switch between VR and non-VR modes
     public Button VRToggle = null;
 
+    //boolean to store whether or not this class needs to restore a locked cursor when switching back to PC
+    private bool reLockCursor = false;
+
     //this is the UI controller which needs the instantiated VR Player to start up
     //note: currently the VRUIController checks for the player object
     //public VRUIController VRUIControl = null;
+    
 
 
     // Start is called before the first frame update
@@ -59,7 +63,11 @@ public class VRStartupController : MonoBehaviour
     {
 
         PlayerToTurnOff.SetActive(false);
-
+        if(Cursor.lockState == CursorLockMode.Locked)
+        {
+            reLockCursor = true;
+            Cursor.lockState = CursorLockMode.None;
+        }
         VRPlayerObject = (GameObject) Instantiate(Resources.Load("VR/PlayerVR"));
         VRPlayerObject.transform.position = VRSpawnPoint.transform.position;
         VRPlayerObject.transform.rotation = VRSpawnPoint.transform.rotation;
@@ -82,6 +90,11 @@ public class VRStartupController : MonoBehaviour
             }
             else
             {
+                if (Cursor.lockState == CursorLockMode.Locked)
+                {
+                    reLockCursor = true;
+                    Cursor.lockState = CursorLockMode.None;
+                }
                 PlayerToTurnOff.SetActive(false);
                 VRPlayerObject.SetActive(true);
             }
@@ -94,6 +107,11 @@ public class VRStartupController : MonoBehaviour
                 Debug.Log("Attempted VR shutoff when already off.");
             }
             isInVR = false;
+            if (reLockCursor)
+            {
+                Cursor.lockState = CursorLockMode.Locked;
+                reLockCursor = false;
+            }
             PlayerToTurnOff.SetActive(true);
             VRPlayerObject.SetActive(false);
         }
