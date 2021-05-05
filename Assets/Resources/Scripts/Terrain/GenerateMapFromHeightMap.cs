@@ -8,8 +8,8 @@ using UnityEngine;
 /// Each mesh has a chunk resolution of 64x64 triangles.
 /// </summary>
 public partial class GenerateMapFromHeightMap : MonoBehaviour {
-    public static float worldMaxHeight = float.MinValue;
-    public static float worldMinHeight = float.MaxValue;
+    private float worldMaxHeight = float.MinValue;
+    private float worldMinHeight = float.MaxValue;
 
 
     [Header("Heightmap Properties")]
@@ -84,6 +84,8 @@ public partial class GenerateMapFromHeightMap : MonoBehaviour {
     /// 4. generate the chunk meshes
     /// </summary>
     public void GenerateMap() {
+        worldMaxHeight = float.MinValue;
+        worldMinHeight = float.MaxValue;
 
         mapChunks = new MapChunk[numberOfChunks, numberOfChunks];   // set map chunk container
 
@@ -171,7 +173,7 @@ public partial class GenerateMapFromHeightMap : MonoBehaviour {
 
             // generate mesh data
             MeshData _meshData = MeshGenerator.GenerateTerrainMesh(mapChunks[row, col], meshHeight, meshHieghtCurve,
-                                                                   chunkSize, editorPreviewLOD);
+                                                                   chunkSize, editorPreviewLOD, ref worldMaxHeight, ref worldMinHeight);
             mapChunks[row, col].meshData = _meshData;
             mapChunks[row, col].meshData.CreateMesh();
             mapChunks[row, col].meshData.RecalulateNormals();

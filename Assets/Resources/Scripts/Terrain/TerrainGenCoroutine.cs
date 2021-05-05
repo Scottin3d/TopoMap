@@ -185,7 +185,7 @@ public partial class GenerateMapFromHeightMap : MonoBehaviour {
 
                 // generate mesh data
                 MeshData _meshData = MeshGenerator.GenerateTerrainMesh(mapChunks[x, z], meshHeight, meshHieghtCurve,
-                                                                       chunkSize, editorPreviewLOD);
+                                                                       chunkSize, editorPreviewLOD, ref worldMaxHeight, ref worldMinHeight);
                 mapChunks[x, z].meshData = _meshData;
 
                 // reset colors
@@ -193,6 +193,11 @@ public partial class GenerateMapFromHeightMap : MonoBehaviour {
                 yield return new WaitForSeconds(timeStep);
             }
         }
+
+        // 4. set material min max values
+        material.SetFloat("_WorldMax", worldMaxHeight);
+        material.SetFloat("_WorldMin", worldMinHeight);
+
         // 3. smooth the edges
         StartCoroutine(SmoothChunkEdgesC());
 

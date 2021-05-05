@@ -16,7 +16,8 @@ public static class MeshGenerator {
     /// <param name="chunkSize">The size of the chunk in world space units.</param>
     /// <param name="levelOfDetail">The level of detail the chunk is going to be created at.</param>
     /// <returns>The generated meshData of the chunk.</returns>
-    public static MeshData GenerateTerrainMesh(MapChunk chunk, float heightMulitplier, AnimationCurve meshHieghtCurve, float chunkSize, int levelOfDetail) {
+    public static MeshData GenerateTerrainMesh(MapChunk chunk, float heightMulitplier, AnimationCurve meshHieghtCurve, float chunkSize, int levelOfDetail, ref float WorldMaxHeight, ref float WorldMinHeight) {
+        
         AnimationCurve heightCurve = new AnimationCurve(meshHieghtCurve.keys);                  // create a local copy of the curve.  There were issues when using threading about sampling the correct value
         int width = chunk.mapData.heightValues.GetLength(0);
         int height = chunk.mapData.heightValues.GetLength(1);
@@ -38,7 +39,9 @@ public static class MeshGenerator {
 
                 // calculate the Vector3
                 float xVal = quadCenter.x;
-                float yVal = heightCurve.Evaluate(chunk.mapData.heightValues[x, z]) * heightMulitplier;
+                //float yVal = heightCurve.Evaluate(chunk.mapData.heightValues[x, z]) * heightMulitplier;
+                float yVal = chunk.mapData.heightValues[x, z] * heightMulitplier;
+
                 float zVal = quadCenter.y;
 
                 // store the vertex and uv data in the container
@@ -46,12 +49,12 @@ public static class MeshGenerator {
                 meshData.uv[vertexIndex] = new Vector2(x / (float)width, z / (float)height);
 
                 // find world min and max values
-                if (yVal > GenerateMapFromHeightMap.worldMaxHeight) {
-                    GenerateMapFromHeightMap.worldMaxHeight = yVal;
+                if (yVal > WorldMaxHeight) {
+                    WorldMaxHeight = yVal;
                 }
 
-                if (yVal < GenerateMapFromHeightMap.worldMinHeight) {
-                    GenerateMapFromHeightMap.worldMinHeight = yVal;
+                if (yVal < WorldMinHeight) {
+                    WorldMinHeight = yVal;
                 }
 
                 // check and store edge vertices for later use in smoothing the mesh seams
