@@ -18,6 +18,8 @@ public class MarkerDisplay : MonoBehaviour
 
 
     private static List<GameObject> playerMarkerPool = new List<GameObject>();
+    private static Dictionary<GameObject, ASLObject> markerToObjectDictionary = new Dictionary<GameObject, ASLObject>();
+
     private bool expanding = false;
 
     private void Awake() {
@@ -34,8 +36,16 @@ public class MarkerDisplay : MonoBehaviour
         mapScaleFactor = bigMap.mapSize / smallMap.mapSize;
 
         GeneratePlayerPool(20);
-
         StartCoroutine(UpdatePlayerPositions());
+    }
+
+    public bool GetMarketGameObject(GameObject marker, out ASLObject obj) {
+        obj = null;
+        if (markerToObjectDictionary.ContainsKey(marker)) {
+            obj = markerToObjectDictionary[marker];
+            return true;
+        }
+        return false;
     }
 
     IEnumerator UpdatePlayerPositions() {
@@ -44,7 +54,6 @@ public class MarkerDisplay : MonoBehaviour
                 yield return new WaitForSeconds(1f);
             }
             yield return new WaitForSeconds(1 / updatesPerSecond);
-
             UpdateMapMarkers();
         }
     }
@@ -62,12 +71,14 @@ public class MarkerDisplay : MonoBehaviour
             GeneratePlayerPool(20);
         }
 
+
         for (int i = 0, o = 0; i < playerMarkerPool.Count; i++) {
             if (i < numPlayers) {
+                // for each player create a blue marker
                 playerMarkerPool[i].SetActive(true);
                 playerMarkerPool[i].transform.GetComponentInChildren<MeshRenderer>().material.color = Color.blue;
+                // translate position to small world scale
                 Vector3 position = mapDisplay.position + (playerTransforms[i].position / mapScaleFactor);
-                //position.y = mapDisplay.position.y;
                 playerMarkerPool[i].transform.position = position;
                 Quaternion rotation = Quaternion.identity;
                 rotation.eulerAngles = new Vector3(0f, playerTransforms[i].rotation.eulerAngles.y, 0f);
@@ -76,9 +87,12 @@ public class MarkerDisplay : MonoBehaviour
                 // send to ASL
                 ASLObject marker = playerMarkerPool[i].GetComponent<ASLObject>();
                 marker.SendAndSetClaim(() => {
-                    marker.SendAndSetWorldPosition(playerMarkerPool[i].transform.position);
+                    marker.SendAndSetWorldPosition(marker.transform.position);
                     //marker.SendAndIncrementWorldRotation(rotation);
                 });
+
+                // add to dictionary
+                markerToObjectDictionary.Add(playerMarkerPool[i], playerTransforms[i].GetComponent<ASLObject>());
 
             } else if (o < numObjects) {
                 playerMarkerPool[i].SetActive(true);
@@ -93,6 +107,8 @@ public class MarkerDisplay : MonoBehaviour
                     marker.SendAndSetWorldPosition(playerMarkerPool[i].transform.position);
                 });
 
+                // add to dictionary
+                markerToObjectDictionary.Add(playerMarkerPool[i], objectTransforms[o].GetComponent<ASLObject>());
 
                 o++;
             } else { 

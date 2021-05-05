@@ -4,6 +4,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.EventSystems;
 
+public class PlayerMakerGenerator : MonoBehaviour { 
     private Camera PlayerCamera;
     private Camera PlayerTableViewCamera;
 
@@ -24,6 +25,8 @@ using UnityEngine.EventSystems;
     private GameObject DrawLineMarker;
     private GameObject DrawLine;
     private GameObject DrawOrigin;
+
+    private bool deleteMode = false;
 
     void Awake() {
         //Find all Camera and MiniMap Display
@@ -296,3 +299,4 @@ using UnityEngine.EventSystems;
         }
     }
 }
+
