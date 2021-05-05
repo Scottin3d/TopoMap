@@ -8,8 +8,7 @@ Material:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_Name: Floor_01_Decal
-  m_Shader: {fileID: -6465566751694194690, guid: 32156ca25c4f45d48b3e204ebd6debd9,
-    type: 3}
+  m_Shader: {fileID: -6465566751694194690, guid: 32156ca25c4f45d48b3e204ebd6debd9, type: 3}
   m_ShaderKeywords: _NORMALMAP
   m_LightmapFlags: 4
   m_EnableInstancingVariants: 0
@@ -45,7 +44,7 @@ Material:
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _DirtRTintGSmoothnessA:
-        m_Texture: {fileID: 2800000, guid: 65b174b1cf77da3439e618aee1f55be5, type: 3}
+        m_Texture: {fileID: 2800000, guid: b18b0605a9cb60248aff2a7908601fdc, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _EmissionMap:
@@ -100,6 +99,18 @@ Material:
         m_Texture: {fileID: 0}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
+    - unity_Lightmaps:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - unity_LightmapsInd:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - unity_ShadowMasks:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
     m_Floats:
     - _BumpScale: 1
     - _Cutoff: 0.5
@@ -135,3 +146,4 @@ Material:
     - _EmissionColor: {r: 0, g: 0, b: 0, a: 1}
     - _MainColor: {r: 0.3048, g: 0.3524, b: 0.4, a: 0}
     - _TintColor: {r: 0.33767998, g: 0.37884, b: 0.42, a: 0}
+  m_BuildTextureStacks: []
