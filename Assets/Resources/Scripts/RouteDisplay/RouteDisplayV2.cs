@@ -35,7 +35,7 @@ public class RouteDisplayV2 : MonoBehaviour
     public int scaleFactor = 2;
 
     private bool DataCollected = false,
-        GroundSet = false,
+        GroundSet = false, 
         GraphSet = false,
         DrawPath = false;
 
@@ -99,9 +99,9 @@ public class RouteDisplayV2 : MonoBehaviour
     IEnumerator UpdateRoute()
     {
         GameObject curNode, curPath, smPath;
-        Vector3 scale, dir, pos;
+        Vector3 scale, dir, pos, nextPos;
         int ndx;
-        float length, AddHeight;
+        float length; 
         while (true)
         {
             while (!DonePooling) yield return new WaitForSeconds(0.1f);
@@ -117,16 +117,16 @@ public class RouteDisplayV2 : MonoBehaviour
                 curPath.SetActive(true);
                 smPath.SetActive(true);
 
-                AddHeight = linkedObj[ndx].localScale.y;
-                AddHeight = (AddHeight > heightAboveMarker) ? AddHeight : heightAboveMarker;
-
                 scale = new Vector3(1.5f, 0.5f, 1.5f);
-                pos = linkedObj[ndx].position + AddHeight * Vector3.up;
+                pos = linkedObj[ndx].position;// + PrevHeight;// * Vector3.up;
+                pos.y += heightAboveMarker;
                 DrawRoute(curNode, pos, scale);
 
                 if (ndx < linkedObj.Count - 1)
                 {
-                    dir = linkedObj[ndx + 1].position - linkedObj[ndx].position;
+                    nextPos = linkedObj[ndx + 1].position;
+                    nextPos.y += heightAboveMarker;
+                    dir = nextPos - pos;
                     length = (dir).magnitude / 2f;
                     scale = new Vector3(.25f, length, .25f);
                     pos = pos + (length * dir.normalized);
@@ -139,7 +139,7 @@ public class RouteDisplayV2 : MonoBehaviour
                     {
                         if (scaleFactor > 0)
                         {
-                            pos = MapDisplay.position + ((pos - AddHeight * Vector3.up) / scaleFactor);
+                            pos = MapDisplay.position + ((pos - 0.5f * heightAboveMarker * Vector3.up) / scaleFactor);
                             scale = new Vector3(.05f, length / scaleFactor, .05f);
                         }
                         else
@@ -152,7 +152,7 @@ public class RouteDisplayV2 : MonoBehaviour
                     {
                         if (scaleFactor > 0)
                         {
-                            pos = SmallMap.transform.position + ((pos - AddHeight * 0.5f * Vector3.up) / scaleFactor);
+                            pos = SmallMap.transform.position + ((pos - 0.5f * heightAboveMarker * Vector3.up) / scaleFactor);
                             //- smMap.transform.right / scaleFactor - smMap.transform.right / smMap.GetComponent<GenerateMapFromHeightMap>().mapSize;
                             scale = new Vector3(0.01f, length / scaleFactor, 0.01f);
                         }
@@ -236,6 +236,7 @@ public class RouteDisplayV2 : MonoBehaviour
                 float scanHeight = heightMapData.meshHeight;
 
                 StartCoroutine(SetGround());
+                StartCoroutine(SetHolomap());
                 StartCoroutine(SetGridGraph(2 * graphSize, nodeSize / 2, scanHeight));
 
                 while(!GraphSet || !GroundSet)
@@ -286,10 +287,28 @@ public class RouteDisplayV2 : MonoBehaviour
         int ndx = 0;
         while (ndx < meshes.Length)
         {
-            meshes[ndx].gameObject.layer = 9;
+            meshes[ndx].gameObject.layer = LayerMask.NameToLayer("Ground");
             ndx++;
         }
         GroundSet = true;
+        yield return new WaitForSeconds(0.1f);
+    }
+
+    IEnumerator SetHolomap()
+    {
+        MeshFilter[] meshes = SmallMap.GetComponentsInChildren<MeshFilter>();
+        while(meshes.Length < 1)
+        {
+            yield return new WaitForSeconds(1 / updatesPerSecond);
+            meshes = SmallMap.GetComponentsInChildren<MeshFilter>();
+        }
+        Debug.Log("Setting " + meshes.Length + " chunks to Holomap layer");
+        int ndx = 0;
+        while (ndx < meshes.Length)
+        {
+            meshes[ndx].gameObject.layer = LayerMask.NameToLayer("Holomap");
+            ndx++;
+        }
         yield return new WaitForSeconds(0.1f);
     }
 
@@ -375,7 +394,7 @@ public class RouteDisplayV2 : MonoBehaviour
         }
     }
 
-    public static void InsertMarkerAt(Transform _target, Transform _t)
+    public static int InsertMarkerAt(Transform _target, Transform _t)
     {
         int ndx = (_target != null) ? current.linkedObj.IndexOf(_target) : -1;
         if(ndx < 0)
@@ -392,6 +411,7 @@ public class RouteDisplayV2 : MonoBehaviour
                 current.GenerateRoutePool(current.batchSize);
             }
         }
+        return ndx;
     }
 
     public static void RemoveRouteMarker(Transform _t, bool fromFloatCallback)
