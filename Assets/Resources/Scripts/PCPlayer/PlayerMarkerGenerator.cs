@@ -183,103 +183,22 @@ public class PlayerMarkerGenerator : MonoBehaviour
                         Vector3 CenterToMarker = (Hit.point - SmallMapCenter) * (LargeMapSize / SmallMapSize);
                         Vector3 NewPositionOnLargeMap = CenterToMarker + LargerMapCenter;
 
-                        if (Input.GetKey(KeyCode.LeftShift)) ASL.ASLHelper.InstantiateASLObject("PlayerMarker", NewPositionOnLargeMap, Quaternion.identity, "", "", GetSmallMapMarker);
+                        if (Input.GetKey(KeyCode.LeftShift)) ASL.ASLHelper.InstantiateASLObject("PlayerMarker", NewPositionOnLargeMap, Quaternion.identity, "", "", GetLargerMapMarker);
                         //GenerateMarkerOnLargerMap(Hit.point);
+                    }
+                    else if (Hit.collider.gameObject.layer == 6 /*&& DrawLineMarker == null*/)  //If we don't hit either map but do hit a marker
+                    {
+                        DrawLineMarker = Instantiate(Hit.collider.gameObject) as GameObject;
+
+                        Destroy(DrawLineMarker.GetComponent<ASL.ASLObject>());
+                        Destroy(DrawLineMarker.GetComponent<BoxCollider>());
+                        DrawLineMarker.layer = 11;
+                        DrawOrigin = Hit.collider.gameObject;
                     }
                 }
             }
         }
     }
-
-    /*private void WhileClickDown()
-    {
-        if (Input.GetMouseButton(0))
-        {
-            int markerNdx = LargerMapMarkerList.IndexOf(DrawOrigin);//, 
-                //layerMask = (markerNdx > -1) ? LayerMask.GetMask("Ground") : LayerMask.GetMask("Holomap");
-            Debug.Log(markerNdx);
-            float thickness = (markerNdx > -1) ? 0.25f : 0.01f;
-            //Ray mouseRay = new Ray(10f * Vector3.down, Vector3.down); 
-            RaycastHit hit;
-            if (PlayerCamera.isActiveAndEnabled)
-            {
-                Ray mouseRay = PlayerCamera.ScreenPointToRay(Input.mousePosition);
-                //DragDrawCast(mouseRay, layerMask, thickness);
-                int layerMask = LayerMask.GetMask("Ground");
-
-                
-                if (Physics.Raycast(mouseRay, out hit, 1000f, layerMask))
-                {
-                    if (EventSystem.current.IsPointerOverGameObject(-1)) return;
-                    DrawLine.SetActive(true);
-                    if (DrawLineMarker != null)
-                    {
-                        DrawLineMarker.SetActive(true);
-                        DrawLineMarker.transform.position = hit.point;
-
-                        Vector3 line = (DrawLineMarker.transform.position - DrawOrigin.transform.position);
-                        DrawLine.transform.localScale = new Vector3(thickness, line.magnitude * 0.5f, thickness);
-                        DrawLine.transform.position = DrawOrigin.transform.position + 0.5f * line;
-                        DrawLine.transform.up = line;
-                    }
-                }
-                else
-                {
-                    DrawLine.SetActive(false);
-                    if (DrawLineMarker != null) DrawLineMarker.SetActive(false);
-                }
-
-
-            } else if (PlayerTableViewCamera.isActiveAndEnabled)
-            {
-                Ray mouseRay = PlayerTableViewCamera.ScreenPointToRay(Input.mousePosition);
-                //DragDrawCast(mouseRay, layerMask, thickness);
-                int layerMask = LayerMask.GetMask("Holomap");
-
-                if (Physics.Raycast(mouseRay, out hit, 1000f, layerMask))
-                {
-                    if (EventSystem.current.IsPointerOverGameObject(-1)) return;
-                    DrawLine.SetActive(true);
-                    if (DrawLineMarker != null)
-                    {
-                        DrawLineMarker.SetActive(true);
-                        DrawLineMarker.transform.position = hit.point;
-
-                        Vector3 line = (DrawLineMarker.transform.position - DrawOrigin.transform.position);
-                        DrawLine.transform.localScale = new Vector3(thickness, line.magnitude * 0.5f, thickness);
-                        DrawLine.transform.position = DrawOrigin.transform.position + 0.5f * line;
-                        DrawLine.transform.up = line;
-                    }
-                }
-                else
-                {
-                    DrawLine.SetActive(false);
-                    if (DrawLineMarker != null) DrawLineMarker.SetActive(false);
-                }
-            }
-            
-            /*if (Physics.Raycast(mouseRay, out hit, 1000f, layerMask))
-            {
-                if (EventSystem.current.IsPointerOverGameObject(-1)) return;
-                DrawLine.SetActive(true);
-                if (DrawLineMarker != null)
-                {
-                    DrawLineMarker.SetActive(true);
-                    DrawLineMarker.transform.position = hit.point;
-
-                    Vector3 line = (DrawLineMarker.transform.position - DrawOrigin.transform.position);
-                    DrawLine.transform.localScale = new Vector3(thickness, line.magnitude * 0.5f, thickness);
-                    DrawLine.transform.position = DrawOrigin.transform.position + 0.5f * line;
-                    DrawLine.transform.up = line;
-                }
-            }
-            else
-            {
-                DrawLine.SetActive(false);
-                if (DrawLineMarker != null) DrawLineMarker.SetActive(false);
-            }
-        }
-    }*/
 
     private void WhileClickDown()
     {
@@ -288,64 +207,37 @@ public class PlayerMarkerGenerator : MonoBehaviour
             if (PlayerCamera.isActiveAndEnabled)
             {
                 Ray mouseRay = PlayerCamera.ScreenPointToRay(Input.mousePosition);
-                RaycastHit hit;
+                //RaycastHit hit;
 
                 int layerMask = (LargerMapMarkerList.IndexOf(DrawOrigin) >= 0) ? LayerMask.GetMask("Ground") : LayerMask.GetMask("Holomap");
-                Debug.Log(layerMask);
-
-                if (Physics.Raycast(mouseRay, out hit, 1000f, layerMask))
-                {
-                    if (EventSystem.current.IsPointerOverGameObject(-1)) return;
-                    
-                    if (DrawLineMarker != null)
-                    {
-                        DrawLine.SetActive(true);
-                        DrawLineMarker.SetActive(true);
-                        DrawLineMarker.transform.position = hit.point;
-
-                        Vector3 line = (DrawLineMarker.transform.position - DrawOrigin.transform.position);
-                        if (LayerMask.GetMask("Ground") == layerMask)
-                        {
-                            DrawLine.transform.localScale = new Vector3(0.25f, line.magnitude * 0.5f, 0.25f);
-                        }
-                        else
-                        {
-                            DrawLine.transform.localScale = new Vector3(0.01f, line.magnitude * 0.5f, 0.01f);
-                        }
-                        DrawLine.transform.position = DrawOrigin.transform.position + 0.5f * line;
-                        DrawLine.transform.up = line;
-                    }
-                }
-                else
-                {
-                    DrawLine.SetActive(false);
-                    if (DrawLineMarker != null) DrawLineMarker.SetActive(false);
-                }
+                float thickness = (LargerMapMarkerList.IndexOf(DrawOrigin) >= 0) ? 0.25f : 0.01f;
+                //Debug.Log(layerMask);
+                DragDrawCast(mouseRay, layerMask, thickness);
+            }
+            if (PlayerTableViewCamera.isActiveAndEnabled)
+            {
+                Ray mouseRay = PlayerTableViewCamera.ScreenPointToRay(Input.mousePosition);
+                int layerMask = LayerMask.GetMask("Holomap");
+                DragDrawCast(mouseRay, layerMask, 0.01f);
             }
         }
     }
 
-    private void DragDrawCast(Ray ray, int layerMask, float thickness)
+    private void DragDrawCast(Ray mouseRay, int layerMask, float thickness)
     {
         RaycastHit hit;
-        if (Physics.Raycast(ray, out hit, 1000f, layerMask))
+        if (Physics.Raycast(mouseRay, out hit, 1000f, layerMask))
         {
             if (EventSystem.current.IsPointerOverGameObject(-1)) return;
-            DrawLine.SetActive(true);
+
             if (DrawLineMarker != null)
             {
+                DrawLine.SetActive(true);
                 DrawLineMarker.SetActive(true);
                 DrawLineMarker.transform.position = hit.point;
 
                 Vector3 line = (DrawLineMarker.transform.position - DrawOrigin.transform.position);
-                if (LayerMask.LayerToName(layerMask).Equals("Ground"))
-                {
-                    DrawLine.transform.localScale = new Vector3(thickness, line.magnitude * 0.5f, thickness);
-                } else
-                {
-                    DrawLine.transform.localScale = new Vector3(thickness, line.magnitude * 0.5f, thickness);
-                }
-                
+                DrawLine.transform.localScale = new Vector3(thickness, line.magnitude * 0.5f, thickness);
                 DrawLine.transform.position = DrawOrigin.transform.position + 0.5f * line;
                 DrawLine.transform.up = line;
             }
@@ -366,35 +258,45 @@ public class PlayerMarkerGenerator : MonoBehaviour
                 if (PlayerCamera.isActiveAndEnabled)
                 {
                     Ray mouseRay = PlayerCamera.ScreenPointToRay(Input.mousePosition);
-                    RaycastHit hit;
 
                     int layerMask = (LargerMapMarkerList.IndexOf(DrawOrigin) >= 0) ? LayerMask.GetMask("Ground") : LayerMask.GetMask("Holomap");
-
-                    if (Physics.Raycast(mouseRay, out hit, 1000f, layerMask))
-                    {
-                        if (EventSystem.current.IsPointerOverGameObject(-1)) return;
-
-                        string DropdownOpionValue = MyDropdownList.options[MyDropdownList.value].text;
-                        if (LayerMask.GetMask("Ground") == layerMask)
-                        {
-                            ASL.ASLHelper.InstantiateASLObject(DropdownOpionValue, hit.point, Quaternion.identity, "", "", InsertLargerMapMarker);
-                        } else
-                        {
-                            Vector3 CenterToMarker = (hit.point - SmallMapCenter) * (LargeMapSize / SmallMapSize);
-                            Vector3 NewPositionOnLargeMap = CenterToMarker + LargerMapCenter;
-
-                            ASL.ASLHelper.InstantiateASLObject(DropdownOpionValue, NewPositionOnLargeMap, Quaternion.identity, "", "", InsertLargerMapMarker);
-                        }
-                        
-                    }
+                    DragDrawFinish(mouseRay, layerMask);
                 }
-                //check if DrawLineMarker is on large map
-                //if yes, instantiate a new marker
-                //will need to refactor to support object pooling
+                if (PlayerTableViewCamera.isActiveAndEnabled)
+                {
+                    Ray mouseRay = PlayerTableViewCamera.ScreenPointToRay(Input.mousePosition);
+                    int layerMask = (LargerMapMarkerList.IndexOf(DrawOrigin) >= 0) ? LayerMask.GetMask("Ground") : LayerMask.GetMask("Holomap");
+                    DragDrawFinish(mouseRay, layerMask);
+                }
+                
 
                 DrawLine.SetActive(false);
                 Destroy(DrawLineMarker);
             }
+        }
+    }
+
+    private void DragDrawFinish(Ray mouseRay, int layerMask)
+    {
+        RaycastHit hit;
+
+        if (Physics.Raycast(mouseRay, out hit, 1000f, layerMask))
+        {
+            if (EventSystem.current.IsPointerOverGameObject(-1)) return;
+
+            string DropdownOpionValue = MyDropdownList.options[MyDropdownList.value].text;
+            if (LayerMask.GetMask("Ground") == layerMask)
+            {
+                ASL.ASLHelper.InstantiateASLObject(DropdownOpionValue, hit.point, Quaternion.identity, "", "", InsertLargerMapMarker);
+            }
+            else
+            {
+                Vector3 CenterToMarker = (hit.point - SmallMapCenter) * (LargeMapSize / SmallMapSize);
+                Vector3 NewPositionOnLargeMap = CenterToMarker + LargerMapCenter;
+
+                ASL.ASLHelper.InstantiateASLObject(DropdownOpionValue, NewPositionOnLargeMap, Quaternion.identity, "", "", InsertLargerMapMarker);
+            }
+
         }
     }
 
@@ -422,6 +324,8 @@ public class PlayerMarkerGenerator : MonoBehaviour
     {
         ASLObjectTrackingSystem.AddObjectToTrack(_myGameObject.GetComponent<ASL.ASLObject>(), _myGameObject.transform);
         int insertNdx = RouteDisplayV2.InsertMarkerAt(generator.DrawOrigin.transform, _myGameObject.transform);
+        //how to grab corresponding marker from tracked markers?
+        Debug.Log(insertNdx);
         if (insertNdx < 0)
         {
             LargerMapMarkerList.Add(_myGameObject);
