@@ -152,12 +152,8 @@ public class PlayerMarkerGenerator : MonoBehaviour
                     }
                     else if (Hit.collider.gameObject.layer == 6 /*&& DrawLineMarker == null*/)  //If we don't hit either map but do hit a marker
                     {
-                        DrawLineMarker = Instantiate(Hit.collider.gameObject) as GameObject;
-                        
-                        Destroy(DrawLineMarker.GetComponent<ASL.ASLObject>());
-                        Destroy(DrawLineMarker.GetComponent<BoxCollider>());
-                        DrawLineMarker.layer = 11;
                         DrawOrigin = Hit.collider.gameObject;
+                        CreateDrawLineMarker(Hit.collider.gameObject);
                     }
                 }
             }
@@ -188,16 +184,22 @@ public class PlayerMarkerGenerator : MonoBehaviour
                     }
                     else if (Hit.collider.gameObject.layer == 6 /*&& DrawLineMarker == null*/)  //If we don't hit either map but do hit a marker
                     {
-                        DrawLineMarker = Instantiate(Hit.collider.gameObject) as GameObject;
-
-                        Destroy(DrawLineMarker.GetComponent<ASL.ASLObject>());
-                        Destroy(DrawLineMarker.GetComponent<BoxCollider>());
-                        DrawLineMarker.layer = 11;
                         DrawOrigin = Hit.collider.gameObject;
+                        CreateDrawLineMarker(Hit.collider.gameObject);
                     }
                 }
             }
         }
+    }
+
+    private void CreateDrawLineMarker(GameObject _g)
+    {
+        DrawLineMarker = Instantiate(_g) as GameObject;
+        if (DrawLineMarker.GetComponent<ASL.ASLObject>() != null) Destroy(DrawLineMarker.GetComponent<ASL.ASLObject>());
+
+        Destroy(DrawLineMarker.GetComponent<ASL.ASLObject>());
+        Destroy(DrawLineMarker.GetComponent<BoxCollider>());
+        DrawLineMarker.layer = 11;
     }
 
     private void WhileClickDown()
