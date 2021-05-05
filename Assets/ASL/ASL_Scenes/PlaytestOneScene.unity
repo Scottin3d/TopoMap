@@ -552,7 +552,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!114 &432528924
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -815,10 +815,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   heightmap: {fileID: 2800000, guid: 54f48e2410f8db04e8fb4ad0b1188cf9, type: 3}
-  mapSize: 10000
+  mapSize: 100
   material: {fileID: 2100000, guid: aa51ed62bd15500438dacc5d81a801e8, type: 2}
   useDefaultMeshHeight: 1
-  meshHeight: 100
+  meshHeight: 10
   meshHieghtCurve:
     serializedVersion: 2
     m_Curve:

@@ -28,6 +28,7 @@ public class PlayerMarkerGenerator : MonoBehaviour
     private GameObject DrawLine;
     private GameObject DrawOrigin;
     private Vector3 HoloDrawOrigin;
+    private float drawTime = 1f;
 
     private bool deleteMode = false;
 
@@ -194,6 +195,8 @@ public class PlayerMarkerGenerator : MonoBehaviour
     {
         if (Input.GetMouseButton(0))
         {
+            drawTime -= Time.deltaTime;
+            if (drawTime < 0f) drawTime = 0f;
             if (PlayerCamera.isActiveAndEnabled)
             {
                 Ray mouseRay = PlayerCamera.ScreenPointToRay(Input.mousePosition);
@@ -202,13 +205,13 @@ public class PlayerMarkerGenerator : MonoBehaviour
                 int layerMask = (LargerMapMarkerList.IndexOf(DrawOrigin) >= 0) ? LayerMask.GetMask("Ground") : LayerMask.GetMask("Holomap");
                 float thickness = (LargerMapMarkerList.IndexOf(DrawOrigin) >= 0) ? 0.25f : 0.01f;
                 //Debug.Log(layerMask);
-                DragDrawCast(mouseRay, layerMask, thickness);
+                if (drawTime <= 0f) DragDrawCast(mouseRay, layerMask, thickness);
             }
             if (PlayerTableViewCamera.isActiveAndEnabled)
             {
                 Ray mouseRay = PlayerTableViewCamera.ScreenPointToRay(Input.mousePosition);
                 int layerMask = LayerMask.GetMask("Holomap");
-                DragDrawCast(mouseRay, layerMask, 0.01f);
+                if (drawTime <= 0f) DragDrawCast(mouseRay, layerMask, 0.01f);
             }
         }
     }
@@ -250,19 +253,20 @@ public class PlayerMarkerGenerator : MonoBehaviour
                     Ray mouseRay = PlayerCamera.ScreenPointToRay(Input.mousePosition);
 
                     int layerMask = (LargerMapMarkerList.IndexOf(DrawOrigin) >= 0) ? LayerMask.GetMask("Ground") : LayerMask.GetMask("Holomap");
-                    DragDrawFinish(mouseRay, layerMask);
+                    if (drawTime <= 0f) DragDrawFinish(mouseRay, layerMask);
                 }
                 if (PlayerTableViewCamera.isActiveAndEnabled)
                 {
                     Ray mouseRay = PlayerTableViewCamera.ScreenPointToRay(Input.mousePosition);
                     int layerMask = (LargerMapMarkerList.IndexOf(DrawOrigin) >= 0) ? LayerMask.GetMask("Ground") : LayerMask.GetMask("Holomap");
-                    DragDrawFinish(mouseRay, layerMask);
+                    if (drawTime <= 0f) DragDrawFinish(mouseRay, layerMask);
                 }
                 
 
                 DrawLine.SetActive(false);
                 Destroy(DrawLineMarker);
             }
+            drawTime = 1f;
         }
     }
 
