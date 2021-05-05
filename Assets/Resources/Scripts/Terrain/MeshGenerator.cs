@@ -45,6 +45,15 @@ public static class MeshGenerator {
                 meshData.vertices[vertexIndex] = new Vector3(xVal, yVal, zVal);
                 meshData.uv[vertexIndex] = new Vector2(x / (float)width, z / (float)height);
 
+                // find world min and max values
+                if (yVal > GenerateMapFromHeightMap.worldMaxHeight) {
+                    GenerateMapFromHeightMap.worldMaxHeight = yVal;
+                }
+
+                if (yVal < GenerateMapFromHeightMap.worldMinHeight) {
+                    GenerateMapFromHeightMap.worldMinHeight = yVal;
+                }
+
                 // check and store edge vertices for later use in smoothing the mesh seams
                 // top
                 if (z == height - 1) {
@@ -107,6 +116,13 @@ public static class MeshGenerator {
                 vertexIndex++;
             }
         }
+
+        Mesh mesh = new Mesh();
+        mesh.vertices = meshData.vertices;
+        mesh.triangles = meshData.triangles;
+        mesh.uv = meshData.uv;
+        mesh.RecalculateNormals();
+        meshData.normals = mesh.normals;
         return meshData;
     }
 }
@@ -115,8 +131,11 @@ public static class MeshGenerator {
 /// MeshData: Stores all of the object data for the terrain chunk mesh.
 /// </summary>
 public class MeshData {
+    public Mesh chunkMesh;
     public int chunkSize;
     public Vector3[] vertices;
+    public Vector3[] normals;
+
     int triangleIndex;
     public int[] triangles;
     public Vector2[] uv;
@@ -130,6 +149,7 @@ public class MeshData {
         chunkSize = meshWidth;
         int size = meshWidth * meshHeight;
         vertices = new Vector3[size];
+        normals = new Vector3[size];
         triangles = new int[(meshWidth - 1) * (meshHeight - 1) * 2 * 3];
         uv = new Vector2[size];
     }
@@ -156,7 +176,12 @@ public class MeshData {
         mesh.vertices = vertices;
         mesh.triangles = triangles;
         mesh.uv = uv;
-        mesh.RecalculateNormals();
+        mesh.normals = normals;
+        chunkMesh = mesh;
         return mesh;
+    }
+
+    public void RecalulateNormals() {
+        chunkMesh.RecalculateNormals();
     }
 }

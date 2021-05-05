@@ -36,7 +36,7 @@ public class ASLDemoPlayer : MonoBehaviour {
     }
 
     private void Update() {
-        miniCam.transform.position = _localPlayerObject.transform.position + 15f * Vector3.up;
+        //miniCam.transform.position = _localPlayerObject.transform.position + 15f * Vector3.up;
         if (Input.GetKeyDown(KeyCode.Alpha1)) {
             ASLHelper.InstantiateASLObject(PrimitiveType.Capsule, _localPlayerObject.transform.position, Quaternion.identity, null, null, OnPrimitiveCreate);
         
