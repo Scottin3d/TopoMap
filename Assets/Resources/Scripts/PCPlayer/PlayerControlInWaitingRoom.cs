@@ -11,6 +11,7 @@ public class PlayerControlInWaitingRoom : MonoBehaviour
 
     void Awake()
     {
+        this.transform.position = new Vector3(-11, 29.4f, -8100);
         PlayerController = this.GetComponent<CharacterController>();
     }
 
