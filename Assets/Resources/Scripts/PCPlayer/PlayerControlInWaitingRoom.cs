@@ -15,7 +15,7 @@ public class PlayerControlInWaitingRoom : MonoBehaviour
         PlayerController = this.GetComponent<CharacterController>();
         PlayerController.enabled = false;
         this.transform.position = new Vector3(0, 43, -810);
-        WalkSpeed = 5;
+        WalkSpeed = 6;
         JumpSpeed = 3;
         PlayerController.enabled = true;
     }
@@ -23,6 +23,7 @@ public class PlayerControlInWaitingRoom : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+        ChangeWalkSpeed();
         ChangePosition();
     }
 
@@ -53,6 +54,15 @@ public class PlayerControlInWaitingRoom : MonoBehaviour
 
     private void ChangeWalkSpeed()
     {
-
+        if (Input.GetKeyDown(KeyCode.LeftShift))
+        {
+            WalkSpeed = 12;
+            JumpSpeed = 6;
+        }
+        if (Input.GetKeyUp(KeyCode.LeftShift))
+        {
+            WalkSpeed = 6;
+            JumpSpeed = 3;
+        }
     }
 }
