@@ -1110,7 +1110,6 @@ MonoBehaviour:
   smallMap: {fileID: 468696375}
   updatesPerSecond: 10
   playerMaker: {fileID: 1375720642727765894, guid: e10b86d10312ae0408de2cd61b96943a, type: 3}
-  mapDisplay: {fileID: 994805318}
 --- !u!1 &432528923
 GameObject:
   m_ObjectHideFlags: 0
@@ -1129,7 +1128,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!114 &432528924
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1374,8 +1373,7 @@ Transform:
   m_LocalRotation: {x: -0, y: 1, z: -0, w: 0}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
-  m_Children:
-  - {fileID: 1743245342}
+  m_Children: []
   m_Father: {fileID: 0}
   m_RootOrder: 4
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -5961,6 +5959,30 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 91443028, guid: 6c21f35d451268d4da0883a9980a2721, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: -34.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 91443028, guid: 6c21f35d451268d4da0883a9980a2721, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 38.448
+      objectReference: {fileID: 0}
+    - target: {fileID: 91443028, guid: 6c21f35d451268d4da0883a9980a2721, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: -838.329
+      objectReference: {fileID: 0}
+    - target: {fileID: 6897538588392656317, guid: 6c21f35d451268d4da0883a9980a2721, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: -34.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 6897538588392656317, guid: 6c21f35d451268d4da0883a9980a2721, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 38.448
+      objectReference: {fileID: 0}
+    - target: {fileID: 6897538588392656317, guid: 6c21f35d451268d4da0883a9980a2721, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: -838.329
+      objectReference: {fileID: 0}
     - target: {fileID: 6897538589646759656, guid: 6c21f35d451268d4da0883a9980a2721, type: 3}
       propertyPath: m_Name
       value: VRController
