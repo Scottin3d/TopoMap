@@ -4,7 +4,11 @@ using UnityEngine;
 using ASL;
 
 
-public class ObjectList<T> {
+/// <summary>
+/// Generic object list class that has expanded functionality for adding and removing.
+/// </summary>
+/// <typeparam name="T">The list type</typeparam>
+public class ObjectList<T> : List<T>{
     public static int listCount = 0;
     string listName = null;
 
@@ -52,6 +56,10 @@ public class ObjectList<T> {
     }
 }
 
+/// <summary>
+/// A more robust way to track network objects within the scene.
+/// In the process of creating a generic version for better implementation.
+/// </summary>
 public static class ASLObjectTrackingSystem {
     public static event Action<ASLObject> playerAddedEvent;
     public static event Action<ASLObject> playerRemovedEvent;
@@ -62,11 +70,18 @@ public static class ASLObjectTrackingSystem {
     private static List<ASLObject> playersInScene = new List<ASLObject>();
     private static List<ASLObject> objectsInScene = new List<ASLObject>();
 
+    // generic testing
+    /*
     private static ObjectList<ASLObject> playerList = new ObjectList<ASLObject>("PlayersInScene");
     public static ObjectList<ASLObject> PlayerList { get => playerList; set => playerList = value; }
+    */
 
-
-    //==Player==
+    //==Player List==
+    /// <summary>
+    /// Add a player ASLObject to track.
+    /// </summary>
+    /// <param name="playerToTrack">The ASLObject of the player to be tracked.</param>
+    /// <returns>Bool if added or not.</returns>
     public static bool AddPlayerToTrack(ASLObject playerToTrack) {
         // try to emplace
         if (playersInScene.Contains(playerToTrack)) {
@@ -76,13 +91,15 @@ public static class ASLObjectTrackingSystem {
             playerAddedEvent?.Invoke(playerToTrack);
             return true;
         }
-
-
     }
 
-
+    /// <summary>
+    /// Remove a player ASLObject from being tracked.
+    /// </summary>
+    /// <param name="playerToRemove">The ASLObject of the player to be removed.</param>
+    /// <returns>Bool if removed or not.</returns>
     public static bool RemovePlayerToTrack(ASLObject playerToRemove) {
-        // try to emplace
+        // try to remove
         if (playersInScene.Contains(playerToRemove)) {
             playersInScene.Remove(playerToRemove);
             playerRemovedEvent?.Invoke(playerToRemove);
@@ -95,7 +112,7 @@ public static class ASLObjectTrackingSystem {
     /// <summary>
     /// Deep copy of playersInScene and return a new list.
     /// </summary>
-    /// <returns></returns>
+    /// <returns>A list of players tracked in the scene.</returns>
     public static List<Transform> GetPlayers() {
         List<Transform> players = new List<Transform>();
         foreach (var obj in playersInScene) {
@@ -104,7 +121,12 @@ public static class ASLObjectTrackingSystem {
         return players;
     }
 
-    //---Objects--------------------------------------------------
+    //==Object List==
+    /// <summary>
+    /// Add an object ASLObject to be track.
+    /// </summary>
+    /// <param name="objectToTrack">The ASLObject of the object to be tracked.</param>
+    /// <returns>Bool if the object was added.</returns>
     public static bool AddObjectToTrack(ASLObject objectToTrack) {
         if (objectsInScene.Contains(objectToTrack)) {
             return false;
@@ -115,6 +137,11 @@ public static class ASLObjectTrackingSystem {
         }
     }
 
+    /// <summary>
+    /// Remove an object ASLObject from being tracked.
+    /// </summary>
+    /// <param name="objectToRemove">The ASLObject of the object to be removed.</param>
+    /// <returns>Bool if object removed.</returns>
     public static bool RemoveObjectToTrack(ASLObject objectToRemove)
     {
         if (objectsInScene.Contains(objectToRemove)) {
@@ -125,6 +152,11 @@ public static class ASLObjectTrackingSystem {
             return false;
         }
     }
+
+    /// <summary>
+    /// Get a list of objects being tracked in scene.
+    /// </summary>
+    /// <returns>A deep copy of the objects tracked in the scene.</returns>
     public static List<Transform> GetObjects() {
         List<Transform> objects = new List<Transform>();
         /*

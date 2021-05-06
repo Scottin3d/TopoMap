@@ -38,7 +38,7 @@ RenderSettings:
   m_ReflectionIntensity: 1
   m_CustomReflection: {fileID: 0}
   m_Sun: {fileID: 2138677392}
-  m_IndirectSpecularColor: {r: 0.17767137, g: 0.21596217, b: 0.26740775, a: 1}
+  m_IndirectSpecularColor: {r: 0.17937289, g: 0.22459763, b: 0.30627322, a: 1}
   m_UseRadianceAmbientProbe: 0
 --- !u!157 &3
 LightmapSettings:
@@ -98,7 +98,7 @@ LightmapSettings:
     m_TrainingDataDestination: TrainingData
     m_LightProbeSampleCountMultiplier: 4
   m_LightingDataAsset: {fileID: 0}
-  m_LightingSettings: {fileID: 4890085278179872738, guid: 6e42da10f74caec44a515da18efd245b, type: 2}
+  m_LightingSettings: {fileID: 4890085278179872738, guid: 8baeb51dfd7f4834a9010886b2bad755, type: 2}
 --- !u!196 &4
 NavMeshSettings:
   serializedVersion: 2
@@ -277,7 +277,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8a1a2b3aef5961748af1b57380ce474a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  heightmap: {fileID: 2800000, guid: da32138c6e3c58948a5064d344011bc8, type: 3}
+  heightmap: {fileID: 2800000, guid: a85da2b4f199d874a94a9e2812338b8f, type: 3}
   mapSize: 5
   material: {fileID: 2100000, guid: 1bd258dd9c1c6f7469ff3cd2c6bfa65f, type: 2}
   useDefaultMeshHeight: 0
@@ -373,11 +373,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8a1a2b3aef5961748af1b57380ce474a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  heightmap: {fileID: 2800000, guid: da32138c6e3c58948a5064d344011bc8, type: 3}
-  mapSize: 100
+  heightmap: {fileID: 2800000, guid: a85da2b4f199d874a94a9e2812338b8f, type: 3}
+  mapSize: 1000
   material: {fileID: 2100000, guid: aa51ed62bd15500438dacc5d81a801e8, type: 2}
   useDefaultMeshHeight: 0
-  meshHeight: 7
+  meshHeight: 75
   meshHieghtCurve:
     serializedVersion: 2
     m_Curve:
@@ -1082,13 +1082,13 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2138677391}
-  m_LocalRotation: {x: -0.27418196, y: -0.46340707, z: 0.6030309, w: 0.58858466}
+  m_LocalRotation: {x: 0.82590806, y: -0.12225414, z: 0.33537358, w: 0.4364107}
   m_LocalPosition: {x: 0.24, y: 3, z: 4.18}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 0}
   m_RootOrder: 0
-  m_LocalEulerAnglesHint: {x: 13.659, y: -64.381, z: 82.766}
+  m_LocalEulerAnglesHint: {x: 53.405, y: 131.387, z: 171.241}
 --- !u!1001 &8251294994742214579
 PrefabInstance:
   m_ObjectHideFlags: 0

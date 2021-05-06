@@ -133,7 +133,7 @@ public class RouteDisplayV2 : MonoBehaviour
                     curPath.transform.up = dir;
                     DrawRoute(curPath, pos, scale);
 
-                    int scaleFactor = CalcSmallScale();
+                    float scaleFactor = CalcSmallScale();
                     smPath.transform.up = dir;
                     if (MapDisplay != null)
                     {
@@ -181,7 +181,7 @@ public class RouteDisplayV2 : MonoBehaviour
         
     }
 
-    private int CalcSmallScale()
+    private float CalcSmallScale()
     {
         if (TryGetComponent(out MarkerDisplay _md))
         {

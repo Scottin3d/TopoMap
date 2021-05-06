@@ -85,7 +85,7 @@ public class MinimapDisplay : MonoBehaviour
                     routeConnectPool[i].GetComponent<ASLObject>().SendAndSetLocalRotation(routeConnectPool[i].transform.localRotation);
                 });
 
-                int scaleFactor = CalcSmallScale();
+                float scaleFactor = CalcSmallScale();
                 smallConnectPool[i].transform.up = nextDir;
                 if (MapDisplay != null)
                 {
@@ -125,7 +125,7 @@ public class MinimapDisplay : MonoBehaviour
         }
     }
 
-    private int CalcSmallScale()
+    private float CalcSmallScale()
     {
         if (TryGetComponent(out MarkerDisplay _md))
         {
