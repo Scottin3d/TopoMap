@@ -1,125 +1,162 @@
-using System.Collections;
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 using ASL;
 
-public static class ASLObjectTrackingSystem { 
 
-    private static Dictionary<ASLObject, Transform> ASLObjectsInScene = new Dictionary<ASLObject, Transform>();
-    private static Dictionary<ASLObject, Transform> ASLPlayersInScene = new Dictionary<ASLObject, Transform>();
+/// <summary>
+/// Generic object list class that has expanded functionality for adding and removing.
+/// </summary>
+/// <typeparam name="T">The list type</typeparam>
+public class ObjectList<T> : List<T>{
+    public static int listCount = 0;
+    string listName = null;
 
-    private static int numberOfPlayers = 0;
-    public static int NumberOfPlayers { get => numberOfPlayers; set => numberOfPlayers = value; }
-    public static int NumberOfObjects { get => numberOfObjects; set => numberOfObjects = value; }
+    private  List<T> objectList;
+    public event Action<T> AddedEvent;
+    public event Action<T> RemovedEvent;
 
-    private static int numberOfObjects = 0;
-    public static bool AddPlayerToTrack(ASLObject playerToTrack, Transform playerTransform) {
+    public ObjectList(string newListName = null) {
+        listName = newListName;
+        if (listName == null) {
+            listName = "New List" + listCount.ToString("D3");
+        }
+
+        objectList = new List<T>();
+    }
+
+    public  bool AddToTrack(T toTrack) {
         // try to emplace
-        if (ASLPlayersInScene.ContainsKey(playerToTrack)) {
+        if (objectList.Contains(toTrack)) {
             return false;
-
-            // add if not
         } else {
-            ASLPlayersInScene.Add(playerToTrack, playerTransform);
-            numberOfPlayers++;
+            objectList.Add(toTrack);
+            AddedEvent?.Invoke(toTrack);
             return true;
         }
     }
 
+    public  bool RemoveToTrack(T toRemove) {
+        // try to emplace
+        if (objectList.Contains(toRemove)) {
+            objectList.Remove(toRemove);
+            RemovedEvent?.Invoke(toRemove);
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    public  List<T> GetList() {
+        List<T> list = new List<T>();
+        foreach (var obj in objectList) {
+            list.Add(obj);
+        }
+        return list;
+    }
+}
+
+/// <summary>
+/// A more robust way to track network objects within the scene.
+/// In the process of creating a generic version for better implementation.
+/// </summary>
+public static class ASLObjectTrackingSystem {
+    public static event Action<ASLObject> playerAddedEvent;
+    public static event Action<ASLObject> playerRemovedEvent;
+    public static event Action<ASLObject> objectAddedEvent;
+    public static event Action<ASLObject> objectRemovedEvent;
+
+
+    private static List<ASLObject> playersInScene = new List<ASLObject>();
+    private static List<ASLObject> objectsInScene = new List<ASLObject>();
+
+    // generic testing
+    /*
+    private static ObjectList<ASLObject> playerList = new ObjectList<ASLObject>("PlayersInScene");
+    public static ObjectList<ASLObject> PlayerList { get => playerList; set => playerList = value; }
+    */
+
+    //==Player List==
+    /// <summary>
+    /// Add a player ASLObject to track.
+    /// </summary>
+    /// <param name="playerToTrack">The ASLObject of the player to be tracked.</param>
+    /// <returns>Bool if added or not.</returns>
+    public static bool AddPlayerToTrack(ASLObject playerToTrack) {
+        // try to emplace
+        if (playersInScene.Contains(playerToTrack)) {
+            return false;
+        } else {
+            playersInScene.Add(playerToTrack);
+            playerAddedEvent?.Invoke(playerToTrack);
+            return true;
+        }
+    }
+
+    /// <summary>
+    /// Remove a player ASLObject from being tracked.
+    /// </summary>
+    /// <param name="playerToRemove">The ASLObject of the player to be removed.</param>
+    /// <returns>Bool if removed or not.</returns>
     public static bool RemovePlayerToTrack(ASLObject playerToRemove) {
-        // try to emplace
-        if (ASLPlayersInScene.ContainsKey(playerToRemove)) {
-            ASLPlayersInScene.Remove(playerToRemove);
-            numberOfPlayers = (numberOfPlayers - 1 >= 0) ? numberOfPlayers-- : 0;
+        // try to remove
+        if (playersInScene.Contains(playerToRemove)) {
+            playersInScene.Remove(playerToRemove);
+            playerRemovedEvent?.Invoke(playerToRemove);
             return true;
-
-            // add if not
         } else {
             return false;
         }
     }
+
+    /// <summary>
+    /// Deep copy of playersInScene and return a new list.
+    /// </summary>
+    /// <returns>A list of players tracked in the scene.</returns>
     public static List<Transform> GetPlayers() {
         List<Transform> players = new List<Transform>();
-        foreach (var pair in ASLPlayersInScene) {
-            players.Add(pair.Value);
+        foreach (var obj in playersInScene) {
+            players.Add(obj.transform);
         }
         return players;
     }
 
-    public static Transform GetPlayerTransform(ASLObject playerToTrack) {
-        if (ASLPlayersInScene.ContainsKey(playerToTrack)) {
-            return ASLPlayersInScene[playerToTrack];
-        } else {
-            return null;
-        }
-
-    }
-
-    //---Objects--------------------------------------------------
-
-    public static void UpdatePlayerTransform(ASLObject playerToTrack, Transform playerTransform) {
-        // try to emplace
-        if (ASLPlayersInScene.ContainsKey(playerToTrack)) {
-            ASLPlayersInScene[playerToTrack] = playerTransform;
-            return;
-
-            // add if not
-        } else {
-            AddPlayerToTrack(playerToTrack, playerTransform);
-            return;
-        }
-    }
-
-    public static bool AddObjectToTrack(ASLObject objectToTrack, Transform objectTransform) {
-        // try to emplace
-        if (ASLObjectsInScene.ContainsKey(objectToTrack)) {
+    //==Object List==
+    /// <summary>
+    /// Add an object ASLObject to be track.
+    /// </summary>
+    /// <param name="objectToTrack">The ASLObject of the object to be tracked.</param>
+    /// <returns>Bool if the object was added.</returns>
+    public static bool AddObjectToTrack(ASLObject objectToTrack) {
+        if (objectsInScene.Contains(objectToTrack)) {
             return false;
-
-        // add if not
         } else {
-            ASLObjectsInScene.Add(objectToTrack, objectTransform);
+            objectsInScene.Add(objectToTrack);
+            objectAddedEvent?.Invoke(objectToTrack);
             return true;
         }
     }
+
+    /// <summary>
+    /// Remove an object ASLObject from being tracked.
+    /// </summary>
+    /// <param name="objectToRemove">The ASLObject of the object to be removed.</param>
+    /// <returns>Bool if object removed.</returns>
     public static bool RemoveObjectToTrack(ASLObject objectToRemove)
     {
-        // try to emplace
-        if (ASLObjectsInScene.ContainsKey(objectToRemove))
-        {
-            ASLObjectsInScene.Remove(objectToRemove);
-            numberOfObjects = (numberOfObjects - 1 >= 0) ? numberOfObjects-- : 0;
+        if (objectsInScene.Contains(objectToRemove)) {
+            objectsInScene.Remove(objectToRemove);
+            objectRemovedEvent?.Invoke(objectToRemove);
             return true;
-
-            // add if not
-        }
-        else
-        {
+        } else {
             return false;
         }
     }
 
-    public static void UpdateObjectTransform(ASLObject objectToTrack, Transform objectTransform) {
-        // try to emplace
-        if (ASLObjectsInScene.ContainsKey(objectToTrack)) {
-            ASLObjectsInScene[objectToTrack] = objectTransform;
-            return;
-
-            // add if not
-        } else {
-            AddObjectToTrack(objectToTrack, objectTransform);
-            return;
-        }
-    }
-
-    // object
-    public static Transform GetObjectTransform(ASLObject objectToTrack) {
-        if (ASLObjectsInScene.ContainsKey(objectToTrack)) {
-            return ASLObjectsInScene[objectToTrack];
-        } else {
-            return null;
-        }
-        
-    }
+    /// <summary>
+    /// Get a list of objects being tracked in scene.
+    /// </summary>
+    /// <returns>A deep copy of the objects tracked in the scene.</returns>
     public static List<Transform> GetObjects() {
         List<Transform> objects = new List<Transform>();
         /*
@@ -127,8 +164,8 @@ public static class ASLObjectTrackingSystem {
             players.Add(pair.Value.transform);
         }
         */
-        foreach (var pair in ASLObjectsInScene) {
-            objects.Add(pair.Value);
+        foreach (var obj in objectsInScene) {
+            objects.Add(obj.transform);
         }
         return objects;
     }

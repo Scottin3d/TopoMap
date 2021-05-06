@@ -39,7 +39,9 @@ public class ASLVRCameraTracking : MonoBehaviour
         {
             yield return new WaitForSeconds(0.1f);
         }
-        ASLObjectTrackingSystem.AddPlayerToTrack(VRCameraToTrack.GetComponent<ASLObject>(), VRCameraToTrack.transform);
+
+        ASLObjectTrackingSystem.AddPlayerToTrack(VRCameraToTrack.GetComponent<ASLObject>());
+
         VRCameraToTrack.GetComponent<Renderer>().enabled = false;
         while (true)
         {
@@ -49,7 +51,7 @@ public class ASLVRCameraTracking : MonoBehaviour
                 VRCameraToTrack.GetComponent<ASLObject>().SendAndSetClaim(() => { 
                     VRCameraToTrack.GetComponent<ASLObject>().SendAndSetLocalPosition(LocalVRCamera.transform.position); 
                     VRCameraToTrack.GetComponent<ASLObject>().SendAndSetLocalRotation(LocalVRCamera.transform.rotation);
-                    ASLObjectTrackingSystem.UpdatePlayerTransform(VRCameraToTrack.GetComponent<ASLObject>(), VRCameraToTrack.transform);
+                    //ASLObjectTrackingSystem.UpdatePlayerTransform(VRCameraToTrack.GetComponent<ASLObject>(), VRCameraToTrack.transform);
                 });
             }
             else

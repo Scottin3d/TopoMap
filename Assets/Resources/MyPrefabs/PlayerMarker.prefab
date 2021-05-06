@@ -56,7 +56,6 @@ GameObject:
   - component: {fileID: 1375720643529287364}
   - component: {fileID: 1375720643529287387}
   - component: {fileID: 1375720643529287386}
-  - component: {fileID: 1375720643529287385}
   m_Layer: 6
   m_Name: MarkerVisual
   m_TagString: Untagged
@@ -136,7 +135,7 @@ MeshCollider:
   m_GameObject: {fileID: 1375720643529287384}
   m_Material: {fileID: 0}
   m_IsTrigger: 0
-  m_Enabled: 0
+  m_Enabled: 1
   serializedVersion: 4
   m_Convex: 0
   m_CookingOptions: 30

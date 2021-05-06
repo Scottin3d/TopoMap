@@ -14,6 +14,8 @@ TagManager:
   - SpawnLargerMap
   - A*
   - PathCam
+  - Marker
+  - Object
   layers:
   - Default
   - TransparentFX
@@ -27,8 +29,8 @@ TagManager:
   - Ground
   - Path
   - IgnoreMinimap
-  - 
-  - 
+  - Holomap
+  - RouteMarkers
   - 
   - 
   - 

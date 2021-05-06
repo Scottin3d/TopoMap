@@ -26,7 +26,6 @@ public partial class GenerateMapFromHeightMap : MonoBehaviour {
     [Tooltip("This material will be instances on each chunk.")]
     public Material material = null;
     public bool useDefaultMeshHeight = true;
-    [Range(0f, 100f)]
     public float meshHeight = 1f;
     public AnimationCurve meshHieghtCurve = new AnimationCurve(new Keyframe(0, 0), new Keyframe(1, 1));
     public const int mapChunkSize = 241;
@@ -187,6 +186,8 @@ public partial class GenerateMapFromHeightMap : MonoBehaviour {
         // 4. set material min max values
         material.SetFloat("_WorldMax", worldMaxHeight);
         material.SetFloat("_WorldMin", worldMinHeight);
+        material.SetFloat("_NumChunks", numberOfChunks);
+
 
 
         row = 0;

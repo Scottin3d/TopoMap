@@ -17,9 +17,11 @@ public class PlayerControlInWaitingRoom : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        this.transform.position = new Vector3(8, 30, 8);
+        PlayerController.enabled = false;
+        this.transform.position = new Vector3(-11, 43, -810);
         WalkSpeed = 5;
         JumpSpeed = 3;
+        PlayerController.enabled = true;
     }
 
     // Update is called once per frame

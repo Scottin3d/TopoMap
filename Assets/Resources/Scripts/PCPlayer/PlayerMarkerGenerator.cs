@@ -4,7 +4,9 @@ using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.EventSystems;
 
-public class PlayerMakerGenerator : MonoBehaviour { 
+public class PlayerMarkerGenerator : MonoBehaviour
+{
+    private static PlayerMarkerGenerator generator;
     private Camera PlayerCamera;
     private Camera PlayerTableViewCamera;
 
@@ -25,10 +27,14 @@ public class PlayerMakerGenerator : MonoBehaviour {
     private GameObject DrawLineMarker;
     private GameObject DrawLine;
     private GameObject DrawOrigin;
+    private Vector3 HoloDrawOrigin;
+    private float drawTime = 1f;
 
     private bool deleteMode = false;
 
-    void Awake() {
+    void Awake()
+    {
+        generator = this;
         //Find all Camera and MiniMap Display
         PlayerCamera = GameObject.Find("PCHandler/Player").GetComponentInChildren<Camera>();
         PlayerTableViewCamera = GameObject.Find("PCHandler/PlayerTopViewCamera").GetComponentInChildren<Camera>();
@@ -41,6 +47,7 @@ public class PlayerMakerGenerator : MonoBehaviour {
         LargeMapSize = LargerMapGenerator.GetComponent<GenerateMapFromHeightMap>().mapSize;
         SmallMapSize = SmallMapGenerator.GetComponent<GenerateMapFromHeightMap>().mapSize;
         LocalProjectMarker = Instantiate(Resources.Load("MyPrefabs/PlayerMarker") as GameObject);
+        Destroy(LocalProjectMarker.GetComponent<BoxCollider>());
         LocalProjectMarker.SetActive(false);
 
         DrawLine = GameObject.CreatePrimitive(PrimitiveType.Cylinder);
@@ -137,12 +144,8 @@ public class PlayerMakerGenerator : MonoBehaviour {
                     }
                     else if (Hit.collider.gameObject.layer == 6 /*&& DrawLineMarker == null*/)  //If we don't hit either map but do hit a marker
                     {
-                        DrawLineMarker = Instantiate(Hit.collider.gameObject) as GameObject;
-                        
-                        Destroy(DrawLineMarker.GetComponent<ASL.ASLObject>());
-                        Destroy(DrawLineMarker.GetComponent<BoxCollider>());
-                        DrawLineMarker.layer = 11;
                         DrawOrigin = Hit.collider.gameObject;
+                        CreateDrawLineMarker(Hit.collider.gameObject);
                     }
                 }
             }
@@ -161,52 +164,81 @@ public class PlayerMakerGenerator : MonoBehaviour {
                         {
                             DropdownOpionValue = "PlayerRouteMarker";
                         }
-
+                        //ASL.ASLHelper.InstantiateASLObject(DropdownOpionValue, Hit.point, Quaternion.identity, "", "", GetSmallMapMarker);*/
                         Vector3 CenterToMarker = (Hit.point - SmallMapCenter) * (LargeMapSize / SmallMapSize);
                         Vector3 NewPositionOnLargeMap = CenterToMarker + LargerMapCenter;
+
                         if (Input.GetKey(KeyCode.LeftShift)) ASL.ASLHelper.InstantiateASLObject(DropdownOpionValue, NewPositionOnLargeMap, Quaternion.identity, "", "", GetLargerMapMarker);
-
-                        //ASL.ASLHelper.InstantiateASLObject(DropdownOpionValue, Hit.point, Quaternion.identity, "", "", GetSmallMapMarker);
-
-                        //ASL.ASLHelper.InstantiateASLObject("PlayerMarker", Hit.point, Quaternion.identity, "", "", GetSmallMapMarker);
                         //GenerateMarkerOnLargerMap(Hit.point);
+                    }
+                    else if (Hit.collider.gameObject.layer == 6 /*&& DrawLineMarker == null*/)  //If we don't hit either map but do hit a marker
+                    {
+                        DrawOrigin = Hit.collider.gameObject;
+                        CreateDrawLineMarker(Hit.collider.gameObject);
                     }
                 }
             }
         }
     }
 
+    private void CreateDrawLineMarker(GameObject _g)
+    {
+        DrawLineMarker = Instantiate(_g) as GameObject;
+        if (DrawLineMarker.GetComponent<ASL.ASLObject>() != null) Destroy(DrawLineMarker.GetComponent<ASL.ASLObject>());
+
+        Destroy(DrawLineMarker.GetComponent<ASL.ASLObject>());
+        Destroy(DrawLineMarker.GetComponent<BoxCollider>());
+        DrawLineMarker.layer = 11;
+    }
+
     private void WhileClickDown()
     {
         if (Input.GetMouseButton(0))
         {
-            if(PlayerCamera.isActiveAndEnabled)
+            drawTime -= Time.deltaTime;
+            if (drawTime < 0f) drawTime = 0f;
+            if (PlayerCamera.isActiveAndEnabled)
             {
                 Ray mouseRay = PlayerCamera.ScreenPointToRay(Input.mousePosition);
-                RaycastHit hit;
+                //RaycastHit hit;
 
-                int layerMask = LayerMask.GetMask("Ground");
+                int layerMask = (LargerMapMarkerList.IndexOf(DrawOrigin) >= 0) ? LayerMask.GetMask("Ground") : LayerMask.GetMask("Holomap");
+                float thickness = (LargerMapMarkerList.IndexOf(DrawOrigin) >= 0) ? 0.25f : 0.01f;
                 //Debug.Log(layerMask);
-
-                if (Physics.Raycast(mouseRay, out hit, 1000f, layerMask))
-                {
-                    if (EventSystem.current.IsPointerOverGameObject(-1)) return;
-                    DrawLine.SetActive(true);
-                    if (DrawLineMarker != null) {
-                        DrawLineMarker.SetActive(true);
-                        DrawLineMarker.transform.position = hit.point;
-
-                        Vector3 line = (DrawLineMarker.transform.position - DrawOrigin.transform.position);
-                        DrawLine.transform.localScale = new Vector3(0.25f, line.magnitude * 0.5f, 0.25f);
-                        DrawLine.transform.position = DrawOrigin.transform.position + 0.5f * line;
-                        DrawLine.transform.up = line;
-                    }
-                } else
-                {
-                    DrawLine.SetActive(false);
-                    if (DrawLineMarker != null) DrawLineMarker.SetActive(false);
-                }
+                if (drawTime <= 0f) DragDrawCast(mouseRay, layerMask, thickness);
             }
+            if (PlayerTableViewCamera.isActiveAndEnabled)
+            {
+                Ray mouseRay = PlayerTableViewCamera.ScreenPointToRay(Input.mousePosition);
+                int layerMask = LayerMask.GetMask("Holomap");
+                if (drawTime <= 0f) DragDrawCast(mouseRay, layerMask, 0.01f);
+            }
+        }
+    }
+
+    private void DragDrawCast(Ray mouseRay, int layerMask, float thickness)
+    {
+        RaycastHit hit;
+        if (Physics.Raycast(mouseRay, out hit, 1000f, layerMask))
+        {
+            if (EventSystem.current.IsPointerOverGameObject(-1)) return;
+
+            if (DrawLineMarker != null)
+            {
+                DrawLine.SetActive(true);
+                DrawLineMarker.SetActive(true);
+                DrawLineMarker.transform.position = hit.point;
+
+                Vector3 line = (DrawLineMarker.transform.position - DrawOrigin.transform.position);
+                DrawLine.transform.localScale = new Vector3(thickness, line.magnitude * 0.5f, thickness);
+                DrawLine.transform.position = DrawOrigin.transform.position + 0.5f * line;
+                DrawLine.transform.up = line;
+            }
+        }
+        else
+        {
+            DrawLine.SetActive(false);
+            if (DrawLineMarker != null) DrawLineMarker.SetActive(false);
         }
     }
 
@@ -219,40 +251,82 @@ public class PlayerMakerGenerator : MonoBehaviour {
                 if (PlayerCamera.isActiveAndEnabled)
                 {
                     Ray mouseRay = PlayerCamera.ScreenPointToRay(Input.mousePosition);
-                    RaycastHit hit;
 
-                    int layerMask = LayerMask.GetMask("Ground");
-
-                    if (Physics.Raycast(mouseRay, out hit, 1000f, layerMask))
-                    {
-                        if (EventSystem.current.IsPointerOverGameObject(-1)) return;
-
-                        string DropdownOpionValue = MyDropdownList.options[MyDropdownList.value].text;
-                        ASL.ASLHelper.InstantiateASLObject(DropdownOpionValue, hit.point, Quaternion.identity, "", "", GetLargerMapMarker);
-                    }
+                    int layerMask = (LargerMapMarkerList.IndexOf(DrawOrigin) >= 0) ? LayerMask.GetMask("Ground") : LayerMask.GetMask("Holomap");
+                    if (drawTime <= 0f) DragDrawFinish(mouseRay, layerMask);
                 }
-                //check if DrawLineMarker is on large map
-                //if yes, instantiate a new marker
-                //will need to refactor to support object pooling
+                if (PlayerTableViewCamera.isActiveAndEnabled)
+                {
+                    Ray mouseRay = PlayerTableViewCamera.ScreenPointToRay(Input.mousePosition);
+                    int layerMask = (LargerMapMarkerList.IndexOf(DrawOrigin) >= 0) ? LayerMask.GetMask("Ground") : LayerMask.GetMask("Holomap");
+                    if (drawTime <= 0f) DragDrawFinish(mouseRay, layerMask);
+                }
+                
 
                 DrawLine.SetActive(false);
                 Destroy(DrawLineMarker);
             }
+            drawTime = 1f;
         }
     }
 
-    private static void GetSmallMapMarker(GameObject _myGameObject) {
-        ASLObjectTrackingSystem.AddObjectToTrack(_myGameObject.GetComponent<ASL.ASLObject>(), _myGameObject.transform);
+    private void DragDrawFinish(Ray mouseRay, int layerMask)
+    {
+        RaycastHit hit;
+
+        if (Physics.Raycast(mouseRay, out hit, 1000f, layerMask))
+        {
+            if (EventSystem.current.IsPointerOverGameObject(-1)) return;
+
+            string DropdownOpionValue = MyDropdownList.options[MyDropdownList.value].text;
+            if (LayerMask.GetMask("Ground") == layerMask)
+            {
+                ASL.ASLHelper.InstantiateASLObject(DropdownOpionValue, hit.point, Quaternion.identity, "", "", InsertLargerMapMarker);
+            }
+            else
+            {
+                Vector3 CenterToMarker = (hit.point - SmallMapCenter) * (LargeMapSize / SmallMapSize);
+                Vector3 NewPositionOnLargeMap = CenterToMarker + LargerMapCenter;
+
+                ASL.ASLHelper.InstantiateASLObject(DropdownOpionValue, NewPositionOnLargeMap, Quaternion.identity, "", "", InsertLargerMapMarker);
+            }
+
+        }
+    }
+
+    private void SpawnRegularMarker(Vector3 HitPoint)
+    {
+
+    }
+
+    private static void GetSmallMapMarker(GameObject _myGameObject)
+    {
+        ASLObjectTrackingSystem.AddObjectToTrack(_myGameObject.GetComponent<ASL.ASLObject>());
         RouteDisplayV2.AddRouteMarker(_myGameObject.transform);
         SmallMapMarkerList.Add(_myGameObject);
     }
 
     //Add the large map marker into the list and add it into ASLObjectTrackingSystem
     private static void GetLargerMapMarker(GameObject _myGameObject) {
-        ASLObjectTrackingSystem.AddObjectToTrack(_myGameObject.GetComponent<ASL.ASLObject>(), _myGameObject.transform);
+        ASLObjectTrackingSystem.AddObjectToTrack(_myGameObject.GetComponent<ASL.ASLObject>());
         //MiniMapDisplayObject.GetComponent<MinimapDisplay>().AddRouteMarker(_myGameObject.transform.position);
         RouteDisplayV2.AddRouteMarker(_myGameObject.transform);
         LargerMapMarkerList.Add(_myGameObject);
+    }
+
+    private static void InsertLargerMapMarker(GameObject _myGameObject)
+    {
+        ASLObjectTrackingSystem.AddObjectToTrack(_myGameObject.GetComponent<ASL.ASLObject>());
+        int insertNdx = RouteDisplayV2.InsertMarkerAt(generator.DrawOrigin.transform, _myGameObject.transform);
+        //how to grab corresponding marker from tracked markers?
+        Debug.Log(insertNdx);
+        if (insertNdx < 0)
+        {
+            LargerMapMarkerList.Add(_myGameObject);
+        } else
+        {
+            LargerMapMarkerList.Insert(insertNdx, _myGameObject);
+        }
     }
 
     //Get position from small map and comvert is to larger map and generate a new marker on larger map

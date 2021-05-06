@@ -11,7 +11,7 @@ GameObject:
   - component: {fileID: 2373769379679389259}
   - component: {fileID: 5784778622414557518}
   - component: {fileID: 2847759828169655260}
-  m_Layer: 0
+  m_Layer: 13
   m_Name: MinimapMarker_RoutePath
   m_TagString: Untagged
   m_Icon: {fileID: 0}
