@@ -28,7 +28,7 @@ public class TeleportBetweenMap : MonoBehaviour
             {
                 AtSmallMap = false;
                 Player.GetComponent<CharacterController>().enabled = false;
-                Player.transform.position = new Vector3(0, 10, 0);
+                Player.transform.position = LargeMap.transform.position;
                 Player.GetComponent<CharacterController>().enabled = true;
                 //Player.transform.position = LargeMap.transform.parent.transform.position + new Vector3(0, 10, 0);
             }
@@ -37,7 +37,7 @@ public class TeleportBetweenMap : MonoBehaviour
                 Debug.Log("To small");
                 AtSmallMap = true;
                 Player.GetComponent<CharacterController>().enabled = false;
-                Player.transform.position = new Vector3(-11, 45, -800);
+                Player.transform.position = SmallMap.transform.position + new Vector3(0, 0, 3);
                 Player.GetComponent<CharacterController>().enabled = true;
                 //Player.transform.position = SmallMap.transform.parent.transform.position;
             }

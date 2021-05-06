@@ -9,16 +9,12 @@ public class PlayerControlInWaitingRoom : MonoBehaviour
     private CharacterController PlayerController;
     private Vector3 NewMove;
 
-    void Awake()
-    {
-        PlayerController = this.GetComponent<CharacterController>();
-    }
-
     // Start is called before the first frame update
     void Start()
     {
+        PlayerController = this.GetComponent<CharacterController>();
         PlayerController.enabled = false;
-        this.transform.position = new Vector3(-11, 43, -810);
+        this.transform.position = new Vector3(0, 43, -810);
         WalkSpeed = 5;
         JumpSpeed = 3;
         PlayerController.enabled = true;
@@ -53,5 +49,10 @@ public class PlayerControlInWaitingRoom : MonoBehaviour
         NewMove.y = NewMove.y - g * Time.deltaTime;
 
         PlayerController.Move(NewMove * WalkSpeed * Time.deltaTime);
+    }
+
+    private void ChangeWalkSpeed()
+    {
+
     }
 }
