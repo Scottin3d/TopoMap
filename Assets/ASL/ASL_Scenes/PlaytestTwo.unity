@@ -1390,7 +1390,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   heightmap: {fileID: 2800000, guid: 54f48e2410f8db04e8fb4ad0b1188cf9, type: 3}
-  mapSize: 1000
+  mapSize: 100
   material: {fileID: 2100000, guid: aa51ed62bd15500438dacc5d81a801e8, type: 2}
   useDefaultMeshHeight: 1
   meshHeight: 10
