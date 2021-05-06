@@ -1128,7 +1128,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!114 &432528924
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -5959,6 +5959,30 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 91443028, guid: 6c21f35d451268d4da0883a9980a2721, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: -34.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 91443028, guid: 6c21f35d451268d4da0883a9980a2721, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 38.448
+      objectReference: {fileID: 0}
+    - target: {fileID: 91443028, guid: 6c21f35d451268d4da0883a9980a2721, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: -838.329
+      objectReference: {fileID: 0}
+    - target: {fileID: 6897538588392656317, guid: 6c21f35d451268d4da0883a9980a2721, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: -34.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 6897538588392656317, guid: 6c21f35d451268d4da0883a9980a2721, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 38.448
+      objectReference: {fileID: 0}
+    - target: {fileID: 6897538588392656317, guid: 6c21f35d451268d4da0883a9980a2721, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: -838.329
+      objectReference: {fileID: 0}
     - target: {fileID: 6897538589646759656, guid: 6c21f35d451268d4da0883a9980a2721, type: 3}
       propertyPath: m_Name
       value: VRController
