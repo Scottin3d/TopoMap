@@ -20,6 +20,20 @@ public class VRToolSelector : MonoBehaviour
     //
     //
     // None <-> Road <-> Marker
+    //
+    //info for the swipe hitboxes:
+    //tool:
+    //   T: 0.176f, -0.027f, -0.102f
+    //   R: 0f, 0f, 0f
+    //   S: 0.1f, 0.1f, 0.1f
+    //left:
+    //   T: 0.176f, 0.0357f, -0.102f
+    //   R: 0f, 0f, 0f
+    //   S: 0.1f, 0.025f, 0.1f
+    //right:
+    //    T: 0.176f, -0.0885f, -0.1021f
+    //    R: 0f, 0f, 0f
+    //    S: 0.1f, 0.1f, 0.1f
 
     private GameObject leftHand = null; //left hand of the VR player
 
@@ -55,6 +69,11 @@ public class VRToolSelector : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        
+        checkActive(); //see if we need to activate/deactivate
+    }
+
+    private void checkActive()
+    {
+
     }
 }
