@@ -29,7 +29,7 @@ public class PlayerTableView : MonoBehaviour
             RaycastHit Hit;
             if (Physics.Raycast(MouseRay, out Hit))
             {
-                if (Hit.collider.tag == "Table")
+                if (Hit.collider.tag == "Table" || Hit.collider.gameObject.layer == LayerMask.NameToLayer("Holomap"))
                 {
                     PlayerCamera.enabled = false;
                     PlayerTopViewCamera.enabled = true;
