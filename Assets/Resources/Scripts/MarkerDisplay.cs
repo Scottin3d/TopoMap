@@ -45,6 +45,8 @@ public class MarkerDisplay : MonoBehaviour
 
         GeneratePlayerPool(20);
         StartCoroutine(UpdatePlayerPositions());
+
+
     }
 
 
@@ -62,6 +64,29 @@ public class MarkerDisplay : MonoBehaviour
                     hit.collider.GetComponentInChildren<Renderer>().material.color = Color.white;
                 }
             }
+        }
+    }
+    IEnumerator UpdatePlayerPositions() {
+        while (true) {
+            if (markerPool.Count == 0) {
+                yield return new WaitForSeconds(1f);
+            }
+            yield return new WaitForSeconds(1 / updatesPerSecond);
+            UpdateMapMarkers();
+        }
+    }
+
+    private void UpdateMapMarkers() {
+        foreach (var pair in markerToObjectDictionary) {
+            ASLObject mapMarker = pair.Key.GetComponent<ASLObject>();
+            ASLObject worldObject = pair.Value;
+
+            Vector3 position = mapDisplay.position + (worldObject.transform.position / mapScaleFactor);
+            mapMarker.transform.position = position;
+
+            mapMarker.SendAndSetClaim(() => {
+                mapMarker.SendAndSetWorldPosition(mapMarker.transform.position);
+            });
         }
     }
 
@@ -104,6 +129,27 @@ public class MarkerDisplay : MonoBehaviour
         return null;
     }
 
+    private void GeneratePlayerPool(int count) {
+        for (int i = 0; i < count; i++) {
+            ASLHelper.InstantiateASLObject(playerMaker.name, Vector3.zero, Quaternion.identity, null, null, OnMarkerCreate);
+        }
+        expanding = false;
+    }
+
+    private static void OnMarkerCreate(GameObject _gameObject) {
+        markerPool.Add(_gameObject);
+        _gameObject.SetActive(false);
+        _gameObject.name = "Map Marker " + (markerPool.Count - 1);
+        _gameObject.transform.parent = current.transform;
+    }
+
+    public static int GetScaleFactor()
+    {
+        return current.mapScaleFactor;
+    }
+
+    //==Legacy Code==
+    /*
     public bool GetMarketGameObject(GameObject marker, out ASLObject obj) {
         obj = null;
         if (markerToObjectDictionary.ContainsKey(marker)) {
@@ -113,32 +159,8 @@ public class MarkerDisplay : MonoBehaviour
         return false;
     }
 
-    IEnumerator UpdatePlayerPositions() {
-        while (true) {
-            if (markerPool.Count == 0) {
-                yield return new WaitForSeconds(1f);
-            }
-            yield return new WaitForSeconds(1 / updatesPerSecond);
-            UpdateMapMarkers();
-        }
-    }
-
-    private void UpdateMapMarkers() {
-        foreach (var pair in markerToObjectDictionary) {
-            ASLObject mapMarker = pair.Key.GetComponent<ASLObject>();
-            ASLObject worldObject = pair.Value;
-
-            Vector3 position = mapDisplay.position + (worldObject.transform.position / mapScaleFactor);
-            mapMarker.transform.position = position;
-
-            mapMarker.SendAndSetClaim(() => {
-                mapMarker.SendAndSetWorldPosition(mapMarker.transform.position);
-            });
-        }
-    }
-
     public void UpdateMapMarkersOld() {
-        
+
         List<Transform> playerTransforms = ASLObjectTrackingSystem.GetPlayers();
         List<Transform> objectTransforms = ASLObjectTrackingSystem.GetObjects();
         markerToObjectDictionary.Clear();
@@ -171,7 +193,7 @@ public class MarkerDisplay : MonoBehaviour
                     //marker.SendAndIncrementWorldRotation(rotation);
                 });
 
-                
+
 
             } else if (o < numObjects) {
                 markerPool[i].SetActive(true);
@@ -190,30 +212,12 @@ public class MarkerDisplay : MonoBehaviour
                 markerToObjectDictionary.Add(markerPool[i], objectTransforms[o].GetComponent<ASLObject>());
 
                 o++;
-            } else { 
-               markerPool[i].SetActive(false);
-            
+            } else {
+                markerPool[i].SetActive(false);
+
             }
-            
+
         }
     }
-
-    private void GeneratePlayerPool(int count) {
-        for (int i = 0; i < count; i++) {
-            ASLHelper.InstantiateASLObject(playerMaker.name, Vector3.zero, Quaternion.identity, null, null, OnMarkerCreate);
-        }
-        expanding = false;
-    }
-
-    private static void OnMarkerCreate(GameObject _gameObject) {
-        markerPool.Add(_gameObject);
-        _gameObject.SetActive(false);
-        _gameObject.name = "Map Marker " + (markerPool.Count - 1);
-        _gameObject.transform.parent = current.transform;
-    }
-
-    public static int GetScaleFactor()
-    {
-        return current.mapScaleFactor;
-    }
+    */
 }

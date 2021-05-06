@@ -41,7 +41,7 @@ public class ASLDemoPlayer : MonoBehaviour {
                 _ASLplayer.SendAndSetWorldRotation(_localPlayer.transform.rotation);
             });
             
-            ASLObjectTrackingSystem.UpdatePlayerTransform(_ASLplayer, _ASLplayer.transform);
+            //ASLObjectTrackingSystem.UpdatePlayerTransform(_ASLplayer, _ASLplayer.transform);
 
 
             yield return new WaitForSeconds(1 / UPDATES_PER_SECOND);
@@ -51,7 +51,7 @@ public class ASLDemoPlayer : MonoBehaviour {
     private static void OnPlayerCreated(GameObject obj) {
         _ASLplayer = obj.GetComponent<ASLObject>();
         _ASLplayer.gameObject.GetComponent<Renderer>().enabled = false;
-        ASLObjectTrackingSystem.AddPlayerToTrack(_ASLplayer, _ASLplayer.transform);
+        ASLObjectTrackingSystem.AddPlayerToTrack(_ASLplayer);
     }
 
     private static void OnPrimitiveCreate(GameObject _gameObject) {
@@ -60,6 +60,6 @@ public class ASLDemoPlayer : MonoBehaviour {
         {
             _gameObject.GetComponent<ASLObject>().SendAndSetWorldPosition(_gameObject.transform.position);
         });
-       ASLObjectTrackingSystem.AddObjectToTrack(_gameObject.GetComponent<ASLObject>(), _gameObject.transform);
+       ASLObjectTrackingSystem.AddObjectToTrack(_gameObject.GetComponent<ASLObject>());
     }
 }

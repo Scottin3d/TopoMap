@@ -301,14 +301,14 @@ public class PlayerMarkerGenerator : MonoBehaviour
 
     private static void GetSmallMapMarker(GameObject _myGameObject)
     {
-        ASLObjectTrackingSystem.AddObjectToTrack(_myGameObject.GetComponent<ASL.ASLObject>(), _myGameObject.transform);
+        ASLObjectTrackingSystem.AddObjectToTrack(_myGameObject.GetComponent<ASL.ASLObject>());
         RouteDisplayV2.AddRouteMarker(_myGameObject.transform);
         SmallMapMarkerList.Add(_myGameObject);
     }
 
     //Add the large map marker into the list and add it into ASLObjectTrackingSystem
     private static void GetLargerMapMarker(GameObject _myGameObject) {
-        ASLObjectTrackingSystem.AddObjectToTrack(_myGameObject.GetComponent<ASL.ASLObject>(), _myGameObject.transform);
+        ASLObjectTrackingSystem.AddObjectToTrack(_myGameObject.GetComponent<ASL.ASLObject>());
         //MiniMapDisplayObject.GetComponent<MinimapDisplay>().AddRouteMarker(_myGameObject.transform.position);
         RouteDisplayV2.AddRouteMarker(_myGameObject.transform);
         LargerMapMarkerList.Add(_myGameObject);
@@ -316,7 +316,7 @@ public class PlayerMarkerGenerator : MonoBehaviour
 
     private static void InsertLargerMapMarker(GameObject _myGameObject)
     {
-        ASLObjectTrackingSystem.AddObjectToTrack(_myGameObject.GetComponent<ASL.ASLObject>(), _myGameObject.transform);
+        ASLObjectTrackingSystem.AddObjectToTrack(_myGameObject.GetComponent<ASL.ASLObject>());
         int insertNdx = RouteDisplayV2.InsertMarkerAt(generator.DrawOrigin.transform, _myGameObject.transform);
         //how to grab corresponding marker from tracked markers?
         Debug.Log(insertNdx);
