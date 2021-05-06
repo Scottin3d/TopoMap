@@ -76,7 +76,7 @@ public class PlayerMarkerGenerator : MonoBehaviour
         if (Input.GetKeyDown(KeyCode.Minus))
         {
             if (DrawOrigin != null) {
-                if(RouteDisplayV2.RemoveRouteMarker(DrawOrigin.transform, false)) Destroy(DrawOrigin);
+                if(RouteDisplayV2.RemoveRouteMarker(DrawOrigin.transform, false)) RemoveMarker(DrawOrigin);
             } 
         }
     }
@@ -406,14 +406,26 @@ public class PlayerMarkerGenerator : MonoBehaviour
         if (LargerMapMarkerList.Count > 0)
         {
             GameObject LMarker = LargerMapMarkerList[LargerMapMarkerList.Count - 1];
-            RouteDisplayV2.RemoveRouteMarker(LMarker.transform, false);
-            ASLObjectTrackingSystem.RemoveObjectToTrack(LMarker.GetComponent<ASL.ASLObject>());
+            if (RouteDisplayV2.RemoveRouteMarker(LMarker.transform, false)) RemoveMarker(LMarker);
+            /*ASLObjectTrackingSystem.RemoveObjectToTrack(LMarker.GetComponent<ASL.ASLObject>());
             LMarker.GetComponent<ASL.ASLObject>().SendAndSetClaim(() =>
             {
                 LMarker.GetComponent<ASL.ASLObject>().DeleteObject();
             });
 
-            LargerMapMarkerList.RemoveAt(LargerMapMarkerList.Count - 1);
+            LargerMapMarkerList.RemoveAt(LargerMapMarkerList.Count - 1);*/
+        }
+    }
+
+    public static void RemoveMarker(GameObject _marker)
+    {
+        if (LargerMapMarkerList.Remove(_marker))
+        {
+            ASLObjectTrackingSystem.RemoveObjectToTrack(_marker.GetComponent<ASL.ASLObject>());
+            _marker.GetComponent<ASL.ASLObject>().SendAndSetClaim(() =>
+            {
+                _marker.GetComponent<ASL.ASLObject>().DeleteObject();
+            });
         }
     }
 }

@@ -440,7 +440,7 @@ public class RouteDisplayV2 : MonoBehaviour
 
             if (fromFloatCallback)
             {
-                //call deletion of marker
+                PlayerMarkerGenerator.RemoveMarker(_t.gameObject);
             }
 
             return true;
