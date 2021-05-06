@@ -1,9 +1,12 @@
-using System.Collections;
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 using ASL;
 
-public static class ASLObjectTrackingSystem { 
+public static class ASLObjectTrackingSystem {
+    public static event Action<ASLObject> playerAddedEvent;
+    public static event Action<ASLObject> objectAddedEvent;
+
 
     private static Dictionary<ASLObject, Transform> ASLObjectsInScene = new Dictionary<ASLObject, Transform>();
     private static Dictionary<ASLObject, Transform> ASLPlayersInScene = new Dictionary<ASLObject, Transform>();
@@ -13,6 +16,7 @@ public static class ASLObjectTrackingSystem {
     public static int NumberOfObjects { get => numberOfObjects; set => numberOfObjects = value; }
 
     private static int numberOfObjects = 0;
+    
     public static bool AddPlayerToTrack(ASLObject playerToTrack, Transform playerTransform) {
         // try to emplace
         if (ASLPlayersInScene.ContainsKey(playerToTrack)) {
@@ -21,6 +25,7 @@ public static class ASLObjectTrackingSystem {
             // add if not
         } else {
             ASLPlayersInScene.Add(playerToTrack, playerTransform);
+            playerAddedEvent?.Invoke(playerToTrack);
             numberOfPlayers++;
             return true;
         }
@@ -38,6 +43,7 @@ public static class ASLObjectTrackingSystem {
             return false;
         }
     }
+
     public static List<Transform> GetPlayers() {
         List<Transform> players = new List<Transform>();
         foreach (var pair in ASLPlayersInScene) {
@@ -78,6 +84,8 @@ public static class ASLObjectTrackingSystem {
         // add if not
         } else {
             ASLObjectsInScene.Add(objectToTrack, objectTransform);
+            objectAddedEvent?.Invoke(objectToTrack);
+            numberOfObjects++;
             return true;
         }
     }
