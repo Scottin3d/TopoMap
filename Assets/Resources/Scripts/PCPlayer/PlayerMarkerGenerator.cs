@@ -27,8 +27,10 @@ public class PlayerMarkerGenerator : MonoBehaviour
     private GameObject DrawLineMarker;
     private GameObject DrawLine;
     private GameObject DrawOrigin;
-    private Vector3 HoloDrawOrigin;
     private float drawTime = 1f;
+
+    public Color OriginColor;
+    private Color SelectedColor = new Color(1f, 1f, 0f, 1f);
 
     private bool deleteMode = false;
 
@@ -70,6 +72,12 @@ public class PlayerMarkerGenerator : MonoBehaviour
 
         if (Input.GetKeyDown(KeyCode.Backspace)) {
             RemoveLastMarker();
+        }
+        if (Input.GetKeyDown(KeyCode.Minus))
+        {
+            if (DrawOrigin != null) {
+                if(RouteDisplayV2.RemoveRouteMarker(DrawOrigin.transform, false)) Destroy(DrawOrigin);
+            } 
         }
     }
 
@@ -132,6 +140,11 @@ public class PlayerMarkerGenerator : MonoBehaviour
                         Vector3 NewPositionOnLargeMap = CenterToMarker + LargerMapCenter;
 
                         if (Input.GetKey(KeyCode.LeftShift)) ASL.ASLHelper.InstantiateASLObject(DropdownOpionValue, NewPositionOnLargeMap, Quaternion.identity, "", "", GetLargerMapMarker);
+                        else if (DrawOrigin != null)
+                        {
+                            DrawOrigin.GetComponent<MeshRenderer>().material.color = OriginColor;
+                            DrawOrigin = null;
+                        }
                         //GenerateMarkerOnLargerMap(Hit.point);
 
                     }
@@ -140,12 +153,29 @@ public class PlayerMarkerGenerator : MonoBehaviour
                     {
                         DropdownOpionValue = MyDropdownList.options[MyDropdownList.value].text;
                         if(Input.GetKey(KeyCode.LeftShift)) ASL.ASLHelper.InstantiateASLObject(DropdownOpionValue, Hit.point, Quaternion.identity, "", "", GetLargerMapMarker);
+                        else if(DrawOrigin != null)
+                        {
+                            DrawOrigin.GetComponent<MeshRenderer>().material.color = OriginColor;
+                            DrawOrigin = null;
+                        }
                         //GenerateMarkerOnSmallMap(Hit.point);
                     }
                     else if (Hit.collider.gameObject.layer == 6 /*&& DrawLineMarker == null*/)  //If we don't hit either map but do hit a marker
                     {
+                        if (DrawOrigin != null)
+                        {
+                            DrawOrigin.GetComponent<MeshRenderer>().material.color = OriginColor;
+                        }
+
                         DrawOrigin = Hit.collider.gameObject;
+                        OriginColor = DrawOrigin.GetComponent<MeshRenderer>().material.color;
+                        DrawOrigin.GetComponent<MeshRenderer>().material.color = SelectedColor;
                         CreateDrawLineMarker(Hit.collider.gameObject);
+                    }
+                    else if(DrawOrigin != null)
+                    {
+                        DrawOrigin.GetComponent<MeshRenderer>().material.color = OriginColor;
+                        DrawOrigin = null;
                     }
                 }
             }
@@ -173,8 +203,22 @@ public class PlayerMarkerGenerator : MonoBehaviour
                     }
                     else if (Hit.collider.gameObject.layer == 6 /*&& DrawLineMarker == null*/)  //If we don't hit either map but do hit a marker
                     {
+                        if(DrawOrigin != null)
+                        {
+                            DrawOrigin.GetComponent<MeshRenderer>().material.color = OriginColor;
+                        }
+
                         DrawOrigin = Hit.collider.gameObject;
+                        OriginColor = DrawOrigin.GetComponent<MeshRenderer>().material.color;
+                        DrawOrigin.GetComponent<MeshRenderer>().material.color = SelectedColor;
                         CreateDrawLineMarker(Hit.collider.gameObject);
+                    }
+                    else
+                    {
+                        if (DrawOrigin != null)
+                        {
+                            DrawOrigin.GetComponent<MeshRenderer>().material.color = OriginColor;
+                        }
                     }
                 }
             }

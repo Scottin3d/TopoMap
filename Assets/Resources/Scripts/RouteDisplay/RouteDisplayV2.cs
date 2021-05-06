@@ -414,7 +414,7 @@ public class RouteDisplayV2 : MonoBehaviour
         return ndx;
     }
 
-    public static void RemoveRouteMarker(Transform _t, bool fromFloatCallback)
+    public static bool RemoveRouteMarker(Transform _t, bool fromFloatCallback)
     {
         current.removedNdx = current.linkedObj.IndexOf(_t);
         if (current.removedNdx > -1)
@@ -437,6 +437,13 @@ public class RouteDisplayV2 : MonoBehaviour
             pathToRemove.SetActive(false);
             smallToRemove.SetActive(false);
             current.DrawPath = true;
+
+            if (fromFloatCallback)
+            {
+                //call deletion of marker
+            }
+
+            return true;
         }
         else
         {
@@ -444,6 +451,8 @@ public class RouteDisplayV2 : MonoBehaviour
             {
                 current.PrepSearchCallback(_t.gameObject.GetComponent<ASLObject>().m_Id);
             }
+
+            return false;
         }
     }
 
