@@ -39,6 +39,9 @@ public class MarkerDisplay : MonoBehaviour {
         // subscribe event handlers to events actions
         ASLObjectTrackingSystem.playerAddedEvent += current.HandleAddPlayer;
         ASLObjectTrackingSystem.objectAddedEvent += current.HandleAddObject;
+        ASLObjectTrackingSystem.playerRemovedEvent += HandleRemove;
+        ASLObjectTrackingSystem.objectRemovedEvent += HandleRemove;
+
 
         // ensure variables are assigned
         Debug.Assert(bigMap != null, "Please set " + bigMap + " in the inspector.");
@@ -59,6 +62,7 @@ public class MarkerDisplay : MonoBehaviour {
     /// MonoBehaviour Update
     /// </summary>
     private void Update() {
+        /*
         // check delete mdoe
         if (Input.GetKeyDown(KeyCode.R)) {
             deleteMode = !deleteMode;
@@ -75,6 +79,7 @@ public class MarkerDisplay : MonoBehaviour {
                 }
             }
         }
+        */
     }
 
     /// <summary>
@@ -145,6 +150,15 @@ public class MarkerDisplay : MonoBehaviour {
         marker.SetActive(true);
         // other actions
         marker.GetComponentInChildren<Renderer>().material.color = Color.green;
+    }
+
+    private void HandleRemove(ASLObject obj) {
+        foreach (var pair in markerToObjectDictionary) {
+            if (pair.Value == obj) {
+                pair.Key.gameObject.SetActive(false);
+                markerToObjectDictionary.Remove(pair.Key);
+            }
+        }
     }
 
     #region Marker Pool
