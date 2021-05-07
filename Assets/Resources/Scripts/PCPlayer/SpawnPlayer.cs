@@ -65,7 +65,7 @@ public class SpawnPlayer : MonoBehaviour
     {
         while (true)
         {
-            yield return new WaitForSeconds(0.5f);
+            yield return new WaitForSeconds(0.1f);
             Cube.transform.position = PlayerObject.transform.position;
             Cube.transform.rotation = PlayerObject.transform.rotation;
 
