@@ -86,8 +86,6 @@ public class RouteDisplayV2 : MonoBehaviour
         DonePooling = true;
     }
 
-    
-
     public Color GetColor()
     {
         return myColor;
@@ -95,7 +93,7 @@ public class RouteDisplayV2 : MonoBehaviour
 
     #region DRAW_DIRECT_ROUTE
 
-    //Update route coroutine split for readability
+    //High-level route update
     IEnumerator UpdateRoute()
     {
         GameObject curNode, curPath, smPath;
@@ -181,6 +179,7 @@ public class RouteDisplayV2 : MonoBehaviour
         
     }
 
+    //Get map small scale
     private float CalcSmallScale()
     {
         if (TryGetComponent(out MarkerDisplay _md))
@@ -199,6 +198,7 @@ public class RouteDisplayV2 : MonoBehaviour
         }
     }
 
+    //Set route object transform
     private void DrawRoute(GameObject _g, Vector3 pos, Vector3 scale)
     {
         _g.GetComponent<ASLObject>().SendAndSetClaim(() =>
@@ -213,6 +213,7 @@ public class RouteDisplayV2 : MonoBehaviour
 
     #region SCAN_GRAPH
 
+    //High level graph generation
     IEnumerator GenerateGraph()
     {
         if (LargeMap != null && !DataCollected)
@@ -255,6 +256,7 @@ public class RouteDisplayV2 : MonoBehaviour
         yield return new WaitForSeconds(0.1f);
     }
 
+    //Set graph data
     IEnumerator SetGridGraph(int size, float nodeSize, float scanHeight)
     {
         GridGraph graph = data.AddGraph(typeof(GridGraph)) as GridGraph;
@@ -275,6 +277,7 @@ public class RouteDisplayV2 : MonoBehaviour
         yield return new WaitForSeconds(0.1f);
     }
 
+    //Set large map to ground layer
     IEnumerator SetGround()
     {
         MeshFilter[] meshes = LargeMap.GetComponentsInChildren<MeshFilter>();
@@ -294,6 +297,7 @@ public class RouteDisplayV2 : MonoBehaviour
         yield return new WaitForSeconds(0.1f);
     }
 
+    //Set small map to holomap layer
     IEnumerator SetHolomap()
     {
         MeshFilter[] meshes = SmallMap.GetComponentsInChildren<MeshFilter>();
@@ -315,8 +319,8 @@ public class RouteDisplayV2 : MonoBehaviour
     #endregion
 
     #region TRACE_PATH
-    //TODO: Move to PathDisplay?
 
+    //Get path from grid
     IEnumerator DrawMapCurve()
     {
         while (true)
@@ -354,6 +358,7 @@ public class RouteDisplayV2 : MonoBehaviour
         }        
     }
 
+    //Trace spline in preparation for display
     private void BezierTrace()
     {
         BezierSpline _bs = mySpline;
@@ -382,6 +387,7 @@ public class RouteDisplayV2 : MonoBehaviour
 
     #region STATIC_FUNCTIONS
 
+    //Add node at end
     public static void AddRouteMarker(Transform _t)
     {
         current.linkedObj.Add(_t);
@@ -398,6 +404,7 @@ public class RouteDisplayV2 : MonoBehaviour
         }
     }
 
+    //Route insertion
     public static int InsertMarkerAt(Transform _target, Transform _t)
     {
         int ndx = (_target != null) ? current.linkedObj.IndexOf(_target) : -1;
@@ -418,6 +425,7 @@ public class RouteDisplayV2 : MonoBehaviour
         return ndx;
     }
 
+    //Remove route node
     public static bool RemoveRouteMarker(Transform _t, bool fromFloatCallback)
     {
         current.removedNdx = current.linkedObj.IndexOf(_t);
@@ -460,6 +468,7 @@ public class RouteDisplayV2 : MonoBehaviour
         }
     }
 
+    //Delete route
     public static void ClearRoute()
     {
         current.linkedObj.Clear();
@@ -467,6 +476,7 @@ public class RouteDisplayV2 : MonoBehaviour
         current.DrawPath = true;
     }
 
+    //Clear map data
     public static void ClearMeshData()
     {
         foreach (NavGraph graph in current.data.graphs)
@@ -479,6 +489,7 @@ public class RouteDisplayV2 : MonoBehaviour
         current.DrawPath = false;
     }
 
+    //Change path being tracked
     public static void ShowPath()
     {
         if(current.linkedObj.Count > 1)
@@ -492,6 +503,7 @@ public class RouteDisplayV2 : MonoBehaviour
 
     #region CALLBACK_FUNCTIONS
 
+    //Create route note
     private static void MarkerInstantiation(GameObject _myGameObject)
     {
         current.routeMarkerPool.Add(_myGameObject);
@@ -503,6 +515,7 @@ public class RouteDisplayV2 : MonoBehaviour
         Debug.Log("Added marker");
     }
 
+    //Create route on large map
     private static void RouteInstantiation(GameObject _myGameObject)
     {
         current.routeConnectPool.Add(_myGameObject);
@@ -513,6 +526,7 @@ public class RouteDisplayV2 : MonoBehaviour
         _myGameObject.SetActive(false);
     }
 
+    //Create route on small map
     private static void SmallRouteInstantiation(GameObject _myGameObject)
     {
         current.smallConnectPool.Add(_myGameObject);

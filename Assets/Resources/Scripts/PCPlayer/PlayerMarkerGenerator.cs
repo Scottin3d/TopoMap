@@ -421,7 +421,7 @@ public class PlayerMarkerGenerator : MonoBehaviour
     {
         if (LargerMapMarkerList.Remove(_marker))
         {
-            ASLObjectTrackingSystem.RemoveObjectToTrack(_marker.GetComponent<ASL.ASLObject>());
+            if(ASLObjectTrackingSystem.RemoveObjectToTrack(_marker.GetComponent<ASL.ASLObject>()))
             _marker.GetComponent<ASL.ASLObject>().SendAndSetClaim(() =>
             {
                 _marker.GetComponent<ASL.ASLObject>().DeleteObject();

@@ -17,7 +17,6 @@ public class PathCam : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        
         if (transform.parent == null)
         {
             IsRendering = false;

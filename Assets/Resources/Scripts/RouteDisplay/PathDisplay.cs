@@ -30,12 +30,11 @@ public static class PathDisplay //: MonoBehaviour
 
     #region INIT
 
+    //Start up
     public static IEnumerator Initialize(Color _c, float tSpeed, float ups)
     {
         cam = GameObject.Find("PathCamera");
         Debug.Assert(cam != null, "Missing path camera");
-        //cam.SetActive(false);
-        //DeactivatePathCam();
 
         myColor = _c;
         updatesPerSecond = ups;
@@ -44,6 +43,7 @@ public static class PathDisplay //: MonoBehaviour
         InitFinished = true;
     }
 
+    //Create splinewalkers
     public static IEnumerator GeneratePathPool(int amount)
     {
         while (!InitFinished) yield return new WaitForSeconds(0.1f);
@@ -63,12 +63,14 @@ public static class PathDisplay //: MonoBehaviour
 
     #region DISPLAY
 
+    //Set spline and begin trace
     public static void SetSpline(BezierSpline _b)   //Need some way to clone a spline
     {
         mySpline = _b;
         PathDisplayHelper.Instance.StartCoroutine(StartTrace());
     }
 
+    //Set inverse of walker speed at default
     public static void SetSpeed(float _f)
     {
         _f = (_f > 10f) ? 10f : _f;
@@ -79,6 +81,7 @@ public static class PathDisplay //: MonoBehaviour
         }
     }
 
+    //Set walker positions
     public static IEnumerator StartTrace()
     {
         while (RunningTrace) yield return new WaitForSeconds(1f / updatesPerSecond);
@@ -97,7 +100,6 @@ public static class PathDisplay //: MonoBehaviour
             walkers[ndx].duration = (speed > 0) ? maxDuration / speed : maxDuration;
             curDuration += spacing * speed;
             walkers[ndx].Begin((float)ndx / (float)walkerCount);
-            //yield return new WaitForSeconds(spacing);
         }
 
         DoNotRender = false;
@@ -105,6 +107,7 @@ public static class PathDisplay //: MonoBehaviour
         RunningTrace = false;
     }
 
+    //Show/hide spline walkers
     public static IEnumerator Render()
     {
         while (true)
@@ -130,16 +133,13 @@ public static class PathDisplay //: MonoBehaviour
         }
     }
 
+    //Toggle render
     public static void ToggleNotRender()
     {
         DoNotRender = !DoNotRender;
-        /*if(cam.transform.parent != null)
-        {
-            //cam.GetComponent<DeactivatePathCam>().SetRender
-        }
-        //if (DoNotRender) DeactivatePathCam();*/
     }
 
+    //Stop rendering
     public static void ClearNotRender()
     {
         DoNotRender = true;
@@ -150,6 +150,7 @@ public static class PathDisplay //: MonoBehaviour
 
     #region PATH_CAMERA
 
+    //Select walker and attach camera
     public static void Select(Transform _t)
     {
         if(cam.transform.parent != null && _t != cam.transform.parent)
@@ -162,13 +163,9 @@ public static class PathDisplay //: MonoBehaviour
             if (cam.transform.parent != null) cam.transform.parent.DetachChildren();
             cam.transform.SetParent(_t, false);
         }
-        /*else if(_t.gameObject.layer != 9 )
-        {
-            Debug.Log("detatching path cam...");
-            DetatchPathCam();
-        }*/
     }
 
+    //Automatically remove path camera
     public static void DetatchPathCam()
     {
         if(cam.transform.parent != null) cam.transform.parent.DetachChildren();
@@ -176,6 +173,7 @@ public static class PathDisplay //: MonoBehaviour
 
     #endregion
 
+    //Get velocity of spline walker
     public static float GetWalkerVelocity(Transform _t)
     {
         if(_t == null)
@@ -195,6 +193,7 @@ public static class PathDisplay //: MonoBehaviour
         
     }
 
+    //Set up spline walkers
     private static void PathTraceInstantiation(GameObject _myGameObject)
     {
         if (_myGameObject.GetComponent<SplineWalker>() != null)
