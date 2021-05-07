@@ -386,11 +386,15 @@ public class RouteDisplayV2 : MonoBehaviour
     {
         current.linkedObj.Add(_t);
         current.DrawPath = true;
+        current.DonePooling = false;
         if (current.linkedObj.Count > current.routeMarkerPool.Count)
         {
             Debug.Log("Instantiating new batch");
-            current.DonePooling = false;
+            
             current.GenerateRoutePool(current.batchSize);
+        } else
+        {
+            current.DonePooling = true;
         }
     }
 
