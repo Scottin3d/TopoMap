@@ -27,7 +27,7 @@ public class PlayerMarkerGenerator : MonoBehaviour
     private GameObject DrawLineMarker;
     private GameObject DrawLine;
     private GameObject DrawOrigin;
-    private float drawTime = 1f;
+    private float drawTime = 0.5f;
 
     public Color OriginColor;
     private Color SelectedColor = new Color(1f, 1f, 0f, 1f);
@@ -164,17 +164,18 @@ public class PlayerMarkerGenerator : MonoBehaviour
                     {
                         if (DrawOrigin != null)
                         {
-                            DrawOrigin.GetComponent<MeshRenderer>().material.color = OriginColor;
+                            if (DrawOrigin.GetComponent<MeshRenderer>() != null) DrawOrigin.GetComponent<MeshRenderer>().material.color = OriginColor;
                         }
 
                         DrawOrigin = Hit.collider.gameObject;
-                        OriginColor = DrawOrigin.GetComponent<MeshRenderer>().material.color;
-                        DrawOrigin.GetComponent<MeshRenderer>().material.color = SelectedColor;
+                        OriginColor = (DrawOrigin.GetComponent<MeshRenderer>() != null) ? 
+                            DrawOrigin.GetComponent<MeshRenderer>().material.color : Color.white;
+                        if (DrawOrigin.GetComponent<MeshRenderer>() != null) DrawOrigin.GetComponent<MeshRenderer>().material.color = SelectedColor;
                         CreateDrawLineMarker(Hit.collider.gameObject);
                     }
                     else if(DrawOrigin != null)
                     {
-                        DrawOrigin.GetComponent<MeshRenderer>().material.color = OriginColor;
+                        if (DrawOrigin.GetComponent<MeshRenderer>() != null) DrawOrigin.GetComponent<MeshRenderer>().material.color = OriginColor;
                         DrawOrigin = null;
                     }
                 }
@@ -205,19 +206,20 @@ public class PlayerMarkerGenerator : MonoBehaviour
                     {
                         if(DrawOrigin != null)
                         {
-                            DrawOrigin.GetComponent<MeshRenderer>().material.color = OriginColor;
+                            if (DrawOrigin.GetComponent<MeshRenderer>() != null) DrawOrigin.GetComponent<MeshRenderer>().material.color = OriginColor;
                         }
 
                         DrawOrigin = Hit.collider.gameObject;
-                        OriginColor = DrawOrigin.GetComponent<MeshRenderer>().material.color;
-                        DrawOrigin.GetComponent<MeshRenderer>().material.color = SelectedColor;
+                        OriginColor = (DrawOrigin.GetComponent<MeshRenderer>() != null) ?
+                            DrawOrigin.GetComponent<MeshRenderer>().material.color : Color.white;
+                        if (DrawOrigin.GetComponent<MeshRenderer>() != null) DrawOrigin.GetComponent<MeshRenderer>().material.color = SelectedColor;
                         CreateDrawLineMarker(Hit.collider.gameObject);
                     }
                     else
                     {
                         if (DrawOrigin != null)
                         {
-                            DrawOrigin.GetComponent<MeshRenderer>().material.color = OriginColor;
+                            if (DrawOrigin.GetComponent<MeshRenderer>() != null) DrawOrigin.GetComponent<MeshRenderer>().material.color = OriginColor;
                         }
                     }
                 }
@@ -246,16 +248,16 @@ public class PlayerMarkerGenerator : MonoBehaviour
                 Ray mouseRay = PlayerCamera.ScreenPointToRay(Input.mousePosition);
                 //RaycastHit hit;
 
-                int layerMask = (LargerMapMarkerList.IndexOf(DrawOrigin) >= 0) ? LayerMask.GetMask("Ground") : LayerMask.GetMask("Holomap");
+                //int layerMask = (LargerMapMarkerList.IndexOf(DrawOrigin) >= 0) ? LayerMask.GetMask("Ground") : LayerMask.GetMask("Holomap");
                 float thickness = (LargerMapMarkerList.IndexOf(DrawOrigin) >= 0) ? 0.25f : 0.01f;
                 //Debug.Log(layerMask);
-                if (drawTime <= 0f) DragDrawCast(mouseRay, layerMask, thickness);
+                if (drawTime <= 0f) DragDrawCast(mouseRay, LayerMask.GetMask("Ground"), thickness);
             }
             if (PlayerTableViewCamera.isActiveAndEnabled)
             {
                 Ray mouseRay = PlayerTableViewCamera.ScreenPointToRay(Input.mousePosition);
-                int layerMask = LayerMask.GetMask("Holomap");
-                if (drawTime <= 0f) DragDrawCast(mouseRay, layerMask, 0.01f);
+                //int layerMask = LayerMask.GetMask("Holomap");
+                if (drawTime <= 0f) DragDrawCast(mouseRay, LayerMask.GetMask("Ground"), 0.01f);
             }
         }
     }
@@ -296,21 +298,21 @@ public class PlayerMarkerGenerator : MonoBehaviour
                 {
                     Ray mouseRay = PlayerCamera.ScreenPointToRay(Input.mousePosition);
 
-                    int layerMask = (LargerMapMarkerList.IndexOf(DrawOrigin) >= 0) ? LayerMask.GetMask("Ground") : LayerMask.GetMask("Holomap");
-                    if (drawTime <= 0f) DragDrawFinish(mouseRay, layerMask);
+                    //int layerMask = (LargerMapMarkerList.IndexOf(DrawOrigin) >= 0) ? LayerMask.GetMask("Ground") : LayerMask.GetMask("Holomap");
+                    if (drawTime <= 0f) DragDrawFinish(mouseRay, LayerMask.GetMask("Ground"));
                 }
                 if (PlayerTableViewCamera.isActiveAndEnabled)
                 {
                     Ray mouseRay = PlayerTableViewCamera.ScreenPointToRay(Input.mousePosition);
-                    int layerMask = (LargerMapMarkerList.IndexOf(DrawOrigin) >= 0) ? LayerMask.GetMask("Ground") : LayerMask.GetMask("Holomap");
-                    if (drawTime <= 0f) DragDrawFinish(mouseRay, layerMask);
+                    //int layerMask = (LargerMapMarkerList.IndexOf(DrawOrigin) >= 0) ? LayerMask.GetMask("Ground") : LayerMask.GetMask("Holomap");
+                    if (drawTime <= 0f) DragDrawFinish(mouseRay, LayerMask.GetMask("Ground"));
                 }
                 
 
                 DrawLine.SetActive(false);
                 Destroy(DrawLineMarker);
             }
-            drawTime = 1f;
+            drawTime = 0.5f;
         }
     }
 
@@ -323,7 +325,7 @@ public class PlayerMarkerGenerator : MonoBehaviour
             if (EventSystem.current.IsPointerOverGameObject(-1)) return;
 
             string DropdownOpionValue = MyDropdownList.options[MyDropdownList.value].text;
-            if (LayerMask.GetMask("Ground") == layerMask)
+            if (hit.collider.transform.parent.tag == "SpawnLargerMap")
             {
                 ASL.ASLHelper.InstantiateASLObject(DropdownOpionValue, hit.point, Quaternion.identity, "", "", InsertLargerMapMarker);
             }
@@ -369,7 +371,7 @@ public class PlayerMarkerGenerator : MonoBehaviour
             LargerMapMarkerList.Add(_myGameObject);
         } else
         {
-            LargerMapMarkerList.Insert(insertNdx, _myGameObject);
+            LargerMapMarkerList.Insert(insertNdx + 1, _myGameObject);
         }
     }
 
@@ -421,7 +423,7 @@ public class PlayerMarkerGenerator : MonoBehaviour
     {
         if (LargerMapMarkerList.Remove(_marker))
         {
-            if(ASLObjectTrackingSystem.RemoveObjectToTrack(_marker.GetComponent<ASL.ASLObject>()))
+            ASLObjectTrackingSystem.RemoveObjectToTrack(_marker.GetComponent<ASL.ASLObject>());
             _marker.GetComponent<ASL.ASLObject>().SendAndSetClaim(() =>
             {
                 _marker.GetComponent<ASL.ASLObject>().DeleteObject();

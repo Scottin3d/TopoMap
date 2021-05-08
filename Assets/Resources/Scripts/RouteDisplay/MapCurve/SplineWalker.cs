@@ -93,4 +93,6 @@ public class SplineWalker : MonoBehaviour
 		gameObject.GetComponent<MeshRenderer>().enabled = false;
         gameObject.GetComponent<MeshCollider>().enabled = false;
     }
+
+    public bool IsRendering {  get { return gameObject.GetComponent<MeshRenderer>().enabled; } }
 }

@@ -70,15 +70,6 @@ public class BezierSpline : MonoBehaviour
 		return (p.Equals(points.Length - 1));
 	}
 
-	public float GetSplineLength()
-    {
-		/*for(int i = 0; i < points.Length - 1; i += 3)
-        {
-
-        }*/
-		return -1f;
-    }
-
     #endregion
 
     #region MUTATORS

@@ -6,14 +6,15 @@ using ASL;
 
 public static class PathDisplay //: MonoBehaviour
 {
-    
     private static List<SplineWalker> walkers = new List<SplineWalker>();
+    private static List<GameObject> smallWalker = new List<GameObject>();
     private static int walkerCount = 0;
 
     private static GameObject cam;
     private static Vector3 camOffset = new Vector3(0f, 2f, 0f);
     private static Quaternion camRot = new Quaternion(-0.2f, 0f, 0f, 1f);
 
+    private static GameObject smallMap;
 
     private static bool InitFinished = false;
     private static bool PoolFinished = false;
@@ -35,6 +36,7 @@ public static class PathDisplay //: MonoBehaviour
     {
         cam = GameObject.Find("PathCamera");
         Debug.Assert(cam != null, "Missing path camera");
+        smallMap = GameObject.FindWithTag("SpawnSmallMap");
 
         myColor = _c;
         updatesPerSecond = ups;
@@ -51,9 +53,15 @@ public static class PathDisplay //: MonoBehaviour
         while(ndx < amount)
         {
             yield return new WaitForSeconds(1f / updatesPerSecond);
+            smallWalker.Add(GameObject.CreatePrimitive(PrimitiveType.Sphere));
             ASLHelper.InstantiateASLObject("PathWalker", new Vector3(0, 0, 0), Quaternion.identity, "", "", PathTraceInstantiation);
             ndx++;
             walkerCount++;
+        }
+        foreach(GameObject _g in smallWalker)
+        {
+            GameObject.Destroy(_g.GetComponent<SphereCollider>());
+            _g.SetActive(false);
         }
         yield return new WaitForSeconds(1f);
         PoolFinished = true;
@@ -89,7 +97,7 @@ public static class PathDisplay //: MonoBehaviour
         RunningTrace = true;
         if (cam.transform.parent == null) cam.SetActive(false);
         while (!PoolFinished) yield return new WaitForSeconds(0.1f);
-        float maxDuration = (mySpline != null) ? mySpline.CurveCount : 0;
+        float maxDuration = (mySpline != null) ? GetSplineLength() : 0;
         float spacing = (maxDuration > 0) ? maxDuration / walkerCount : 0;
         float curDuration = 0f;
 
@@ -115,8 +123,9 @@ public static class PathDisplay //: MonoBehaviour
             cam.transform.localRotation = camRot;
             cam.transform.localPosition = camOffset;
             cam.transform.localScale = Vector3.one;
-            foreach(SplineWalker _s in walkers)
+            for (int ndx = 0; ndx < walkers.Count; ndx++)
             {
+                SplineWalker _s = walkers[ndx];
                 _s.ToggleRender(!DoNotRender);
                 if(_s.GetComponentInChildren<PathCam>() != null)
                 {
@@ -128,6 +137,16 @@ public static class PathDisplay //: MonoBehaviour
                     _s.gameObject.GetComponent<ASLObject>().SendAndSetLocalPosition(_s.gameObject.transform.position);
                     _s.gameObject.GetComponent<ASLObject>().SendAndSetLocalRotation(_s.gameObject.transform.localRotation);
                 });
+                if (_s.IsRendering)
+                {
+                    smallWalker[ndx].SetActive(true);
+                    smallWalker[ndx].transform.position = smallMap.transform.position + _s.gameObject.transform.position / MarkerDisplay.GetScaleFactor();
+                    smallWalker[ndx].transform.localScale = new Vector3(0.03f, 0.03f, 0.03f);
+                } else
+                {
+                    smallWalker[ndx].SetActive(false);
+                }
+                
             }
             yield return new WaitForSeconds(1f / updatesPerSecond);
         }
@@ -136,7 +155,7 @@ public static class PathDisplay //: MonoBehaviour
     //Toggle render
     public static void ToggleNotRender()
     {
-        DoNotRender = !DoNotRender;
+        if(RouteDisplayV2.NodeCount > 1) DoNotRender = !DoNotRender;
     }
 
     //Stop rendering
@@ -178,12 +197,12 @@ public static class PathDisplay //: MonoBehaviour
     {
         if(_t == null)
         {
-            float maxDuration = (mySpline != null) ? mySpline.CurveCount : 0;
+            float maxDuration = (mySpline != null) ? GetSplineLength() : 0;
             return (speed > 0) ? maxDuration / speed : 0;
         }
         else if(_t.gameObject.GetComponent<SplineWalker>() == null)
         {
-            float maxDuration = (mySpline != null) ? mySpline.CurveCount : 0;
+            float maxDuration = (mySpline != null) ? GetSplineLength() : 0;
             return (speed > 0) ? maxDuration / speed : 0;
         } else
         {
@@ -191,6 +210,23 @@ public static class PathDisplay //: MonoBehaviour
             return _sw.spline.GetVelocity(_sw.GetProgress()).magnitude;
         }
         
+    }
+
+    public static float GetSplineLength()
+    {
+        float length =0f;
+        int ndx = 0;
+        for (float i = 0; i < 1f; i += 0.01f)
+        {
+            length += mySpline.GetVelocity(i).magnitude;
+            ndx++;
+        }
+        if (ndx > 0)
+        {
+            length /= ndx;
+            return length;
+        }
+        return -1f;
     }
 
     //Set up spline walkers
