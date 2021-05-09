@@ -10,8 +10,9 @@ public class SplineWalker : MonoBehaviour
 
 	public float duration;
 	private float progress;
+    public float velocity;
 
-	public bool lookForward, propelSelf = true;
+	public bool lookForward, propelSelf = true, constantVelocity = false;
 	private bool goingForward = true;
 
 	public Vector3 walkOffset = Vector3.zero;
@@ -42,9 +43,22 @@ public class SplineWalker : MonoBehaviour
 
     public void Increment(float incProg)
     {
+        if (constantVelocity)
+        {
+            incProg = (duration > 0f) ? velocity / (4f * duration) : 0f;
+            MakeProgress(incProg);
+        }
+        else
+        {
+            MakeProgress(incProg);
+        }
+    }
+
+    private void MakeProgress(float _f)
+    {
         if (goingForward)
         {
-            progress += incProg;
+            progress += _f;
             if (progress > 1f)
             {
                 if (mode == SplineWalkerMode.Once)
@@ -65,7 +79,7 @@ public class SplineWalker : MonoBehaviour
         }
         else
         {
-            progress -= incProg;
+            progress -= _f;
             if (progress < 0f)
             {
                 progress = -progress;
@@ -92,6 +106,11 @@ public class SplineWalker : MonoBehaviour
 		goingForward = true; //IsStarted = false; loopedOnce = false;
 		gameObject.GetComponent<MeshRenderer>().enabled = false;
         gameObject.GetComponent<MeshCollider>().enabled = false;
+    }
+
+    public void SetVelocity(float _f)
+    {
+        velocity = _f;
     }
 
     public bool IsRendering {  get { return gameObject.GetComponent<MeshRenderer>().enabled; } }

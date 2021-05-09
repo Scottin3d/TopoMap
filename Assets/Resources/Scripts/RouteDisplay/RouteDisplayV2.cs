@@ -353,17 +353,18 @@ public class RouteDisplayV2 : MonoBehaviour
             {
                 _bs.SetCurvePoint(0, posNodes[0]);
                 int ndx;
-                for (ndx = 3; ndx * 2 < posNodes.Count; ndx += 3)
+                for (ndx = 3; ndx < posNodes.Count; ndx += 3)
                 {
-                    _bs.SetCurvePoint(ndx, posNodes[ndx * 2]);
+                    _bs.SetCurvePoint(ndx, posNodes[ndx]);
                 }
-                if(posNodes.Count % 3 != 0 && ((_bs.GetLastControlPoint() - posNodes[posNodes.Count - 1]).magnitude > 0.5f))
+                if(((_bs.GetLastControlPoint() - posNodes[posNodes.Count - 1]).magnitude > 0.5f))
                 {
                     _bs.SetCurvePoint(ndx, posNodes[posNodes.Count - 1]);
                 }
             }
             mySpline = _bs;
         }
+        PathDisplay.DisplayCheck(mySpline.Length);
     }
 
     IEnumerator DrawMapCurveV2()

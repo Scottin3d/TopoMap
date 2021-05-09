@@ -21,7 +21,6 @@ public class PathCam : MonoBehaviour
         {
             IsRendering = false;
         } 
-        transform.GetChild(0).gameObject.SetActive(IsRendering);
 
         if(cam != null) cam.enabled = IsRendering;
         if (!IsRendering) DeactivatePathCam();
