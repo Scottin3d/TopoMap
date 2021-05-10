@@ -6,6 +6,8 @@ using ASL;
 
 public class RouteDisplayV2 : MonoBehaviour
 {
+    #region VARIABLES
+
     public static RouteDisplayV2 current;
 
     public float updatesPerSecond = 10f;
@@ -45,6 +47,8 @@ public class RouteDisplayV2 : MonoBehaviour
 
     //Would prefer to fetch this from the player once instantiated
     private Color myColor;
+
+    #endregion
 
     /// <summary>
     /// Ensures that the player controller is working, should be moved out
@@ -287,6 +291,7 @@ public class RouteDisplayV2 : MonoBehaviour
         graph.SetDimensions(size, size, nodeSize);
         graph.collision.fromHeight = scanHeight * scanFactor;
         graph.collision.heightMask = LayerMask.GetMask("Ground");
+        //set obstacle layer
 
         //Set penalties
         graph.penaltyAngle = true;

@@ -5,22 +5,29 @@ using UnityEngine.UI;
 
 public class PositionPanel : MonoBehaviour
 {
-    private static bool IsVisible = false;
+    private bool IsVisible = false;
     public PanelHideDirection direction;
     public Button myButton = null;
     // Start is called before the first frame update
     void Start()
     {
         Debug.Assert(myButton != null);
-        direction = PanelHideDirection.Right;
     }
 
+    /// <summary>
+    /// Toggle whether this panel should be visible, and hide accordingly
+    /// </summary>
     public void ToggleVisibility()
     {
         IsVisible = !IsVisible;
         StartCoroutine(HidePanel(IsVisible));
     }
 
+    /// <summary>
+    /// Handles panel movement
+    /// </summary>
+    /// <param name="toggle">Whether the panel should be visible</param>
+    /// <returns></returns>
     private IEnumerator HidePanel(bool toggle)
     {
         bool NotHide = IsVisible;
@@ -28,18 +35,19 @@ public class PositionPanel : MonoBehaviour
         if(theRect != null)
         {
             //Debug.Log(theRect.anchoredPosition);
-            int width = -1;
+            int delta = -1;
+            //Get offset of panel
             switch(direction){
                 case PanelHideDirection.Left:
                 case PanelHideDirection.Right:
-                    width = (int)(theRect.rect.width - myButton.gameObject.GetComponent<RectTransform>().rect.height);
+                    delta = (int)(theRect.rect.width - myButton.gameObject.GetComponent<RectTransform>().rect.height);
                     break;
                 case PanelHideDirection.Up:
                 case PanelHideDirection.Down:
-                    width = (int)(theRect.rect.height - myButton.gameObject.GetComponent<RectTransform>().rect.height);
+                    delta = (int)(theRect.rect.height - myButton.gameObject.GetComponent<RectTransform>().rect.height);
                     break;
             }
-            while(width > 0)
+            while(delta > 0)
             {
                 switch (direction)
                 {
@@ -60,7 +68,7 @@ public class PositionPanel : MonoBehaviour
                         else theRect.anchoredPosition -= 10f * Vector2.up;
                         break;
                 }
-                width -= 10;
+                delta -= 10;
                 yield return new WaitForSeconds(0.001f);
             }
         }
