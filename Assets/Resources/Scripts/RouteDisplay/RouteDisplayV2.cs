@@ -34,7 +34,6 @@ public class RouteDisplayV2 : MonoBehaviour
     public int scaleFactor = 2;
 
     private bool DataCollected = false,
-        //GroundSet = false, 
         GraphSet = false,
         DrawPath = false;
 
@@ -47,13 +46,20 @@ public class RouteDisplayV2 : MonoBehaviour
     //Would prefer to fetch this from the player once instantiated
     private Color myColor;
 
+    /// <summary>
+    /// Ensures that the player controller is working, should be moved out
+    /// </summary>
     private void Awake()
     {
         current = this;
         MyController.Initialize();
     }
 
-    // Start is called before the first frame update
+    /// <summary>
+    /// -Instantiate route object pool
+    /// -Initialize and instantiate path display
+    /// -Generate and scan graph
+    /// </summary>
     void Start()
     {
         LargeMap = GameObject.FindWithTag("SpawnLargerMap");
@@ -74,6 +80,10 @@ public class RouteDisplayV2 : MonoBehaviour
         StartCoroutine(DrawMapCurve());
     }
 
+    /// <summary>
+    /// Adds a set number of route objects to the pool
+    /// </summary>
+    /// <param name="toAdd">The number of route segments to add to the pool</param>
     private void GenerateRoutePool(int toAdd)
     {
         for(int i = 0; i < toAdd; i++)
@@ -85,6 +95,10 @@ public class RouteDisplayV2 : MonoBehaviour
         DonePooling = true;
     }
 
+    /// <summary>
+    /// Gets the color of the route
+    /// </summary>
+    /// <returns>The color assigned to all route segments</returns>
     public Color GetColor()
     {
         return myColor;
@@ -92,7 +106,12 @@ public class RouteDisplayV2 : MonoBehaviour
 
     #region DRAW_DIRECT_ROUTE
 
-    //High-level route update
+    /// <summary>
+    /// Updates every pooled route segment a number of times/second equal to updatesPerSecond
+    /// Position nodes shall be drawn first, then the routes between nodes, and finally small routes will be drawn
+    /// Segments which are not used shall be set inactive until needed
+    /// </summary>
+    /// <returns></returns>
     IEnumerator UpdateRoute()
     {
         GameObject curNode, curPath, smPath;
@@ -181,7 +200,12 @@ public class RouteDisplayV2 : MonoBehaviour
         }        
     }
 
-    //Set route object transform
+    /// <summary>
+    /// Sets the position, scale, and rotation of route objects in ASL space
+    /// </summary>
+    /// <param name="_g">The game object to be modified</param>
+    /// <param name="pos">The position of the game object</param>
+    /// <param name="scale">The local scale of the game object</param>
     private void DrawRoute(GameObject _g, Vector3 pos, Vector3 scale)
     {
         _g.GetComponent<ASLObject>().SendAndSetClaim(() =>
@@ -196,7 +220,13 @@ public class RouteDisplayV2 : MonoBehaviour
 
     #region SCAN_GRAPH
 
-    //High level graph generation
+    /// <summary>
+    /// Generates a graph. A graph shall not be generated if there is no large map, or if data has already been collected.
+    /// Once heightmap data has been collected, graph paremeters shall be derieved.
+    /// The layer of the holomap chunks (the small map) shall also be set, in addition to the graph
+    /// The graph shall be scanned once set, and data shall be considered collected after that point
+    /// </summary>
+    /// <returns></returns>
     IEnumerator GenerateGraph()
     {
         if (LargeMap != null && !DataCollected)
@@ -239,7 +269,13 @@ public class RouteDisplayV2 : MonoBehaviour
         yield return new WaitForSeconds(0.1f);
     }
 
-    //Set graph data
+    /// <summary>
+    /// Sets various parameters of the graph used for pathfinding
+    /// </summary>
+    /// <param name="size">The size of the graph. This is half the size calculated in GenerateGraph.</param>
+    /// <param name="nodeSize">The size of nodes in the graph. This is twice the size calculated in GenerateGraph.</param>
+    /// <param name="scanHeight">The height of the scanning raycasts</param>
+    /// <returns></returns>
     IEnumerator SetGridGraph(int size, float nodeSize, float scanHeight)
     {
         GridGraph graph = data.AddGraph(typeof(GridGraph)) as GridGraph;
@@ -260,27 +296,10 @@ public class RouteDisplayV2 : MonoBehaviour
         yield return new WaitForSeconds(0.1f);
     }
 
-    //Set large map to ground layer
-    IEnumerator SetGround()
-    {
-        MeshFilter[] meshes = LargeMap.GetComponentsInChildren<MeshFilter>();
-        while (meshes.Length < 1)
-        {
-            yield return new WaitForSeconds(1 / updatesPerSecond);
-            meshes = LargeMap.GetComponentsInChildren<MeshFilter>();
-        }
-        Debug.Log("Setting " + meshes.Length + " chunks to Ground layer");
-        int ndx = 0;
-        while (ndx < meshes.Length)
-        {
-            meshes[ndx].gameObject.layer = LayerMask.NameToLayer("Ground");
-            ndx++;
-        }
-        //GroundSet = true;
-        yield return new WaitForSeconds(0.1f);
-    }
-
-    //Set small map to holomap layer
+    /// <summary>
+    /// Sets the chunks in the small map to the Holomap layer
+    /// </summary>
+    /// <returns></returns>
     IEnumerator SetHolomap()
     {
         MeshFilter[] meshes = SmallMap.GetComponentsInChildren<MeshFilter>();
@@ -303,7 +322,12 @@ public class RouteDisplayV2 : MonoBehaviour
 
     #region TRACE_PATH
 
-    //Get path from grid
+    /// <summary>
+    /// Traces a path between each pair of adjacent markers placed on the map. 
+    /// Markers are considered adjacent if they are indexed next to each other in the linkedObj list
+    /// These paths are combined to create a single path, which is used in BezierTrace
+    /// </summary>
+    /// <returns></returns>
     IEnumerator DrawMapCurve()
     {
         while (true)
@@ -341,7 +365,9 @@ public class RouteDisplayV2 : MonoBehaviour
         }        
     }
 
-    //Trace spline in preparation for display
+    /// <summary>
+    /// Resets and then traces over the BezierSpline mySpline based on the ABPath created from DrawMapCurve
+    /// </summary>
     private void BezierTrace()
     {
         BezierSpline _bs = mySpline;
@@ -367,6 +393,10 @@ public class RouteDisplayV2 : MonoBehaviour
         PathDisplay.DisplayCheck(mySpline.Length);
     }
 
+    /// <summary>
+    /// Alternative version of DrawMapCurve that directly uses the linkedObj list
+    /// </summary>
+    /// <returns></returns>
     IEnumerator DrawMapCurveV2()
     {
         while (true)
@@ -385,6 +415,10 @@ public class RouteDisplayV2 : MonoBehaviour
             }
         }
     }
+
+    /// <summary>
+    /// Alternative version of BezierTrace that directly uses the linkedObj list
+    /// </summary>
     private void BezierTraceV2()
     {
         BezierSpline _bs = mySpline;
@@ -403,7 +437,11 @@ public class RouteDisplayV2 : MonoBehaviour
 
     #region STATIC_FUNCTIONS
 
-    //Add node at end
+    /// <summary>
+    /// Adds a marker at the end of the linkedObj list. 
+    /// If the linkedObj count is greater than the current route segment length, additional route segments shall be pooled
+    /// </summary>
+    /// <param name="_t">The transform of the marker game object to be added</param>
     public static void AddRouteMarker(Transform _t)
     {
         current.linkedObj.Add(_t);
@@ -420,7 +458,14 @@ public class RouteDisplayV2 : MonoBehaviour
         }
     }
 
-    //Route insertion
+    /// <summary>
+    /// Attempts to insert a marker into the linkedObj list, based on a marker transform.
+    /// If the target cannot be found, the marker will instead be added to the end of the list.
+    /// If the linkedObj count is greater than the current route segment length after insertion, additional route segments shall be pooled
+    /// </summary>
+    /// <param name="_target">The target transform to search for in the linkedObj list</param>
+    /// <param name="_t">The transform of the marker object to be added</param>
+    /// <returns>The index of the </returns>
     public static int InsertMarkerAt(Transform _target, Transform _t)
     {
         int ndx = (_target != null) ? current.linkedObj.IndexOf(_target) : -1;
@@ -441,7 +486,13 @@ public class RouteDisplayV2 : MonoBehaviour
         return ndx;
     }
 
-    //Remove route node
+    /// <summary>
+    /// Attempts to remove a marker from the linkedObj list.
+    /// If the marker is not in the linkedObj list, an ASL callback shall be sent to all other clients
+    /// </summary>
+    /// <param name="_t">The transform to be removed</param>
+    /// <param name="fromFloatCallback">Specifies whether this is being called via ASL callback</param>
+    /// <returns>Returns true if removal is successful</returns>
     public static bool RemoveRouteMarker(Transform _t, bool fromFloatCallback)
     {
         current.removedNdx = current.linkedObj.IndexOf(_t);
@@ -484,9 +535,14 @@ public class RouteDisplayV2 : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Gets the count of the linkedObj list
+    /// </summary>
     public static int NodeCount { get { return current.linkedObj.Count; } }
 
-    //Delete route
+    /// <summary>
+    /// Clears the current route and purges the linkedObj list
+    /// </summary>
     public static void ClearRoute()
     {
         current.linkedObj.Clear();
@@ -494,7 +550,9 @@ public class RouteDisplayV2 : MonoBehaviour
         current.DrawPath = true;
     }
 
-    //Clear map data
+    /// <summary>
+    /// Clears the graph data currently used by the route display
+    /// </summary>
     public static void ClearMeshData()
     {
         foreach (NavGraph graph in current.data.graphs)
@@ -507,7 +565,9 @@ public class RouteDisplayV2 : MonoBehaviour
         current.DrawPath = false;
     }
 
-    //Change path being tracked
+    /// <summary>
+    /// Copies the current spline data, and uses the copy for display purposes
+    /// </summary>
     public static void ShowPath()
     {
         if(current.linkedObj.Count > 1)
@@ -522,7 +582,10 @@ public class RouteDisplayV2 : MonoBehaviour
 
     #region CALLBACK_FUNCTIONS
 
-    //Create route note
+    /// <summary>
+    /// Instantiates a marker within ASL space
+    /// </summary>
+    /// <param name="_myGameObject">The game object that initiated this callback</param>
     private static void MarkerInstantiation(GameObject _myGameObject)
     {
         current.routeMarkerPool.Add(_myGameObject);
@@ -534,7 +597,10 @@ public class RouteDisplayV2 : MonoBehaviour
         Debug.Log("Added marker");
     }
 
-    //Create route on large map
+    /// <summary>
+    /// Instantiates a large route segment within ASL space
+    /// </summary>
+    /// <param name="_myGameObject">The game object that initiated this callback</param>
     private static void RouteInstantiation(GameObject _myGameObject)
     {
         current.routeConnectPool.Add(_myGameObject);
@@ -545,7 +611,10 @@ public class RouteDisplayV2 : MonoBehaviour
         _myGameObject.SetActive(false);
     }
 
-    //Create route on small map
+    /// <summary>
+    /// Instantiates a small route segment within ASL space
+    /// </summary>
+    /// <param name="_myGameObject">The game object that inititated this callback</param>
     private static void SmallRouteInstantiation(GameObject _myGameObject)
     {
         current.smallConnectPool.Add(_myGameObject);
@@ -557,7 +626,10 @@ public class RouteDisplayV2 : MonoBehaviour
     }
 
 
-    //For reference in the event we need to pass ASLObject ids (which are strings) to the other players
+    /// <summary>
+    /// Sends the string ID of an ASLObject as a float array to all clients
+    /// </summary>
+    /// <param name="id">The ID of the ASLObject to be sent</param>
     private void PrepSearchCallback(string id)
     {
         current.gameObject.GetComponent<ASLObject>().SendAndSetClaim(() =>
@@ -575,7 +647,11 @@ public class RouteDisplayV2 : MonoBehaviour
     }
 
 
-    //Locally set float callback method
+    /// <summary>
+    /// Callback function used in conjunction with RemoveRouteMarker to remove markers not in a player's local linkedObj list
+    /// </summary>
+    /// <param name="_id">The string ID of the ASLObject that iniated this callback</param>
+    /// <param name="_f">The float array sent over ASL</param>
     public void SyncLists(string _id, float[] _f)
     {
         string theID = current.AssembleID(_f);
@@ -598,7 +674,11 @@ public class RouteDisplayV2 : MonoBehaviour
         }
     }
 
-    //Reassemble ASLObject id from float array
+    /// <summary>
+    /// Reassembes an ASLObject ID from a float array, to check if the player has that ASLObject
+    /// </summary>
+    /// <param name="f_id">The float array containing the ID</param>
+    /// <returns>The string ID of the ASLObject to search for</returns>
     private string AssembleID(float[] f_id)
     {
         char[] c_id = new char[f_id.Length];
