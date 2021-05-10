@@ -34,6 +34,13 @@ public class VRToolSelector : MonoBehaviour
     //    T: 0.176f, -0.0885f, -0.1021f
     //    R: 0f, 0f, 0f
     //    S: 0.1f, 0.1f, 0.1f
+    //
+    //
+    //HotSpot positions:
+    //1:
+    //T: 0.0506f, 0.0598f, -0.1993f
+    //R: 33.841f, 0.014f, -0.018f
+    //S: 0.05f, 0.05f, 0.05f
 
     private GameObject leftHand = null; //left hand of the VR player
 

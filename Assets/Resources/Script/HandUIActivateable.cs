@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class HandUIActivateable : MonoBehaviour
 {
-    private const bool DEBUG_COLORS = true;
+    private const bool DEBUG_COLORS = false;
     //this is a component for the UI Buttons that the VR player uses. when triggered it sends itself to the VRUIController in order to activate its action
 
     public Transform otherHand; //this is the hand that the button should interact with, all this transform needs to represent is the position of the hand, and does not need to be attatched to SteamVR's hand necessarily.
@@ -21,7 +21,10 @@ public class HandUIActivateable : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        
+        if (!DEBUG_COLORS)
+        {
+            this.GetComponent<Renderer>().material.color = Color.white;
+        }
     }
 
     // Update is called once per frame

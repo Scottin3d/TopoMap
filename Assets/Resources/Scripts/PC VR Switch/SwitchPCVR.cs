@@ -15,6 +15,8 @@ public class SwitchPCVR : MonoBehaviour
         SubsystemManager.GetInstances<XRDisplaySubsystem>(XRDisplaySubsystems);
         foreach (var XRDisplay in XRDisplaySubsystems)
         {
+            Debug.Log(XRDisplay);
+            Debug.Log(XRDisplay.running);
             if (XRDisplay.running)
             {
                 PC.SetActive(false);
