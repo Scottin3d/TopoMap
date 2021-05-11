@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class VRToolSelector : MonoBehaviour
 {
@@ -43,8 +44,12 @@ public class VRToolSelector : MonoBehaviour
     //S: 0.05f, 0.05f, 0.05f
 
     private GameObject leftHand = null; //left hand of the VR player
+    private GameObject rightHand = null;//right hand of the VR player
 
     private bool isActive = false; //whether or not the menu should be active (left hand is palm-up)
+
+    //Hotspots (where the player can grab the important tools quickly)
+    private GameObject HotSpot_1 = null;
 
     public enum toolSelectionState
     {
@@ -59,9 +64,40 @@ public class VRToolSelector : MonoBehaviour
         StartCoroutine("delayInitialization");
     }
 
+    //this function takes the given position, rotation, scale, and text, and creates a new hotspot, replacing the spot given
+    private void CreateHotSpot(Vector3 position, Vector3 rotation, Vector3 scale, string spotText, GameObject spot)
+    {
+        if (spot != null)
+        {
+            Destroy(spot);
+            spot = null;
+        }
+
+        spot = (GameObject)Instantiate(Resources.Load("VR/VRHotSpot"));
+        spot.transform.SetParent(leftHand.transform);
+        spot.transform.localPosition = position;
+        if (rotation != Vector3.zero)
+        {
+            spot.transform.localRotation = Quaternion.Euler(rotation);
+        }
+        else
+        {
+            spot.transform.localRotation = Quaternion.Euler(new Vector3(17.044f, 9.419f, 69.47f));
+        }
+        if (scale != Vector3.zero)
+        {
+            spot.transform.localScale = scale;
+        }
+        spot.GetComponentInChildren<Text>().text = spotText;
+        spot.GetComponent<VRToolHotSpot>().UICollider = rightHand.transform.Find("UIInteractSphere").gameObject;
+        spot.GetComponent<VRToolHotSpot>().reciever = this;
+    }
+
     private void StartUp()
     {
         leftHand = VRStartupController.VRPlayerObject.transform.Find("SteamVRObjects/LeftHand").gameObject;
+        rightHand = VRStartupController.VRPlayerObject.transform.Find("SteamVRObjects/RightHand").gameObject;
+        CreateHotSpot(new Vector3(0.0506f, 0.0598f, -0.1993f), new Vector3(33.841f, 0.014f, -0.018f), Vector3.zero, "Marker Tool", HotSpot_1);
     }
 
     IEnumerator delayInitialization()
@@ -82,5 +118,18 @@ public class VRToolSelector : MonoBehaviour
     private void checkActive()
     {
 
+    }
+
+    public void recieveHotSpotInput(GameObject theSpot)
+    {
+        if(theSpot == HotSpot_1)
+        {
+            //activate marker tool
+            Debug.Log("HotSpot1 active");
+        }
+        else
+        {
+            Debug.LogWarning("hotspot input called without hotspot!");
+        }
     }
 }
