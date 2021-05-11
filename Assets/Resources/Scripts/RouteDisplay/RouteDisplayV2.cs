@@ -18,8 +18,8 @@ public class RouteDisplayV2 : MonoBehaviour
     private List<GameObject> routeConnectPool = new List<GameObject>();
     private List<GameObject> smallConnectPool = new List<GameObject>();
 
-    private List<Transform> linkedObj = new List<Transform>();
-    int removedNdx = -1;
+    public List<Transform> linkedObj = new List<Transform>();
+    int actionNdx = -1;
 
     //Map references
     public Transform MapDisplay = null;
@@ -69,10 +69,10 @@ public class RouteDisplayV2 : MonoBehaviour
         LargeMap = GameObject.FindWithTag("SpawnLargerMap");
         SmallMap = GameObject.FindWithTag("SpawnSmallMap");
 
-        if(current.gameObject.GetComponent<ASLObject>() != null)
+        /*if(current.gameObject.GetComponent<ASLObject>() != null)
         {
             current.gameObject.GetComponent<ASLObject>()._LocallySetFloatCallback(SyncLists);
-        }
+        }*/
         myColor = new Color(Random.Range(0, 1f), Random.Range(0, 1f), Random.Range(0, 1f), .25f);
         GenerateRoutePool(batchSize);
         StartCoroutine(PathDisplay.Initialize(myColor, traceSpeed, updatesPerSecond));
@@ -83,6 +83,7 @@ public class RouteDisplayV2 : MonoBehaviour
         StartCoroutine(UpdateRoute());
         StartCoroutine(DrawMapCurve());
     }
+
 
     /// <summary>
     /// Adds a set number of route objects to the pool
@@ -111,97 +112,122 @@ public class RouteDisplayV2 : MonoBehaviour
     #region DRAW_DIRECT_ROUTE
 
     /// <summary>
-    /// Updates every pooled route segment a number of times/second equal to updatesPerSecond
-    /// Position nodes shall be drawn first, then the routes between nodes, and finally small routes will be drawn
-    /// Segments which are not used shall be set inactive until needed
+    /// Update route segments based on actionNdx. If actionNdx >= 0:
+    ///     Update the route segment at actionNdx and actionNdx + 1
+    ///     If actionNdx > 0, update the route segment at actionNdx - 1
     /// </summary>
     /// <returns></returns>
     IEnumerator UpdateRoute()
     {
-        GameObject curNode, curPath, smPath;
-        Vector3 scale, dir, pos, nextPos;
-        int ndx;
-        float length; 
         while (true)
         {
             while (!DonePooling) yield return new WaitForSeconds(0.1f);
             while (!DrawPath) yield return new WaitForSeconds(0.1f);
             yield return new WaitForSeconds(1f / updatesPerSecond);
-
-            for(ndx = 0; ndx < routeMarkerPool.Count; ndx++)
+            if(actionNdx >= 0)
             {
-                curNode = routeMarkerPool[ndx];
-                curPath = routeConnectPool[ndx];
-                smPath = smallConnectPool[ndx];
-
-                if (ndx < linkedObj.Count)
+                try
                 {
-                    curNode.SetActive(true);
-
-                    scale = new Vector3(1.5f, 0.5f, 1.5f);
-                    pos = linkedObj[ndx].position;
-                    pos.y += heightAboveMarker;
-                    DrawRoute(curNode, pos, scale);
-
-                    if (ndx < linkedObj.Count - 1)
+                    //Update previous node
+                    if (actionNdx > 0)
                     {
-                        curPath.SetActive(true);
-                        smPath.SetActive(true);
+                        RouteDraw(actionNdx - 1, routeMarkerPool[actionNdx - 1], routeConnectPool[actionNdx - 1], smallConnectPool[actionNdx - 1]);
+                    }
+                    //Update current node
+                    RouteDraw(actionNdx, routeMarkerPool[actionNdx], routeConnectPool[actionNdx], smallConnectPool[actionNdx]);
+                    //Update next node
+                    if (actionNdx < linkedObj.Count - 1) 
+                    {
+                        RouteDraw(actionNdx + 1, routeMarkerPool[actionNdx + 1], routeConnectPool[actionNdx + 1], smallConnectPool[actionNdx + 1]);
+                    }
+                    actionNdx = -1;
+                } catch(System.Exception e)
+                {
+                    Debug.LogException(e, this);
+                }
+            }
+        }        
+    }
 
-                        nextPos = linkedObj[ndx + 1].position;
-                        nextPos.y += heightAboveMarker;
-                        dir = nextPos - pos;
-                        length = (dir).magnitude / 2f;
-                        scale = new Vector3(.25f, length, .25f);
-                        pos = pos + (length * dir.normalized);
-                        curPath.transform.up = dir;
-                        DrawRoute(curPath, pos, scale);
+    /// <summary>
+    /// Draws the route objects at the current index of action in the linkedObj list
+    /// </summary>
+    /// <param name="ndx">The index where action (insertion/deletion) occurred</param>
+    /// <param name="curNode">The current node from the route pool</param>
+    /// <param name="curPath">The current route connector from the pool</param>
+    /// <param name="smPath">The current small route connecter from the pool</param>
+    private void RouteDraw(int ndx, GameObject curNode, GameObject curPath, GameObject smPath)
+    {
+        Vector3 scale, dir, pos, nextPos;
+        float length;
+        
 
-                        float scaleFactor = MarkerDisplay.GetScaleFactor();
-                        smPath.transform.up = dir;
-                        if (MapDisplay != null)
-                        {
-                            if (scaleFactor > 0)
-                            {
-                                pos = MapDisplay.position + ((pos - 0.5f * heightAboveMarker * Vector3.up) / scaleFactor);
-                                scale = new Vector3(.05f, length / scaleFactor, .05f);
-                            }
-                            else
-                            {
-                                pos = Vector3.zero;
-                                scale = Vector3.zero;
-                            }
-                        }
-                        else
-                        {
-                            if (scaleFactor > 0)
-                            {
-                                pos = SmallMap.transform.position + ((pos - 0.5f * heightAboveMarker * Vector3.up) / scaleFactor);
-                                //- smMap.transform.right / scaleFactor - smMap.transform.right / smMap.GetComponent<GenerateMapFromHeightMap>().mapSize;
-                                scale = new Vector3(0.01f, length / scaleFactor, 0.01f);
-                            }
-                            else
-                            {
-                                pos = Vector3.zero;
-                                scale = Vector3.zero;
-                            }
-                        }
-                        DrawRoute(smPath, pos, scale);
+        if (ndx < linkedObj.Count)
+        {
+            curNode.SetActive(true);
+
+            scale = new Vector3(1.5f, 0.5f, 1.5f);
+            pos = linkedObj[ndx].position;
+            pos.y += heightAboveMarker;
+            DrawRouteObject(curNode, pos, scale);
+
+            if (ndx < linkedObj.Count - 1)
+            {
+                curPath.SetActive(true);
+                smPath.SetActive(true);
+
+                nextPos = linkedObj[ndx + 1].position;
+                nextPos.y += heightAboveMarker;
+                dir = nextPos - pos;
+                length = (dir).magnitude / 2f;
+                scale = new Vector3(.25f, length, .25f);
+                pos = pos + (length * dir.normalized);
+                curPath.transform.up = dir;
+                DrawRouteObject(curPath, pos, scale);
+
+                float scaleFactor = MarkerDisplay.GetScaleFactor();
+                smPath.transform.up = dir;
+                if (MapDisplay != null)
+                {
+                    if (scaleFactor > 0)
+                    {
+                        pos = MapDisplay.position + ((pos - 0.5f * heightAboveMarker * Vector3.up) / scaleFactor);
+                        scale = new Vector3(.05f, length / scaleFactor, .05f);
                     }
                     else
                     {
-                        curPath.SetActive(false);
-                        smPath.SetActive(false);
+                        pos = Vector3.zero;
+                        scale = Vector3.zero;
                     }
                 }
                 else
                 {
-                    curNode.SetActive(false);
-                    curPath.SetActive(false);
-                    smPath.SetActive(false);
+                    if (scaleFactor > 0)
+                    {
+                        pos = SmallMap.transform.position + ((pos - 0.5f * heightAboveMarker * Vector3.up) / scaleFactor);
+                        //- smMap.transform.right / scaleFactor - smMap.transform.right / smMap.GetComponent<GenerateMapFromHeightMap>().mapSize;
+                        scale = new Vector3(0.01f, length / scaleFactor, 0.01f);
+                    }
+                    else
+                    {
+                        pos = Vector3.zero;
+                        scale = Vector3.zero;
+                    }
                 }
+                DrawRouteObject(smPath, pos, scale);
             }
-        }        
+            else
+            {
+                curPath.SetActive(false);
+                smPath.SetActive(false);
+            }
+        }
+        else
+        {
+            curNode.SetActive(false);
+            curPath.SetActive(false);
+            smPath.SetActive(false);
+        }
     }
 
     /// <summary>
@@ -210,7 +236,7 @@ public class RouteDisplayV2 : MonoBehaviour
     /// <param name="_g">The game object to be modified</param>
     /// <param name="pos">The position of the game object</param>
     /// <param name="scale">The local scale of the game object</param>
-    private void DrawRoute(GameObject _g, Vector3 pos, Vector3 scale)
+    private void DrawRouteObject(GameObject _g, Vector3 pos, Vector3 scale)
     {
         _g.GetComponent<ASLObject>().SendAndSetClaim(() =>
         {
@@ -231,19 +257,19 @@ public class RouteDisplayV2 : MonoBehaviour
     /// The graph shall be scanned once set, and data shall be considered collected after that point
     /// </summary>
     /// <returns></returns>
-    IEnumerator GenerateGraph()
+    public static IEnumerator GenerateGraph()
     {
-        if (LargeMap != null && !DataCollected)
+        if (current.LargeMap != null && !current.DataCollected)
         {
             Debug.Log("Generating new graph");
-            data = AstarPath.active.data;
+            current.data = AstarPath.active.data;
             
-            GenerateMapFromHeightMap heightMapData = LargeMap.GetComponent<GenerateMapFromHeightMap>();
+            GenerateMapFromHeightMap heightMapData = current.LargeMap.GetComponent<GenerateMapFromHeightMap>();
 
             while (heightMapData == null)
             {
-                yield return new WaitForSeconds(1 / updatesPerSecond);
-                heightMapData = LargeMap.GetComponent<GenerateMapFromHeightMap>();
+                yield return new WaitForSeconds(1 / current.updatesPerSecond);
+                heightMapData = current.LargeMap.GetComponent<GenerateMapFromHeightMap>();
             }
 
             if(heightMapData.heightmap!= null && heightMapData.heightmap.width >= 32 && heightMapData.heightmap.width % 2 == 0)
@@ -254,20 +280,20 @@ public class RouteDisplayV2 : MonoBehaviour
                 float scanHeight = heightMapData.meshHeight;
 
                 //StartCoroutine(SetGround());
-                StartCoroutine(SetHolomap());
-                StartCoroutine(SetGridGraph(graphSize/2, nodeSize*2, scanHeight));
+                current.StartCoroutine(current.SetHolomap());
+                current.StartCoroutine(current.SetGridGraph(graphSize/2, nodeSize*2, scanHeight));
 
-                while(!GraphSet || !heightMapData.IsGenerated)
+                while(!current.GraphSet || !heightMapData.IsGenerated)
                 {
-                    yield return new WaitForSeconds(1 / updatesPerSecond);
+                    yield return new WaitForSeconds(1 / current.updatesPerSecond);
                 }
 
-                AstarPath.active.Scan(data.graphs);
+                AstarPath.active.Scan(current.data.graphs);
                 //consider culling nodes with no neighbors
-                DataCollected = !DataCollected;
+                current.DataCollected = !current.DataCollected;
             } else
             {
-                Debug.LogError("Large map does not have valid heightmap set.", LargeMap);
+                Debug.LogError("Large map does not have valid heightmap set.", current.LargeMap);
             }            
         }
         yield return new WaitForSeconds(0.1f);
@@ -450,6 +476,7 @@ public class RouteDisplayV2 : MonoBehaviour
     public static void AddRouteMarker(Transform _t)
     {
         current.linkedObj.Add(_t);
+        current.actionNdx = current.linkedObj.Count - 1;
         current.DrawPath = true;
         current.DonePooling = false;
         if (current.linkedObj.Count > current.routeMarkerPool.Count)
@@ -480,6 +507,7 @@ public class RouteDisplayV2 : MonoBehaviour
         } else
         {
             current.linkedObj.Insert(ndx + 1, _t);
+            current.actionNdx = ndx + 1;
             current.DrawPath = true;
             if (current.linkedObj.Count > current.routeMarkerPool.Count)
             {
@@ -487,6 +515,8 @@ public class RouteDisplayV2 : MonoBehaviour
                 current.DonePooling = false;
                 current.GenerateRoutePool(current.batchSize);
             }
+            while (!current.DonePooling) ;
+            current.Reinsertion(current.routeConnectPool.Count - 1, current.actionNdx);
         }
         return ndx;
     }
@@ -500,44 +530,52 @@ public class RouteDisplayV2 : MonoBehaviour
     /// <returns>Returns true if removal is successful</returns>
     public static bool RemoveRouteMarker(Transform _t, bool fromFloatCallback)
     {
-        current.removedNdx = current.linkedObj.IndexOf(_t);
-        if (current.removedNdx > -1)
+        current.actionNdx = current.linkedObj.IndexOf(_t);
+        if (current.actionNdx > -1)
         {
-            GameObject nodeToRemove = current.routeMarkerPool[current.removedNdx];
-            GameObject pathToRemove = current.routeConnectPool[current.removedNdx];
-            GameObject smallToRemove = current.smallConnectPool[current.removedNdx];
-
+            current.Reinsertion(current.actionNdx, current.linkedObj.Count);
             current.linkedObj.Remove(_t);
             if (current.linkedObj.Count < 2) PathDisplay.ClearNotRender();
-
-            current.routeMarkerPool.RemoveAt(current.removedNdx);
-            current.routeConnectPool.RemoveAt(current.removedNdx);
-            current.smallConnectPool.RemoveAt(current.removedNdx);
-
-            current.routeMarkerPool.Add(nodeToRemove);
-            current.routeConnectPool.Add(pathToRemove);
-            current.smallConnectPool.Add(smallToRemove);
-            nodeToRemove.SetActive(false);
-            pathToRemove.SetActive(false);
-            smallToRemove.SetActive(false);
             current.DrawPath = true;
 
-            if (fromFloatCallback)
+            /*if (fromFloatCallback)
             {
                 PlayerMarkerGenerator.RemoveMarker(_t.gameObject);
-            }
-
+            }*/
             return true;
         }
         else
         {
-            if (!fromFloatCallback && current.gameObject.GetComponent<ASLObject>() != null)
+            /*if (!fromFloatCallback && current.gameObject.GetComponent<ASLObject>() != null)
             {
                 current.PrepSearchCallback(_t.gameObject.GetComponent<ASLObject>().m_Id);
-            }
+            }*/
 
             return false;
         }
+    }
+
+    private void Reinsertion(int removeFrom, int insertAt)
+    {
+        if (removeFrom > routeMarkerPool.Count - 1 || removeFrom < 0) return;
+        if (insertAt > routeMarkerPool.Count - 1 || insertAt < 0) return;
+        if (insertAt > removeFrom) insertAt--;
+
+        GameObject nodeToRemove = routeMarkerPool[removeFrom];
+        GameObject pathToRemove = routeConnectPool[removeFrom];
+        GameObject smallToRemove = smallConnectPool[removeFrom];
+
+        routeMarkerPool.RemoveAt(removeFrom);
+        routeConnectPool.RemoveAt(removeFrom);
+        smallConnectPool.RemoveAt(removeFrom);
+
+        routeMarkerPool.Insert(insertAt, nodeToRemove);
+        routeConnectPool.Insert(insertAt, pathToRemove);
+        smallConnectPool.Insert(insertAt, smallToRemove);
+
+        nodeToRemove.SetActive(false);
+        pathToRemove.SetActive(false);
+        smallToRemove.SetActive(false);
     }
 
     /// <summary>
@@ -599,7 +637,7 @@ public class RouteDisplayV2 : MonoBehaviour
             _myGameObject.GetComponent<ASLObject>().SendAndSetObjectColor(current.myColor, current.myColor);
         });
         _myGameObject.SetActive(false);
-        Debug.Log("Added marker");
+        //Debug.Log("Added marker");
     }
 
     /// <summary>
@@ -630,6 +668,10 @@ public class RouteDisplayV2 : MonoBehaviour
         _myGameObject.SetActive(false);
     }
 
+    #endregion
+
+    //Functions not currently in use
+    #region UNUSED FUNCTIONS
 
     /// <summary>
     /// Sends the string ID of an ASLObject as a float array to all clients

@@ -10,7 +10,6 @@ public class PlayerMarkerGenerator : MonoBehaviour
     private Camera PlayerCamera;
     private Camera PlayerTableViewCamera;
 
-    private static List<GameObject> SmallMapMarkerList = new List<GameObject>();
     private static List<GameObject> LargerMapMarkerList = new List<GameObject>();
 
     public Dropdown MyDropdownList;
@@ -141,13 +140,6 @@ public class PlayerMarkerGenerator : MonoBehaviour
                         Vector3 NewPositionOnLargeMap = CenterToMarker + LargerMapCenter;
                         Deselect();
                         if (Input.GetKey(KeyCode.LeftShift)) ASL.ASLHelper.InstantiateASLObject(DropdownOpionValue, NewPositionOnLargeMap, Quaternion.identity, "", "", GetLargerFromSmaller);
-                        /*else if (DrawOrigin != null)
-                        {
-                            DrawOrigin.GetComponent<MeshRenderer>().material.color = OriginColor;
-                            DrawOrigin = null;
-                        }*/
-                        //GenerateMarkerOnLargerMap(Hit.point);
-
                     }
                     //If mouse hit the large map
                     else if (Hit.collider.tag == "Chunk" && Hit.collider.transform.parent.tag == "SpawnLargerMap")
@@ -155,27 +147,13 @@ public class PlayerMarkerGenerator : MonoBehaviour
                         DropdownOpionValue = MyDropdownList.options[MyDropdownList.value].text;
                         Deselect();
                         if (Input.GetKey(KeyCode.LeftShift)) ASL.ASLHelper.InstantiateASLObject(DropdownOpionValue, Hit.point, Quaternion.identity, "", "", GetLargerFromLarger);
-                        /*else if (DrawOrigin != null)
-                        {
-                            DrawOrigin.GetComponent<MeshRenderer>().material.color = OriginColor;
-                            DrawOrigin = null;
-                        }*/
-                        //GenerateMarkerOnSmallMap(Hit.point);
                     }
                     else if (Hit.collider.gameObject.layer == 6 /*&& DrawLineMarker == null*/)  //If we don't hit either map but do hit a marker
                     {
-                        /*if (DrawOrigin != null)
-                        {
-                            if (DrawOrigin.GetComponent<MeshRenderer>() != null) DrawOrigin.GetComponent<MeshRenderer>().material.color = OriginColor;
-                        }*/
                         Deselect();
                         SetDrawOrigin(Hit.collider.gameObject);
                     }
-                    else {Deselect(); }/*if(DrawOrigin != null)
-                    {
-                        if (DrawOrigin.GetComponent<MeshRenderer>() != null) DrawOrigin.GetComponent<MeshRenderer>().material.color = OriginColor;
-                        DrawOrigin = null;
-                    }*/
+                    else {Deselect(); }
                 }
             }
             //If player in third persion view
@@ -202,20 +180,12 @@ public class PlayerMarkerGenerator : MonoBehaviour
                     }
                     else if (Hit.collider.gameObject.layer == 6 /*&& DrawLineMarker == null*/)  //If we don't hit either map but do hit a marker
                     {
-                        /*if(DrawOrigin != null)
-                        {
-                            if (DrawOrigin.GetComponent<MeshRenderer>() != null) DrawOrigin.GetComponent<MeshRenderer>().material.color = OriginColor;
-                        }*/
                         Deselect();
                         SetDrawOrigin(Hit.collider.gameObject);
                     }
                     else
                     {
                         Deselect();
-                        /*if (DrawOrigin != null)
-                        {
-                            if (DrawOrigin.GetComponent<MeshRenderer>() != null) DrawOrigin.GetComponent<MeshRenderer>().material.color = OriginColor;
-                        }*/
                     }
                 }
             }
@@ -352,16 +322,10 @@ public class PlayerMarkerGenerator : MonoBehaviour
         }
     }
 
-    private void SpawnRegularMarker(Vector3 HitPoint)
-    {
-
-    }
-
     private static void GetSmallMapMarker(GameObject _myGameObject)
     {
         ASLObjectTrackingSystem.AddObjectToTrack(_myGameObject.GetComponent<ASL.ASLObject>());
         RouteDisplayV2.AddRouteMarker(_myGameObject.transform);
-        SmallMapMarkerList.Add(_myGameObject);
     }
 
     //Add the large map marker into the list and add it into ASLObjectTrackingSystem
@@ -406,38 +370,20 @@ public class PlayerMarkerGenerator : MonoBehaviour
     }
 
     //Get position from larger map and convert is to small map and generate a new marker on small map
-    private void GenerateMarkerOnSmallMap(Vector3 MarkerPosition) {
+    /*private void GenerateMarkerOnSmallMap(Vector3 MarkerPosition) {
         //(MarkerPosition - LargerMapCenter) will get the math vector from largermapcenter to marker
         Vector3 CenterToMarker = (MarkerPosition - LargerMapCenter) / (LargeMapSize / SmallMapSize);
         Vector3 NewPositionOnLargeMap = CenterToMarker + SmallMapCenter;
         ASL.ASLHelper.InstantiateASLObject("PlayerMarker", NewPositionOnLargeMap, Quaternion.identity, "", "", GetSmallMapMarker);
-    }
+    }*/
 
     private void RemoveLastMarker()
     {
         if (!FromPlace) { 
-            //if (SmallMapMarkerList.Count > 0)
-            //{
-            //    GameObject SMarker = SmallMapMarkerList[SmallMapMarkerList.Count - 1];
-            //    ASLObjectTrackingSystem.RemoveObjectToTrack(SMarker.GetComponent<ASL.ASLObject>());
-            //    SMarker.GetComponent<ASL.ASLObject>().SendAndSetClaim(() =>
-            //    {
-            //        SMarker.GetComponent<ASL.ASLObject>().DeleteObject();
-            //    });
-
-            //    SmallMapMarkerList.RemoveAt(SmallMapMarkerList.Count - 1);
-            //}
             if (LargerMapMarkerList.Count > 0)
             {
                 GameObject LMarker = LargerMapMarkerList[LargerMapMarkerList.Count - 1];
                 if (RouteDisplayV2.RemoveRouteMarker(LMarker.transform, false)) RemoveMarker(LMarker);
-                /*ASLObjectTrackingSystem.RemoveObjectToTrack(LMarker.GetComponent<ASL.ASLObject>());
-                LMarker.GetComponent<ASL.ASLObject>().SendAndSetClaim(() =>
-                {
-                    LMarker.GetComponent<ASL.ASLObject>().DeleteObject();
-                });
-
-                LargerMapMarkerList.RemoveAt(LargerMapMarkerList.Count - 1);*/
             }
         }
     }
