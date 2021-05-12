@@ -26,11 +26,12 @@ public class PlayerMarkerGenerator : MonoBehaviour
     private GameObject DrawLineMarker;
     private GameObject DrawLine;
     public GameObject DrawOrigin;
-    private float drawTime = 0.5f;
+    private float drawTime = 1f;
 
     private Color OriginColor;
     private Color SelectedColor = new Color(1f, 1f, 0f, 1f);
-    private bool FromPlace = false, projecting = false;
+    //public bool FromPlace = false; 
+    private bool projecting = false;
 
     private bool deleteMode = false;
 
@@ -75,7 +76,7 @@ public class PlayerMarkerGenerator : MonoBehaviour
         }
         if (Input.GetKeyDown(KeyCode.Minus))
         {
-            if (DrawOrigin != null && !FromPlace && !projecting) {
+            if (DrawOrigin != null /*&& !FromPlace*/ && !projecting) {
                 if(RouteDisplayV2.RemoveRouteMarker(DrawOrigin.transform, false)) RemoveMarker(DrawOrigin);
             } 
         }
@@ -178,7 +179,7 @@ public class PlayerMarkerGenerator : MonoBehaviour
                         if (Input.GetKey(KeyCode.LeftShift)) ASL.ASLHelper.InstantiateASLObject(DropdownOpionValue, NewPositionOnLargeMap, Quaternion.identity, "", "", GetLargerFromSmaller);
                         //GenerateMarkerOnLargerMap(Hit.point);
                     }
-                    else if (Hit.collider.gameObject.layer == 6 /*&& DrawLineMarker == null*/)  //If we don't hit either map but do hit a marker
+                    else if (Hit.collider.gameObject.layer == 6)  //If we don't hit either map but do hit a marker
                     {
                         Deselect();
                         SetDrawOrigin(Hit.collider.gameObject);
@@ -197,20 +198,29 @@ public class PlayerMarkerGenerator : MonoBehaviour
         if (DrawOrigin != null)
         {
             if (DrawOrigin.GetComponent<MeshRenderer>() != null) DrawOrigin.GetComponent<MeshRenderer>().material.color = OriginColor;
+            else DrawOrigin.GetComponentInChildren<MeshRenderer>().material.color = OriginColor;
             DrawOrigin = null;
         }
     }
 
     private void SetDrawOrigin(GameObject _g)
     {
-        DrawOrigin = _g;
-        OriginColor = (DrawOrigin.GetComponent<MeshRenderer>() != null) ? DrawOrigin.GetComponent<MeshRenderer>().material.color : Color.white;
+        if (!_g.Equals(DrawOrigin))
+        {
+            DrawOrigin = _g;
+            OriginColor = (DrawOrigin.GetComponent<MeshRenderer>() != null) ? 
+                DrawOrigin.GetComponent<MeshRenderer>().material.color : DrawOrigin.GetComponentInChildren<MeshRenderer>().material.color;
+            Debug.Log("Set draw origin");
+        }
         DrawLineMarker = Instantiate(_g) as GameObject;
         if (DrawLineMarker.GetComponent<ASL.ASLObject>() != null) Destroy(DrawLineMarker.GetComponent<ASL.ASLObject>());
         Destroy(DrawLineMarker.GetComponent<ASL.ASLObject>());
         Destroy(DrawLineMarker.GetComponent<BoxCollider>());
         DrawLineMarker.layer = 11;
         if (DrawOrigin.GetComponent<MeshRenderer>() != null) DrawOrigin.GetComponent<MeshRenderer>().material.color = SelectedColor;
+        else DrawOrigin.GetComponentInChildren<MeshRenderer>().material.color = SelectedColor;
+
+
     }
 
     private void WhileClickDown()
@@ -261,7 +271,7 @@ public class PlayerMarkerGenerator : MonoBehaviour
         else
         {
             DrawLine.SetActive(false);
-            if (DrawLineMarker != null) DrawLineMarker.SetActive(false);
+            if (DrawLineMarker != null) GameObject.Destroy(DrawLineMarker);
         }
     }
 
@@ -284,16 +294,12 @@ public class PlayerMarkerGenerator : MonoBehaviour
                     int layerMask = (LargerMapMarkerList.IndexOf(DrawOrigin) >= 0) ? LayerMask.GetMask("Ground") : LayerMask.GetMask("Holomap");
                     if (drawTime <= 0f) DragDrawFinish(mouseRay, layerMask);
                 }
+
                 
                 DrawLine.SetActive(false);
                 Destroy(DrawLineMarker);
             }
-            if(DrawOrigin != null && FromPlace)
-            {
-                if (DrawOrigin.GetComponent<MeshRenderer>() != null) DrawOrigin.GetComponent<MeshRenderer>().material.color = OriginColor;
-                FromPlace = false;
-            }
-            drawTime = 0.5f;
+            drawTime = 1f;
             projecting = false;
         }
     }
@@ -318,7 +324,8 @@ public class PlayerMarkerGenerator : MonoBehaviour
 
                 ASL.ASLHelper.InstantiateASLObject(DropdownOpionValue, NewPositionOnLargeMap, Quaternion.identity, "", "", InsertLargerMapMarker);
             }
-
+            if (DrawOrigin.GetComponent<MeshRenderer>() != null) DrawOrigin.GetComponent<MeshRenderer>().material.color = OriginColor;
+            else DrawOrigin.GetComponentInChildren<MeshRenderer>().material.color = OriginColor;
         }
     }
 
@@ -330,7 +337,7 @@ public class PlayerMarkerGenerator : MonoBehaviour
 
     //Add the large map marker into the list and add it into ASLObjectTrackingSystem
     private static void GetLargerFromLarger(GameObject _myGameObject) {
-        generator.FromPlace = true;
+        //generator.FromPlace = true;
         ASLObjectTrackingSystem.AddObjectToTrack(_myGameObject.GetComponent<ASL.ASLObject>());
         RouteDisplayV2.AddRouteMarker(_myGameObject.transform);
         LargerMapMarkerList.Add(_myGameObject);
@@ -379,18 +386,18 @@ public class PlayerMarkerGenerator : MonoBehaviour
 
     private void RemoveLastMarker()
     {
-        if (!FromPlace) { 
+        //if (!FromPlace) { 
             if (LargerMapMarkerList.Count > 0)
             {
                 GameObject LMarker = LargerMapMarkerList[LargerMapMarkerList.Count - 1];
                 if (RouteDisplayV2.RemoveRouteMarker(LMarker.transform, false)) RemoveMarker(LMarker);
             }
-        }
+        //}
     }
 
     public static void RemoveMarker(GameObject _marker)
     {
-        if (!generator.FromPlace) {
+        //if (!generator.FromPlace) {
             if (LargerMapMarkerList.Remove(_marker))
             {
                 ASLObjectTrackingSystem.RemoveObjectToTrack(_marker.GetComponent<ASL.ASLObject>());
@@ -399,7 +406,7 @@ public class PlayerMarkerGenerator : MonoBehaviour
                     _marker.GetComponent<ASL.ASLObject>().DeleteObject();
                 });
             }
-        }
+        //}
     }
 }
 

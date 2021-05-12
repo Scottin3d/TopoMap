@@ -256,6 +256,7 @@ public static class PathDisplay //: MonoBehaviour
     /// <param name="_t">The transform to try to attach the camera to</param>
     public static void Select(Transform _t)
     {
+        if (cam == null) return;
         if(cam.transform.parent != null && _t != cam.transform.parent)
         {
             if(_t.gameObject.layer != 9) cam.transform.parent.DetachChildren();
@@ -273,6 +274,7 @@ public static class PathDisplay //: MonoBehaviour
     /// </summary>
     public static void DetatchPathCam()
     {
+        if (cam == null) return;
         if(cam.transform.parent != null) cam.transform.parent.DetachChildren();
     }
 
