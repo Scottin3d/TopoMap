@@ -172,10 +172,10 @@ public class RouteDisplayV2 : MonoBehaviour
         route.SetActive(true);
         small.SetActive(true);
 
-        dir = start - end;
+        dir = end - start;
         length = dir.magnitude / 2f;
         scale = new Vector3(.25f, length, .25f);
-        pos = end + (length * dir.normalized);
+        pos = start + (length * dir.normalized);
         route.transform.up = dir;
         DrawRouteObject(route, pos, scale);
 

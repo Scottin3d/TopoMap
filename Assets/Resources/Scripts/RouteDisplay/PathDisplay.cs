@@ -12,6 +12,7 @@ public static class PathDisplay //: MonoBehaviour
     private static int walkerCount = 0;
 
     private static GameObject cam;
+    private static GameObject indicator;
     private static Vector3 camOffset = new Vector3(0f, 2f, 0f);
     private static Quaternion camRot = new Quaternion(-0.2f, 0f, 0f, 1f);
     private static Text myText;
@@ -52,6 +53,13 @@ public static class PathDisplay //: MonoBehaviour
         myColor = _c;
         updatesPerSecond = ups;
         speed = tSpeed;
+
+        indicator = GameObject.CreatePrimitive(PrimitiveType.Sphere);
+        GameObject.Destroy(indicator.GetComponent<SphereCollider>());
+        indicator.GetComponent<MeshRenderer>().material.color = _c;
+        indicator.transform.localScale = new Vector3(0.25f, 0.25f, 0.25f);
+        indicator.layer = 11;
+        indicator.SetActive(false);
         yield return new WaitForSeconds(1f);
         InitFinished = true;
     }
@@ -206,12 +214,24 @@ public static class PathDisplay //: MonoBehaviour
                 
             }
             if (!DoNotRender) {
-                if (cam.transform.parent != null) { 
+                if (cam.transform.parent != null)
+                {
+                    indicator.SetActive(true);
+                    indicator.transform.position = cam.transform.parent.position;
                     myText.text = string.Format("Position:\n({0:f4},{1:f4})", cam.transform.parent.position.x, cam.transform.parent.position.z);
-                } 
-                else myText.text = "No node selected";
-            }            
-            else myText.text = "No node selected";
+                }
+                else 
+                {
+                    indicator.SetActive(false);
+                    myText.text = "No node selected"; 
+                }
+                    
+            }
+            else
+            {
+                indicator.SetActive(false);
+                myText.text = "No node selected";
+            }
             yield return new WaitForSeconds(1f / updatesPerSecond);
         }
     }
