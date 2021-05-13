@@ -10,7 +10,7 @@ public class PlayerMarkerGenerator : MonoBehaviour
     private Camera PlayerCamera;
     private Camera PlayerTableViewCamera;
 
-    private static List<GameObject> SmallMapMarkerList = new List<GameObject>();
+    //private static List<GameObject> SmallMapMarkerList = new List<GameObject>();
     private static List<GameObject> LargerMapMarkerList = new List<GameObject>();
 
     public Dropdown MyDropdownList;
@@ -34,24 +34,25 @@ public class PlayerMarkerGenerator : MonoBehaviour
 
     private bool deleteMode = false;
 
-    void Awake()
+    // Start is called before the first frame update
+    void Start()
     {
         generator = this;
         //Find all Camera and MiniMap Display
         PlayerCamera = GameObject.Find("PCHandler/Player").GetComponentInChildren<Camera>();
         PlayerTableViewCamera = GameObject.Find("PCHandler/PlayerTopViewCamera").GetComponentInChildren<Camera>();
-    }
-
-    // Start is called before the first frame update
-    void Start() {
+        //Get the map center position and the map scale
         LargerMapCenter = LargerMapGenerator.transform.position;
         SmallMapCenter = SmallMapGenerator.transform.position;
         LargeMapSize = LargerMapGenerator.GetComponent<GenerateMapFromHeightMap>().mapSize;
         SmallMapSize = SmallMapGenerator.GetComponent<GenerateMapFromHeightMap>().mapSize;
+
+        //Instantiate a marker on client side. Not ASL Object
         LocalProjectMarker = Instantiate(Resources.Load("MyPrefabs/PlayerMarker") as GameObject);
         Destroy(LocalProjectMarker.GetComponent<BoxCollider>());
         LocalProjectMarker.SetActive(false);
 
+        //
         DrawLine = GameObject.CreatePrimitive(PrimitiveType.Cylinder);
         Destroy(DrawLine.GetComponent<CapsuleCollider>());
         DrawLine.GetComponent<MeshRenderer>().material.color = Color.cyan;
@@ -60,7 +61,8 @@ public class PlayerMarkerGenerator : MonoBehaviour
     }
 
     // Update is called once per frame
-    void Update() {
+    void Update()
+    {
         if (Input.GetKeyDown(KeyCode.R)) {
             deleteMode = !deleteMode;
         }
@@ -95,6 +97,7 @@ public class PlayerMarkerGenerator : MonoBehaviour
                 }
             }
         }
+
         if (PlayerTableViewCamera.isActiveAndEnabled == true) {
             Ray MouseRay = PlayerTableViewCamera.ScreenPointToRay(Input.mousePosition);
             RaycastHit Hit;
@@ -109,7 +112,7 @@ public class PlayerMarkerGenerator : MonoBehaviour
         }
     }
 
-
+    //Select the marker or place the marker
     private void SelectObjectByClick() {
         //Click Left mouse
         if (Input.GetMouseButtonDown(0)) {
@@ -126,20 +129,23 @@ public class PlayerMarkerGenerator : MonoBehaviour
                     //If mouse hit the small map
                     if (Hit.collider.tag == "Chunk" && Hit.collider.transform.parent.tag == "SpawnSmallMap")
                     {
-                        DropdownOpionValue = MyDropdownList.options[MyDropdownList.value].text;
-                        if (DropdownOpionValue == "Marker")
+                        if (Input.GetKey(KeyCode.LeftShift))
                         {
-                            DropdownOpionValue = "Marker";
-                        }
-                        else
-                        {
-                            DropdownOpionValue = "PlayerRouteMarker";
-                        }
+                            DropdownOpionValue = MyDropdownList.options[MyDropdownList.value].text;
+                            if (DropdownOpionValue == "Marker")
+                            {
+                                DropdownOpionValue = "Marker";
+                            }
+                            else
+                            {
+                                DropdownOpionValue = "PlayerRouteMarker";
+                            }
 
-                        Vector3 CenterToMarker = (Hit.point - SmallMapCenter) * (LargeMapSize / SmallMapSize);
-                        Vector3 NewPositionOnLargeMap = CenterToMarker + LargerMapCenter;
+                            Vector3 CenterToMarker = (Hit.point - SmallMapCenter) * (LargeMapSize / SmallMapSize);
+                            Vector3 NewPositionOnLargeMap = CenterToMarker + LargerMapCenter;
 
-                        if (Input.GetKey(KeyCode.LeftShift)) ASL.ASLHelper.InstantiateASLObject(DropdownOpionValue, NewPositionOnLargeMap, Quaternion.identity, "", "", GetLargerMapMarker);
+                            ASL.ASLHelper.InstantiateASLObject(DropdownOpionValue, NewPositionOnLargeMap, Quaternion.identity, "", "", GetLargerMapMarker);
+                        }
                         else if (DrawOrigin != null)
                         {
                             DrawOrigin.GetComponent<MeshRenderer>().material.color = OriginColor;
@@ -194,7 +200,6 @@ public class PlayerMarkerGenerator : MonoBehaviour
                         {
                             DropdownOpionValue = "PlayerRouteMarker";
                         }
-                        //ASL.ASLHelper.InstantiateASLObject(DropdownOpionValue, Hit.point, Quaternion.identity, "", "", GetSmallMapMarker);*/
                         Vector3 CenterToMarker = (Hit.point - SmallMapCenter) * (LargeMapSize / SmallMapSize);
                         Vector3 NewPositionOnLargeMap = CenterToMarker + LargerMapCenter;
 
@@ -338,16 +343,10 @@ public class PlayerMarkerGenerator : MonoBehaviour
         }
     }
 
-    private void SpawnRegularMarker(Vector3 HitPoint)
-    {
-
-    }
-
     private static void GetSmallMapMarker(GameObject _myGameObject)
     {
         ASLObjectTrackingSystem.AddObjectToTrack(_myGameObject.GetComponent<ASL.ASLObject>());
         RouteDisplayV2.AddRouteMarker(_myGameObject.transform);
-        SmallMapMarkerList.Add(_myGameObject);
     }
 
     //Add the large map marker into the list and add it into ASLObjectTrackingSystem
@@ -374,46 +373,28 @@ public class PlayerMarkerGenerator : MonoBehaviour
     }
 
     //Get position from small map and comvert is to larger map and generate a new marker on larger map
-    private void GenerateMarkerOnLargerMap(Vector3 MarkerPosition) {
-        //(MarkerPosition - SmallMapCenter) will get the math vector from smallmapcenter to marker
-        Vector3 CenterToMarker = (MarkerPosition - SmallMapCenter) * (LargeMapSize / SmallMapSize);
-        Vector3 NewPositionOnLargeMap = CenterToMarker + LargerMapCenter;
+    //private void GenerateMarkerOnLargerMap(Vector3 MarkerPosition) {
+    //    //(MarkerPosition - SmallMapCenter) will get the math vector from smallmapcenter to marker
+    //    Vector3 CenterToMarker = (MarkerPosition - SmallMapCenter) * (LargeMapSize / SmallMapSize);
+    //    Vector3 NewPositionOnLargeMap = CenterToMarker + LargerMapCenter;
 
-        //ASL.ASLHelper.InstantiateASLObject("Marker", NewPositionOnLargeMap, Quaternion.identity, "", "", GetLargerMapMarker);
-    }
+    //    //ASL.ASLHelper.InstantiateASLObject("Marker", NewPositionOnLargeMap, Quaternion.identity, "", "", GetLargerMapMarker);
+    //}
 
     //Get position from larger map and convert is to small map and generate a new marker on small map
-    private void GenerateMarkerOnSmallMap(Vector3 MarkerPosition) {
-        //(MarkerPosition - LargerMapCenter) will get the math vector from largermapcenter to marker
-        Vector3 CenterToMarker = (MarkerPosition - LargerMapCenter) / (LargeMapSize / SmallMapSize);
-        Vector3 NewPositionOnLargeMap = CenterToMarker + SmallMapCenter;
-        ASL.ASLHelper.InstantiateASLObject("PlayerMarker", NewPositionOnLargeMap, Quaternion.identity, "", "", GetSmallMapMarker);
-    }
+    //private void GenerateMarkerOnSmallMap(Vector3 MarkerPosition) {
+    //    //(MarkerPosition - LargerMapCenter) will get the math vector from largermapcenter to marker
+    //    Vector3 CenterToMarker = (MarkerPosition - LargerMapCenter) / (LargeMapSize / SmallMapSize);
+    //    Vector3 NewPositionOnLargeMap = CenterToMarker + SmallMapCenter;
+    //    ASL.ASLHelper.InstantiateASLObject("PlayerMarker", NewPositionOnLargeMap, Quaternion.identity, "", "", GetSmallMapMarker);
+    //}
 
     private void RemoveLastMarker()
     {
-        //if (SmallMapMarkerList.Count > 0)
-        //{
-        //    GameObject SMarker = SmallMapMarkerList[SmallMapMarkerList.Count - 1];
-        //    ASLObjectTrackingSystem.RemoveObjectToTrack(SMarker.GetComponent<ASL.ASLObject>());
-        //    SMarker.GetComponent<ASL.ASLObject>().SendAndSetClaim(() =>
-        //    {
-        //        SMarker.GetComponent<ASL.ASLObject>().DeleteObject();
-        //    });
-
-        //    SmallMapMarkerList.RemoveAt(SmallMapMarkerList.Count - 1);
-        //}
         if (LargerMapMarkerList.Count > 0)
         {
             GameObject LMarker = LargerMapMarkerList[LargerMapMarkerList.Count - 1];
             if (RouteDisplayV2.RemoveRouteMarker(LMarker.transform, false)) RemoveMarker(LMarker);
-            /*ASLObjectTrackingSystem.RemoveObjectToTrack(LMarker.GetComponent<ASL.ASLObject>());
-            LMarker.GetComponent<ASL.ASLObject>().SendAndSetClaim(() =>
-            {
-                LMarker.GetComponent<ASL.ASLObject>().DeleteObject();
-            });
-
-            LargerMapMarkerList.RemoveAt(LargerMapMarkerList.Count - 1);*/
         }
     }
 

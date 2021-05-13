@@ -3,9 +3,6 @@ using System.Collections.Generic;
 using UnityEngine;
 
 public class Door : MonoBehaviour {
-
-    
-
     private int trDoorOpen = Animator.StringToHash("DoorOpen");
     private int trDoorClose = Animator.StringToHash("DoorClose");
     private Animator animator;
