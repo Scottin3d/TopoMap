@@ -1,4 +1,4 @@
-﻿using System.Collections;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
@@ -26,11 +26,13 @@ public class PlayerMarkerGenerator : MonoBehaviour
 
     private GameObject DrawLineMarker;
     private GameObject DrawLine;
-    private GameObject DrawOrigin;
+    public GameObject DrawOrigin;
     private float drawTime = 1f;
 
-    public Color OriginColor;
+    private Color OriginColor;
     private Color SelectedColor = new Color(1f, 1f, 0f, 1f);
+    //public bool FromPlace = false; 
+    private bool projecting = false;
 
     private bool deleteMode = false;
 
@@ -77,7 +79,7 @@ public class PlayerMarkerGenerator : MonoBehaviour
         }
         if (Input.GetKeyDown(KeyCode.Minus))
         {
-            if (DrawOrigin != null) {
+            if (DrawOrigin != null /*&& !FromPlace*/ && !projecting) {
                 if(RouteDisplayV2.RemoveRouteMarker(DrawOrigin.transform, false)) RemoveMarker(DrawOrigin);
             } 
         }
@@ -143,13 +145,11 @@ public class PlayerMarkerGenerator : MonoBehaviour
 
                             Vector3 CenterToMarker = (Hit.point - SmallMapCenter) * (LargeMapSize / SmallMapSize);
                             Vector3 NewPositionOnLargeMap = CenterToMarker + LargerMapCenter;
-
+                            Deselect();
                             ASL.ASLHelper.InstantiateASLObject(DropdownOpionValue, NewPositionOnLargeMap, Quaternion.identity, "", "", GetLargerMapMarker);
                         }
-                        else if (DrawOrigin != null)
-                        {
-                            DrawOrigin.GetComponent<MeshRenderer>().material.color = OriginColor;
-                            DrawOrigin = null;
+                        else {
+                            Deselect();
                         }
                         //GenerateMarkerOnLargerMap(Hit.point);
 
@@ -158,31 +158,15 @@ public class PlayerMarkerGenerator : MonoBehaviour
                     else if (Hit.collider.tag == "Chunk" && Hit.collider.transform.parent.tag == "SpawnLargerMap")
                     {
                         DropdownOpionValue = MyDropdownList.options[MyDropdownList.value].text;
-                        if(Input.GetKey(KeyCode.LeftShift)) ASL.ASLHelper.InstantiateASLObject(DropdownOpionValue, Hit.point, Quaternion.identity, "", "", GetLargerMapMarker);
-                        else if(DrawOrigin != null)
-                        {
-                            DrawOrigin.GetComponent<MeshRenderer>().material.color = OriginColor;
-                            DrawOrigin = null;
-                        }
-                        //GenerateMarkerOnSmallMap(Hit.point);
+                        Deselect();
+                        if (Input.GetKey(KeyCode.LeftShift)) ASL.ASLHelper.InstantiateASLObject(DropdownOpionValue, Hit.point, Quaternion.identity, "", "", GetLargerFromLarger);
                     }
                     else if (Hit.collider.gameObject.layer == 6 /*&& DrawLineMarker == null*/)  //If we don't hit either map but do hit a marker
                     {
-                        if (DrawOrigin != null)
-                        {
-                            DrawOrigin.GetComponent<MeshRenderer>().material.color = OriginColor;
-                        }
-
-                        DrawOrigin = Hit.collider.gameObject;
-                        OriginColor = DrawOrigin.GetComponent<MeshRenderer>().material.color;
-                        DrawOrigin.GetComponent<MeshRenderer>().material.color = SelectedColor;
-                        CreateDrawLineMarker(Hit.collider.gameObject);
+                        Deselect();
+                        SetDrawOrigin(Hit.collider.gameObject);
                     }
-                    else if(DrawOrigin != null)
-                    {
-                        DrawOrigin.GetComponent<MeshRenderer>().material.color = OriginColor;
-                        DrawOrigin = null;
-                    }
+                    else {Deselect(); }
                 }
             }
             //If player in third persion view
@@ -202,48 +186,59 @@ public class PlayerMarkerGenerator : MonoBehaviour
                         }
                         Vector3 CenterToMarker = (Hit.point - SmallMapCenter) * (LargeMapSize / SmallMapSize);
                         Vector3 NewPositionOnLargeMap = CenterToMarker + LargerMapCenter;
-
-                        if (Input.GetKey(KeyCode.LeftShift)) ASL.ASLHelper.InstantiateASLObject(DropdownOpionValue, NewPositionOnLargeMap, Quaternion.identity, "", "", GetLargerMapMarker);
+                        Deselect();
+                        if (Input.GetKey(KeyCode.LeftShift)) ASL.ASLHelper.InstantiateASLObject(DropdownOpionValue, NewPositionOnLargeMap, Quaternion.identity, "", "", GetLargerFromSmaller);
                         //GenerateMarkerOnLargerMap(Hit.point);
                     }
-                    else if (Hit.collider.gameObject.layer == 6 /*&& DrawLineMarker == null*/)  //If we don't hit either map but do hit a marker
+                    else if (Hit.collider.gameObject.layer == 6)  //If we don't hit either map but do hit a marker
                     {
-                        if(DrawOrigin != null)
-                        {
-                            DrawOrigin.GetComponent<MeshRenderer>().material.color = OriginColor;
-                        }
-
-                        DrawOrigin = Hit.collider.gameObject;
-                        OriginColor = DrawOrigin.GetComponent<MeshRenderer>().material.color;
-                        DrawOrigin.GetComponent<MeshRenderer>().material.color = SelectedColor;
-                        CreateDrawLineMarker(Hit.collider.gameObject);
+                        Deselect();
+                        SetDrawOrigin(Hit.collider.gameObject);
                     }
                     else
                     {
-                        if (DrawOrigin != null)
-                        {
-                            DrawOrigin.GetComponent<MeshRenderer>().material.color = OriginColor;
-                        }
+                        Deselect();
                     }
                 }
             }
         }
     }
 
-    private void CreateDrawLineMarker(GameObject _g)
+    private void Deselect()
     {
+        if (DrawOrigin != null)
+        {
+            if (DrawOrigin.GetComponent<MeshRenderer>() != null) DrawOrigin.GetComponent<MeshRenderer>().material.color = OriginColor;
+            else DrawOrigin.GetComponentInChildren<MeshRenderer>().material.color = OriginColor;
+            DrawOrigin = null;
+        }
+    }
+
+    private void SetDrawOrigin(GameObject _g)
+    {
+        if (!_g.Equals(DrawOrigin))
+        {
+            DrawOrigin = _g;
+            OriginColor = (DrawOrigin.GetComponent<MeshRenderer>() != null) ? 
+                DrawOrigin.GetComponent<MeshRenderer>().material.color : DrawOrigin.GetComponentInChildren<MeshRenderer>().material.color;
+            Debug.Log("Set draw origin");
+        }
         DrawLineMarker = Instantiate(_g) as GameObject;
         if (DrawLineMarker.GetComponent<ASL.ASLObject>() != null) Destroy(DrawLineMarker.GetComponent<ASL.ASLObject>());
-
         Destroy(DrawLineMarker.GetComponent<ASL.ASLObject>());
         Destroy(DrawLineMarker.GetComponent<BoxCollider>());
         DrawLineMarker.layer = 11;
+        if (DrawOrigin.GetComponent<MeshRenderer>() != null) DrawOrigin.GetComponent<MeshRenderer>().material.color = SelectedColor;
+        else DrawOrigin.GetComponentInChildren<MeshRenderer>().material.color = SelectedColor;
+
+
     }
 
     private void WhileClickDown()
     {
         if (Input.GetMouseButton(0))
         {
+            projecting = true;
             drawTime -= Time.deltaTime;
             if (drawTime < 0f) drawTime = 0f;
             if (PlayerCamera.isActiveAndEnabled)
@@ -287,7 +282,7 @@ public class PlayerMarkerGenerator : MonoBehaviour
         else
         {
             DrawLine.SetActive(false);
-            if (DrawLineMarker != null) DrawLineMarker.SetActive(false);
+            if (DrawLineMarker != null) GameObject.Destroy(DrawLineMarker);
         }
     }
 
@@ -310,12 +305,13 @@ public class PlayerMarkerGenerator : MonoBehaviour
                     int layerMask = (LargerMapMarkerList.IndexOf(DrawOrigin) >= 0) ? LayerMask.GetMask("Ground") : LayerMask.GetMask("Holomap");
                     if (drawTime <= 0f) DragDrawFinish(mouseRay, layerMask);
                 }
-                
 
+                
                 DrawLine.SetActive(false);
                 Destroy(DrawLineMarker);
             }
             drawTime = 1f;
+            projecting = false;
         }
     }
 
@@ -328,7 +324,7 @@ public class PlayerMarkerGenerator : MonoBehaviour
             if (EventSystem.current.IsPointerOverGameObject(-1)) return;
 
             string DropdownOpionValue = MyDropdownList.options[MyDropdownList.value].text;
-            if (LayerMask.GetMask("Ground") == layerMask)
+            if (hit.collider.transform.parent.tag == "SpawnLargerMap")
             {
                 ASL.ASLHelper.InstantiateASLObject(DropdownOpionValue, hit.point, Quaternion.identity, "", "", InsertLargerMapMarker);
             }
@@ -339,7 +335,8 @@ public class PlayerMarkerGenerator : MonoBehaviour
 
                 ASL.ASLHelper.InstantiateASLObject(DropdownOpionValue, NewPositionOnLargeMap, Quaternion.identity, "", "", InsertLargerMapMarker);
             }
-
+            if (DrawOrigin.GetComponent<MeshRenderer>() != null) DrawOrigin.GetComponent<MeshRenderer>().material.color = OriginColor;
+            else DrawOrigin.GetComponentInChildren<MeshRenderer>().material.color = OriginColor;
         }
     }
 
@@ -350,7 +347,16 @@ public class PlayerMarkerGenerator : MonoBehaviour
     }
 
     //Add the large map marker into the list and add it into ASLObjectTrackingSystem
-    private static void GetLargerMapMarker(GameObject _myGameObject) {
+    private static void GetLargerFromLarger(GameObject _myGameObject) {
+        //generator.FromPlace = true;
+        ASLObjectTrackingSystem.AddObjectToTrack(_myGameObject.GetComponent<ASL.ASLObject>());
+        RouteDisplayV2.AddRouteMarker(_myGameObject.transform);
+        LargerMapMarkerList.Add(_myGameObject);
+        generator.SetDrawOrigin(_myGameObject);
+    }
+
+    private static void GetLargerFromSmaller(GameObject _myGameObject)
+    {
         ASLObjectTrackingSystem.AddObjectToTrack(_myGameObject.GetComponent<ASL.ASLObject>());
         //MiniMapDisplayObject.GetComponent<MinimapDisplay>().AddRouteMarker(_myGameObject.transform.position);
         RouteDisplayV2.AddRouteMarker(_myGameObject.transform);
@@ -362,13 +368,13 @@ public class PlayerMarkerGenerator : MonoBehaviour
         ASLObjectTrackingSystem.AddObjectToTrack(_myGameObject.GetComponent<ASL.ASLObject>());
         int insertNdx = RouteDisplayV2.InsertMarkerAt(generator.DrawOrigin.transform, _myGameObject.transform);
         //how to grab corresponding marker from tracked markers?
-        Debug.Log(insertNdx);
+        //Debug.Log(insertNdx);
         if (insertNdx < 0)
         {
             LargerMapMarkerList.Add(_myGameObject);
         } else
         {
-            LargerMapMarkerList.Insert(insertNdx, _myGameObject);
+            LargerMapMarkerList.Insert(insertNdx + 1, _myGameObject);
         }
     }
 
@@ -400,14 +406,16 @@ public class PlayerMarkerGenerator : MonoBehaviour
 
     public static void RemoveMarker(GameObject _marker)
     {
-        if (LargerMapMarkerList.Remove(_marker))
-        {
-            if(ASLObjectTrackingSystem.RemoveObjectToTrack(_marker.GetComponent<ASL.ASLObject>()))
-            _marker.GetComponent<ASL.ASLObject>().SendAndSetClaim(() =>
+        //if (!generator.FromPlace) {
+            if (LargerMapMarkerList.Remove(_marker))
             {
-                _marker.GetComponent<ASL.ASLObject>().DeleteObject();
-            });
-        }
+                ASLObjectTrackingSystem.RemoveObjectToTrack(_marker.GetComponent<ASL.ASLObject>());
+                _marker.GetComponent<ASL.ASLObject>().SendAndSetClaim(() =>
+                {
+                    _marker.GetComponent<ASL.ASLObject>().DeleteObject();
+                });
+            }
+        //}
     }
 }
 

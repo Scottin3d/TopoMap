@@ -65,19 +65,22 @@ public class BezierSpline : MonoBehaviour
 		get { return (points.Length - 1) / 3; }
 	}
 
+	public float Length {  get
+        {
+			float length = 0f;
+			for(int ndx = 0; ndx < points.Length - 3; ndx += 3)
+            {
+				length += (transform.TransformPoint(
+					Bezier.GetFirstDerivative(points[ndx], points[ndx + 1], points[ndx + 2], points[ndx + 3], (float)ndx / (float)points.Length)) - transform.position).magnitude;
+            }
+			return length;
+        } 
+	}
+
 	public bool IsEnd(Vector3 p)
 	{
 		return (p.Equals(points.Length - 1));
 	}
-
-	public float GetSplineLength()
-    {
-		/*for(int i = 0; i < points.Length - 1; i += 3)
-        {
-
-        }*/
-		return -1f;
-    }
 
     #endregion
 

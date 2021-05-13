@@ -153,12 +153,17 @@ public class MarkerDisplay : MonoBehaviour {
     }
 
     private void HandleRemove(ASLObject obj) {
-        foreach (var pair in markerToObjectDictionary) {
-            if (pair.Value == obj) {
+        GameObject keyToRemove = null;
+        foreach (var pair in markerToObjectDictionary)
+        {
+            if (pair.Value == obj)
+            {
                 pair.Key.gameObject.SetActive(false);
-                markerToObjectDictionary.Remove(pair.Key);
+                //markerToObjectDictionary.Remove(pair.Key);
+                keyToRemove = pair.Key;
             }
         }
+        if (keyToRemove != null) markerToObjectDictionary.Remove(keyToRemove);
     }
 
     #region Marker Pool
