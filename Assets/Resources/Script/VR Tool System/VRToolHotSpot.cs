@@ -27,7 +27,8 @@ public class VRToolHotSpot : MonoBehaviour
 
     private void OnTriggerStay(Collider other)
     {
-        Debug.Log("in trigger stay " + other.gameObject == UICollider + " " + SteamVR_Actions.default_GrabGrip.state + ".");
+        Debug.Log("is it the collider? " + (other.gameObject == UICollider));
+        Debug.Log("in trigger stay gripstate = " + SteamVR_Actions.default_GrabGrip.state + ".");
         if(other.gameObject == UICollider && SteamVR_Actions.default_GrabGrip.state)
         {
             //trigger reciever
