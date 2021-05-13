@@ -357,7 +357,7 @@ public class PlayerMarkerGenerator : MonoBehaviour
         ASLObjectTrackingSystem.AddObjectToTrack(_myGameObject.GetComponent<ASL.ASLObject>());
         int insertNdx = RouteDisplayV2.InsertMarkerAt(generator.DrawOrigin.transform, _myGameObject.transform);
         //how to grab corresponding marker from tracked markers?
-        Debug.Log(insertNdx);
+        //Debug.Log(insertNdx);
         if (insertNdx < 0)
         {
             LargerMapMarkerList.Add(_myGameObject);

@@ -110,7 +110,11 @@ public class RouteDisplayV2 : MonoBehaviour
 
     #region DRAW_DIRECT_ROUTE
 
-    private void UpdateRouteV2(int actNdx)
+    /// <summary>
+    /// Draws a route node, then updates the current and previous connector paths on the large and small maps
+    /// </summary>
+    /// <param name="actNdx">The index of the node to be acted upon</param>
+    private void UpdateRouteV2(int actNdx, bool Recheck)
     {
         while (!DonePooling) Debug.Log("Route checks not cleared");
         //Debug.Log("ndx of action: " + actNdx);
@@ -118,47 +122,47 @@ public class RouteDisplayV2 : MonoBehaviour
 
         if (actNdx >= 0)
         {
-            try
+            scale = new Vector3(1.5f, 0.5f, 1.5f);
+            pos = linkedObj[actNdx].position + heightAboveMarker * Vector3.up;
+
+            GameObject curNode = routeMarkerPool[actNdx];
+            GameObject curRoute = routeConnectPool[actNdx];
+            GameObject smRoute = smallConnectPool[actNdx];
+
+            curNode.SetActive(true);
+            DrawRouteObject(curNode, pos, scale);
+                
+            if (actNdx > 0)
             {
-                scale = new Vector3(1.5f, 0.5f, 1.5f);
-                pos = linkedObj[actNdx].position + heightAboveMarker * Vector3.up;
-
-                GameObject curNode = routeMarkerPool[actNdx];
-                GameObject curRoute = routeConnectPool[actNdx];
-                GameObject smRoute = smallConnectPool[actNdx];
-
-                curNode.SetActive(true);
-                DrawRouteObject(curNode, pos, scale);
-                
-                if (actNdx > 0)
-                {
-                    GameObject prevRoute = routeConnectPool[actNdx - 1];
-                    GameObject smPrev = smallConnectPool[actNdx - 1];
-                    prevPos = linkedObj[actNdx - 1].position + heightAboveMarker * Vector3.up;
-                    RouteDrawV2(prevPos, pos, prevRoute, smPrev);
-                }
-                if (actNdx + 1 < routeConnectPool.Count)
-                {
-                    if(actNdx+1 < nodeCount)
-                    {
-                        nextPos = linkedObj[actNdx + 1].position + heightAboveMarker * Vector3.up;
-                        RouteDrawV2(pos, nextPos, curRoute, smRoute);
-                    } else
-                    {
-                        curRoute.SetActive(false);
-                        smRoute.SetActive(false);
-                    }
-                }
-                
+                GameObject prevNode = routeMarkerPool[actNdx - 1];
+                GameObject prevRoute = routeConnectPool[actNdx - 1];
+                GameObject smPrev = smallConnectPool[actNdx - 1];
+                prevPos = linkedObj[actNdx - 1].position + heightAboveMarker * Vector3.up;
+                if (!Recheck) UpdateRouteV2(actNdx - 1, true);
+                RouteDrawV2(prevPos, pos, prevRoute, smPrev);
             }
-            catch (System.Exception e)
+            if (actNdx + 1 < routeConnectPool.Count)
             {
-                Debug.LogException(e, this);
-                UpdateRouteV2(actNdx);
+                if(actNdx+1 < nodeCount)
+                {
+                    nextPos = linkedObj[actNdx + 1].position + heightAboveMarker * Vector3.up;
+                    RouteDrawV2(pos, nextPos, curRoute, smRoute);
+                } else
+                {
+                    curRoute.SetActive(false);
+                    smRoute.SetActive(false);
+                }
             }
         }
     }
 
+    /// <summary>
+    /// Draws the connectors on the large and small maps
+    /// </summary>
+    /// <param name="start">The start point of the route draw on the large map</param>
+    /// <param name="end">The end point of the route draw on the large map</param>
+    /// <param name="route">The route connnector on the large map</param>
+    /// <param name="small">The route connector on the small map</param>
     private void RouteDrawV2(Vector3 start, Vector3 end, GameObject route, GameObject small)
     {
         //Debug.Log("Start: " + start + "; End: " + end);
@@ -328,50 +332,6 @@ public class RouteDisplayV2 : MonoBehaviour
 
     #region TRACE_PATH
 
-    //Depreciated
-    /// <summary>
-    /// Traces a path between each pair of adjacent markers placed on the map. 
-    /// Markers are considered adjacent if they are indexed next to each other in the linkedObj list
-    /// These paths are combined to create a single path, which is used in BezierTrace
-    /// </summary>
-    /// <returns></returns>
-    IEnumerator DrawMapCurve()
-    {
-        while (true)
-        {
-            yield return new WaitForSeconds(1f / updatesPerSecond);
-
-            if (DrawPath && DataCollected && data.gridGraph != null)
-            {
-                List<Vector3> posList = new List<Vector3>();
-                List<GraphNode> nodeList = new List<GraphNode>();
-                ABPath tempPath;
-
-                for (int ndx = 0; ndx < linkedObj.Count - 1; ndx++)
-                {
-                    tempPath = ABPath.Construct(linkedObj[ndx].position, linkedObj[ndx + 1].position);
-                    AstarPath.StartPath(tempPath);
-                    tempPath.BlockUntilCalculated();
-
-                    if (ndx == 0)
-                    {
-                        posList.AddRange(tempPath.vectorPath);
-                        nodeList.AddRange(tempPath.path);
-                    }
-                    else
-                    {
-                        posList.AddRange(tempPath.vectorPath.GetRange(1, tempPath.vectorPath.Count - 1));
-                        nodeList.AddRange(tempPath.path.GetRange(1, tempPath.path.Count - 1));
-                    }
-                }
-
-                myPath = ABPath.FakePath(posList, nodeList);
-                DrawPath = !DrawPath;
-                BezierTrace();
-            }
-        }        
-    }
-
     /// <summary>
     /// Traces a path between each pair of adjacent markers placed on the map. 
     /// Markers are considered adjacent if they are indexed next to each other in the linkedObj list
@@ -460,7 +420,7 @@ public class RouteDisplayV2 : MonoBehaviour
         {
             current.DonePooling = true;
         }
-        current.UpdateRouteV2(current.linkedObj.Count - 1);
+        current.UpdateRouteV2(current.linkedObj.Count - 1, false);
     }
 
     /// <summary>
@@ -490,7 +450,7 @@ public class RouteDisplayV2 : MonoBehaviour
             }
             while (!current.DonePooling) ;
             current.Reinsertion(current.routeConnectPool.Count - 1, ndx + 1);
-            current.UpdateRouteV2(ndx + 1);
+            current.UpdateRouteV2(ndx + 1, false);
         }
         return ndx;
     }
@@ -512,7 +472,7 @@ public class RouteDisplayV2 : MonoBehaviour
             current.nodeCount--;
             //if (current.nodeCount < 2) PathDisplay.ClearNotRender();
             current.DrawPath = true;
-            current.UpdateRouteV2(actionNdx - 1);
+            current.UpdateRouteV2(actionNdx - 1, false);
 
             /*if (fromFloatCallback)
             {
@@ -731,6 +691,50 @@ public class RouteDisplayV2 : MonoBehaviour
             c_id[i] = (char)f_id[i];
         }
         return string.Concat(c_id);
+    }
+
+    //Depreciated
+    /// <summary>
+    /// Traces a path between each pair of adjacent markers placed on the map. 
+    /// Markers are considered adjacent if they are indexed next to each other in the linkedObj list
+    /// These paths are combined to create a single path, which is used in BezierTrace
+    /// </summary>
+    /// <returns></returns>
+    IEnumerator DrawMapCurve()
+    {
+        while (true)
+        {
+            yield return new WaitForSeconds(1f / updatesPerSecond);
+
+            if (DrawPath && DataCollected && data.gridGraph != null)
+            {
+                List<Vector3> posList = new List<Vector3>();
+                List<GraphNode> nodeList = new List<GraphNode>();
+                ABPath tempPath;
+
+                for (int ndx = 0; ndx < linkedObj.Count - 1; ndx++)
+                {
+                    tempPath = ABPath.Construct(linkedObj[ndx].position, linkedObj[ndx + 1].position);
+                    AstarPath.StartPath(tempPath);
+                    tempPath.BlockUntilCalculated();
+
+                    if (ndx == 0)
+                    {
+                        posList.AddRange(tempPath.vectorPath);
+                        nodeList.AddRange(tempPath.path);
+                    }
+                    else
+                    {
+                        posList.AddRange(tempPath.vectorPath.GetRange(1, tempPath.vectorPath.Count - 1));
+                        nodeList.AddRange(tempPath.path.GetRange(1, tempPath.path.Count - 1));
+                    }
+                }
+
+                myPath = ABPath.FakePath(posList, nodeList);
+                DrawPath = !DrawPath;
+                BezierTrace();
+            }
+        }
     }
 
     #endregion
