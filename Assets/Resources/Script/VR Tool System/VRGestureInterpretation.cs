@@ -6,8 +6,8 @@ public class VRGestureInterpretation : MonoBehaviour
 {
     private const int BACKLOG_FRAME_SIZE = 15; //the size of the backlogs in both number of frames tracked and number of positions in the array
     private const float DEGREES_TO_CHECK = 20f; //number of degrees for movement to be recognised as a gesture
-    private const bool DEBUG_MODE = true;
-    private const bool DEBUG_TEST_GESTURES = true;
+    private const bool DEBUG_MODE = false;
+    private const bool DEBUG_TEST_GESTURES = false;
 
     //this is the VR Gesture Interpretation system, it's meant to interperet physical gestures (basically a fancy way to say moving your hands in 3D space),
     //and allow other classes or systems to know to react to a gesture when it occurrs.

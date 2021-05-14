@@ -14,12 +14,14 @@ public class ToolBox : MonoBehaviour
     public void activate()
     {
         gameObject.GetComponent<Renderer>().enabled = true;
+        gameObject.GetComponentInChildren<Canvas>().enabled = true;
         isActive = true;
     }
 
     public void deactivate()
     {
         gameObject.GetComponent<Renderer>().enabled = false;
+        gameObject.GetComponentInChildren<Canvas>().enabled = false;
         isActive = false;
     }
 

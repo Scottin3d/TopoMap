@@ -6,10 +6,10 @@ using UnityEngine.UI;
 public class VRToolSelector : MonoBehaviour
 {
     //turning this on will cause the swipeboxes to appear based on the color swipe they represent
-    private const bool DEBUG_SHOW_SWIPEBOXES = true;
+    private const bool DEBUG_SHOW_SWIPEBOXES = false;
 
     //degrees of error for which to calculate the VR player's palm facing upwards
-    private const float DEGREES_ERROR = 45f;
+    private const float DEGREES_ERROR = 20f;
 
     //this is the VR Tool Selector class, it is intended to handle the VR Player choosing from the types of handheld
     //tools they may need to use in or on the map. Currently this includes:
@@ -31,22 +31,34 @@ public class VRToolSelector : MonoBehaviour
     //
     //info for the swipe hitboxes:
     //tool:
-    //   T: 0.176f, -0.027f, -0.102f
-    //   R: 0f, 0f, 0f
+    //   T: 0.179f, -0.0233f, -0.07689f
+    //   R: 4.244f, 104.451f, -23.801f
     //   S: 0.1f, 0.1f, 0.1f
     //left:
-    //   T: 0.176f, 0.0357f, -0.102f
-    //   R: 0f, 0f, 0f
+    //   T: 0.1768f, 0.0342f, -0.1026f
+    //   R: 4.244f, 104.451f, -23.801f
     //   S: 0.1f, 0.025f, 0.1f
     //right:
-    //    T: 0.176f, -0.0885f, -0.1021f
-    //    R: 0f, 0f, 0f
-    //    S: 0.1f, 0.1f, 0.1f
+    //    T: 0.1812f, -0.081f, -0.0511f
+    //    R: 4.244f, 104.451f, -23.801f
+    //    S: 0.1f, 0.025f, 0.1f
     //
     //
     //HotSpot positions:
+    //0:
+    //T: 0.0506f, 0.0886f, -0.2423f
+    //R: 33.841f, 0.014f, -0.018f
+    //S: 0.05f, 0.05f, 0.05f
     //1:
     //T: 0.0506f, 0.0598f, -0.1993f
+    //R: 33.841f, 0.014f, -0.018f
+    //S: 0.05f, 0.05f, 0.05f
+    //2:
+    //T: 0.0506f, 0.0308f, -0.1562f
+    //R: 33.841f, 0.014f, -0.018f
+    //S: 0.05f, 0.05f, 0.05f
+    //3:
+    //T: 0.0506f, 0.0019f, -0.1129f
     //R: 33.841f, 0.014f, -0.018f
     //S: 0.05f, 0.05f, 0.05f
 
@@ -88,6 +100,24 @@ public class VRToolSelector : MonoBehaviour
     }
 
     //this function takes the given position, rotation, scale, and text, and creates a new hotspot, replacing the spot given
+    //
+    //Current HotSpot positions:
+    //0:
+    //T: 0.0506f, 0.0886f, -0.2423f
+    //R: 33.841f, 0.014f, -0.018f
+    //S: 0.05f, 0.05f, 0.05f
+    //1:
+    //T: 0.0506f, 0.0598f, -0.1993f
+    //R: 33.841f, 0.014f, -0.018f
+    //S: 0.05f, 0.05f, 0.05f
+    //2:
+    //T: 0.0506f, 0.0308f, -0.1562f
+    //R: 33.841f, 0.014f, -0.018f
+    //S: 0.05f, 0.05f, 0.05f
+    //3:
+    //T: 0.0506f, 0.0019f, -0.1129f
+    //R: 33.841f, 0.014f, -0.018f
+    //S: 0.05f, 0.05f, 0.05f
     private void CreateHotSpot(Vector3 position, Vector3 rotation, Vector3 scale, string spotText, GameObject spot, int spotNum)
     {
         if (spot != null)
@@ -136,16 +166,16 @@ public class VRToolSelector : MonoBehaviour
 
     //this function will create the toolbox that the player uses according to these specifications:
     //tool:
-    //   T: 0.176f, -0.027f, -0.102f
-    //   R: 0f, 0f, 0f
+    //   T: 0.179f, -0.0233f, -0.07689f
+    //   R: 4.244f, 104.451f, -23.801f
     //   S: 0.1f, 0.1f, 0.1f
     //left:
-    //   T: 0.176f, 0.0357f, -0.102f
-    //   R: 0f, 0f, 0f
+    //   T: 0.1768f, 0.0342f, -0.1026f
+    //   R: 4.244f, 104.451f, -23.801f
     //   S: 0.1f, 0.025f, 0.1f
     //right:
-    //    T: 0.176f, -0.0885f, -0.1021f
-    //    R: 0f, 0f, 0f
+    //    T: 0.1812f, -0.081f, -0.0511f
+    //    R: 4.244f, 104.451f, -23.801f
     //    S: 0.1f, 0.025f, 0.1f
     private void createToolBox()
     {
@@ -153,19 +183,34 @@ public class VRToolSelector : MonoBehaviour
         LeftPad = (GameObject)Instantiate(Resources.Load("VR/VRSwipeBox"));
         RightPad = (GameObject)Instantiate(Resources.Load("VR/VRSwipeBox"));
 
-        ToolBox.transform.position = new Vector3(0.176f, -0.027f, -0.102f);
-        LeftPad.transform.position = new Vector3(0.176f, 0.0357f, -0.102f);
-        RightPad.transform.position = new Vector3(0.176f, -0.0885f, -0.1021f);
+        ToolBox.transform.SetParent(leftHand.transform);
+        LeftPad.transform.SetParent(leftHand.transform);
+        RightPad.transform.SetParent(leftHand.transform);
 
+        ToolBox.transform.localPosition = new Vector3(0.179f, -0.0233f, -0.07689f);
+        LeftPad.transform.localPosition = new Vector3(0.1768f, 0.0342f, -0.1026f);
+        RightPad.transform.localPosition = new Vector3(0.1812f, -0.081f, -0.0511f);
+
+        ToolBox.transform.localRotation = Quaternion.Euler(new Vector3(4.244f, 104.451f, -23.801f));
+        LeftPad.transform.localRotation = Quaternion.Euler(new Vector3(4.244f, 104.451f, -23.801f));
+        RightPad.transform.localRotation = Quaternion.Euler(new Vector3(4.244f, 104.451f, -23.801f));
+
+        //toolbox public fields
         ToolBox.GetComponent<ToolBox>().UICollider = rightHand.transform.Find("UIInteractSphere").gameObject;
         ToolBox.GetComponent<ToolBox>().reciever = this;
         changeToolBoxText(NoneText);
         ToolBox.GetComponent<Renderer>().enabled = false;
+        ToolBox.GetComponentInChildren<Canvas>().enabled = false;
 
+        //leftpad public fields
         LeftPad.GetComponent<VRToolSwipe>().UICollider = rightHand.transform.Find("UIInteractSphere").gameObject;
         LeftPad.GetComponent<VRToolSwipe>().reciever = this;
+        LeftPad.GetComponent<VRToolSwipe>().triggerGesture = VRGestureInterpretation.gesture.SwipeLeft;
+
+        //rightpad public fields
         RightPad.GetComponent<VRToolSwipe>().UICollider = rightHand.transform.Find("UIInteractSphere").gameObject;
         RightPad.GetComponent<VRToolSwipe>().reciever = this;
+        RightPad.GetComponent<VRToolSwipe>().triggerGesture = VRGestureInterpretation.gesture.SwipeRight;
 
         if (DEBUG_SHOW_SWIPEBOXES)
         {
@@ -185,7 +230,13 @@ public class VRToolSelector : MonoBehaviour
     {
         leftHand = VRStartupController.VRPlayerObject.transform.Find("SteamVRObjects/LeftHand").gameObject;
         rightHand = VRStartupController.VRPlayerObject.transform.Find("SteamVRObjects/RightHand").gameObject;
-        CreateHotSpot(new Vector3(0.0506f, 0.0598f, -0.1993f), new Vector3(33.841f, 0.014f, -0.018f), Vector3.zero, MarkerText, HotSpot_1, 1);
+
+        CreateHotSpot(new Vector3(0.0506f, 0.0886f, -0.2423f), new Vector3(33.841f, 0.014f, -0.018f), Vector3.zero, NoneText, HotSpot_0, 0);
+        CreateHotSpot(new Vector3(0.0506f, 0.0598f, -0.1993f), new Vector3(33.841f, 0.014f, -0.018f), Vector3.zero, RoadText, HotSpot_1, 1);
+        CreateHotSpot(new Vector3(0.0506f, 0.0308f, -0.1562f), new Vector3(33.841f, 0.014f, -0.018f), Vector3.zero, MarkerText, HotSpot_2, 2);
+        CreateHotSpot(new Vector3(0.0506f, 0.0019f, -0.1129f), new Vector3(33.841f, 0.014f, -0.018f), Vector3.zero, FlashlightText, HotSpot_3, 3);
+
+        createToolBox();
     }
 
     IEnumerator delayInitialization()
