@@ -31,6 +31,7 @@ public partial class GenerateMapFromHeightMap : MonoBehaviour {
     public const int mapChunkSize = 241;
     [Range(0, 6)]
     private int editorPreviewLOD = 0;
+    private bool DoneGeneration = false;
 
     private NoiseProperties noiseProperties;
     [Header("Noise Properties")]
@@ -208,6 +209,7 @@ public partial class GenerateMapFromHeightMap : MonoBehaviour {
             chunk.transform.localScale = Vector3.one;
             chunk.tag = "Chunk";
             chunk.name = "Chunk" + row + ", " + col;
+            chunk.layer = LayerMask.NameToLayer("Ground");
             chunk.transform.position = new Vector3(mapChunks[row, col].center.x, transform.position.y, mapChunks[row, col].center.y);
             chunk.AddComponent<MeshFilter>().sharedMesh = mesh;
             chunk.AddComponent<MeshCollider>().sharedMesh = mesh;
@@ -217,7 +219,7 @@ public partial class GenerateMapFromHeightMap : MonoBehaviour {
             row++;
         }
 
-
+        DoneGeneration = true;
     }
 
     /// <summary>
@@ -336,6 +338,8 @@ public partial class GenerateMapFromHeightMap : MonoBehaviour {
         float[,] noiseMap = Noise.GenerateNoiseMapFromHeightmap(heightmap, noiseProperties);
         return new MapData(noiseMap, noiseProperties);
     }
+
+    public bool IsGenerated { get { return DoneGeneration; } }
 }
 
 /// <summary>

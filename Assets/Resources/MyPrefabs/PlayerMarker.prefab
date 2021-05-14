@@ -56,6 +56,7 @@ GameObject:
   - component: {fileID: 1375720643529287364}
   - component: {fileID: 1375720643529287387}
   - component: {fileID: 1375720643529287386}
+  - component: {fileID: 1375720643529287385}
   m_Layer: 6
   m_Name: MarkerVisual
   m_TagString: Untagged

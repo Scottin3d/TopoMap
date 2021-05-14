@@ -12,72 +12,182 @@ public class PlayerDrawRoute : MonoBehaviour
     private static List<GameObject> MyBrushList = new List<GameObject>();
     private static List<GameObject> MySmallBrushList = new List<GameObject>();
     private static List<GameObject> MyLargerBrushList = new List<GameObject>();
+
+    private static List<GameObject> MyLineRenenderBetweenBrush = new List<GameObject>();
+    private static Vector3 FirstBrushPosition = new Vector3();
+    private static Vector3 SecondBrushPosition = new Vector3();
+    private int MyLargeBruchListIndex = 0;
+
     public Dropdown MyEraseDropDown;
     private static GameObject ThisGameObject;
-    //Awake function
-    void Awake()
+    // Start is called before the first frame update
+    void Start()
     {
         ThisGameObject = this.gameObject;
         PlayerCamera = GameObject.Find("PCHandler/Player").GetComponentInChildren<Camera>();
         PlayerTableViewCamera = GameObject.Find("PCHandler/PlayerTopViewCamera").GetComponentInChildren<Camera>();
-    }
-
-    // Start is called before the first frame update
-    void Start()
-    {
-
+        StartCoroutine(DrawTheLineIE());
+        StartCoroutine(LinkLastTwoRoute());
     }
 
     // Update is called once per frame
-    void Update()
+    //void Update()
+    //{
+    //    DrawTheLine();
+    //}
+
+    //private void DrawTheLine()
+    //{
+    //    if (Input.GetMouseButton(1))
+    //    {
+    //        if (PlayerCamera.isActiveAndEnabled == true)
+    //        {
+    //            Ray MouseRay = PlayerCamera.ScreenPointToRay(Input.mousePosition);
+    //            RaycastHit Hit;
+    //            if (Physics.Raycast(MouseRay, out Hit))
+    //            {
+    //                if (Hit.collider.tag == "WhiteBoard")
+    //                {
+    //                    ASL.ASLHelper.InstantiateASLObject("Brush", Hit.point, Quaternion.identity, "", "", GetEachBrushOnWhiteBoard);
+    //                }
+    //                if (Hit.collider.tag == "Chunk" && Hit.collider.transform.parent.tag == "SpawnSmallMap")
+    //                {
+    //                    ASL.ASLHelper.InstantiateASLObject("Brush", Hit.point, Quaternion.identity, "", "", GetEachBrushOnSmallMap);
+    //                    int LargeMapSize = LargerMapGenerator.GetComponent<GenerateMapFromHeightMap>().mapSize;
+    //                    int SmallMapSize = SmallMapGenerator.GetComponent<GenerateMapFromHeightMap>().mapSize;
+    //                    Vector3 NewPositionOneLargeMap = ((Hit.point - SmallMapGenerator.transform.position) * (LargeMapSize / SmallMapSize)) + LargerMapGenerator.transform.position;
+    //                    NewPositionOneLargeMap.y += 3f;
+    //                    ASL.ASLHelper.InstantiateASLObject("LargeBrush", NewPositionOneLargeMap, Quaternion.identity, "", "", GetEachBrushOnLargerMap);
+    //                }
+    //            }
+    //        }
+
+    //        if (PlayerTableViewCamera.isActiveAndEnabled == true)
+    //        {
+    //            Ray MouseRay = PlayerTableViewCamera.ScreenPointToRay(Input.mousePosition);
+    //            RaycastHit Hit;
+    //            if (Physics.Raycast(MouseRay, out Hit))
+    //            {
+    //                if (Hit.collider.tag == "Chunk")
+    //                {
+    //                    ASL.ASLHelper.InstantiateASLObject("Brush", Hit.point, Quaternion.identity, "", "", GetEachBrushOnSmallMap);
+    //                    int LargeMapSize = LargerMapGenerator.GetComponent<GenerateMapFromHeightMap>().mapSize;
+    //                    int SmallMapSize = SmallMapGenerator.GetComponent<GenerateMapFromHeightMap>().mapSize;
+    //                    Vector3 NewPositionOneLargeMap = ((Hit.point - SmallMapGenerator.transform.position) * (LargeMapSize / SmallMapSize)) + LargerMapGenerator.transform.position;
+    //                    NewPositionOneLargeMap.y += 3f;
+    //                    ASL.ASLHelper.InstantiateASLObject("LargeBrush", NewPositionOneLargeMap, Quaternion.identity, "", "", GetEachBrushOnLargerMap);
+    //                }
+    //            }
+    //        }
+    //    }
+    //}
+
+    IEnumerator DrawTheLineIE()
     {
-        DrawTheLine();
+        while (true)
+        {
+            if (Input.GetMouseButton(1))
+            {
+                if (PlayerCamera.isActiveAndEnabled == true)
+                {
+                    Ray MouseRay = PlayerCamera.ScreenPointToRay(Input.mousePosition);
+                    RaycastHit Hit;
+                    if (Physics.Raycast(MouseRay, out Hit))
+                    {
+                        if (Hit.collider.tag == "WhiteBoard")
+                        {
+                            ASL.ASLHelper.InstantiateASLObject("Brush", Hit.point, Quaternion.identity, "", "", GetEachBrushOnWhiteBoard);
+                        }
+                        if (Hit.collider.tag == "Chunk" && Hit.collider.transform.parent.tag == "SpawnSmallMap")
+                        {
+                            ASL.ASLHelper.InstantiateASLObject("Brush", Hit.point, Quaternion.identity, "", "", GetEachBrushOnSmallMap);
+                            int LargeMapSize = LargerMapGenerator.GetComponent<GenerateMapFromHeightMap>().mapSize;
+                            int SmallMapSize = SmallMapGenerator.GetComponent<GenerateMapFromHeightMap>().mapSize;
+                            Vector3 NewPositionOneLargeMap = ((Hit.point - SmallMapGenerator.transform.position) * (LargeMapSize / SmallMapSize)) + LargerMapGenerator.transform.position;
+                            NewPositionOneLargeMap.y += 3f;
+                            ASL.ASLHelper.InstantiateASLObject("LargeBrush", NewPositionOneLargeMap, Quaternion.identity, "", "", GetEachBrushOnLargerMap);
+                        }
+                    }
+                }
+
+                if (PlayerTableViewCamera.isActiveAndEnabled == true)
+                {
+                    Ray MouseRay = PlayerTableViewCamera.ScreenPointToRay(Input.mousePosition);
+                    RaycastHit Hit;
+                    if (Physics.Raycast(MouseRay, out Hit))
+                    {
+                        if (Hit.collider.tag == "Chunk")
+                        {
+                            ASL.ASLHelper.InstantiateASLObject("Brush", Hit.point, Quaternion.identity, "", "", GetEachBrushOnSmallMap);
+                            int LargeMapSize = LargerMapGenerator.GetComponent<GenerateMapFromHeightMap>().mapSize;
+                            int SmallMapSize = SmallMapGenerator.GetComponent<GenerateMapFromHeightMap>().mapSize;
+                            Vector3 NewPositionOneLargeMap = ((Hit.point - SmallMapGenerator.transform.position) * (LargeMapSize / SmallMapSize)) + LargerMapGenerator.transform.position;
+                            NewPositionOneLargeMap.y += 3f;
+                            ASL.ASLHelper.InstantiateASLObject("LargeBrush", NewPositionOneLargeMap, Quaternion.identity, "", "", GetEachBrushOnLargerMap);
+                        }
+                    }
+                }
+            }
+            yield return new WaitForSeconds(0.05f);
+        }
     }
 
-    private void DrawTheLine()
+    IEnumerator LinkLastTwoRoute()
     {
-        if (Input.GetMouseButton(1))
+        while (true)
         {
-            if (PlayerCamera.isActiveAndEnabled == true)
+            if (MyLargerBrushList.Count <= 1)
             {
-                Ray MouseRay = PlayerCamera.ScreenPointToRay(Input.mousePosition);
-                RaycastHit Hit;
-                if (Physics.Raycast(MouseRay, out Hit))
-                {
-                    if (Hit.collider.tag == "WhiteBoard")
-                    {
-                        ASL.ASLHelper.InstantiateASLObject("Brush", Hit.point, Quaternion.identity, "", "", GetEachBrushOnWhiteBoard);
-                    }
-                    if (Hit.collider.tag == "Chunk" && Hit.collider.transform.parent.tag == "SpawnSmallMap")
-                    {
-                        ASL.ASLHelper.InstantiateASLObject("Brush", Hit.point, Quaternion.identity, "", "", GetEachBrushOnSmallMap);
-                        int LargeMapSize = LargerMapGenerator.GetComponent<GenerateMapFromHeightMap>().mapSize;
-                        int SmallMapSize = SmallMapGenerator.GetComponent<GenerateMapFromHeightMap>().mapSize;
-                        Vector3 NewPositionOneLargeMap = ((Hit.point - SmallMapGenerator.transform.position) * (LargeMapSize / SmallMapSize)) + LargerMapGenerator.transform.position;
-                        NewPositionOneLargeMap.y += 3f;
-                        ASL.ASLHelper.InstantiateASLObject("LargeBrush", NewPositionOneLargeMap, Quaternion.identity, "", "", GetEachBrushOnLargerMap);
-                    }
-                }
+                //Debug.Log("No Marker");
+                yield return null;
             }
-
-            if (PlayerTableViewCamera.isActiveAndEnabled == true)
+            else if (MyLargeBruchListIndex == MyLargerBrushList.Count - 1)
             {
-                Ray MouseRay = PlayerTableViewCamera.ScreenPointToRay(Input.mousePosition);
-                RaycastHit Hit;
-                if (Physics.Raycast(MouseRay, out Hit))
+                //Debug.Log(MyLargeBruchListIndex);
+                //Debug.Log(MyLargerBrushList.Count);
+                //Debug.Log("=====");
+                yield return null;
+            }
+            else
+            {
+                yield return new WaitForSeconds(0.5f);
+                //01234567
+                int LargeBrushListCount = MyLargerBrushList.Count;
+                for (int i = MyLargeBruchListIndex; i < LargeBrushListCount - 1; i++)
                 {
-                    if (Hit.collider.tag == "Chunk")
-                    {
-                        ASL.ASLHelper.InstantiateASLObject("Brush", Hit.point, Quaternion.identity, "", "", GetEachBrushOnSmallMap);
-                        int LargeMapSize = LargerMapGenerator.GetComponent<GenerateMapFromHeightMap>().mapSize;
-                        int SmallMapSize = SmallMapGenerator.GetComponent<GenerateMapFromHeightMap>().mapSize;
-                        Vector3 NewPositionOneLargeMap = ((Hit.point - SmallMapGenerator.transform.position) * (LargeMapSize / SmallMapSize)) + LargerMapGenerator.transform.position;
-                        NewPositionOneLargeMap.y += 3f;
-                        ASL.ASLHelper.InstantiateASLObject("LargeBrush", NewPositionOneLargeMap, Quaternion.identity, "", "", GetEachBrushOnLargerMap);
-                    }
+                    FirstBrushPosition = new Vector3(MyLargerBrushList[i].transform.position.x, MyLargerBrushList[i].transform.position.y, MyLargerBrushList[i].transform.position.z);
+                    SecondBrushPosition = new Vector3(MyLargerBrushList[i + 1].transform.position.x, MyLargerBrushList[i + 1].transform.position.y, MyLargerBrushList[i + 1].transform.position.z);
+                    FirstBrushPosition.y += 2.5f;
+                    SecondBrushPosition.y += 2.5f;
+                    //Debug.Log(FirstBrushPosition);
+                    //Debug.Log(SecondBrushPosition);
+                    //Debug.Log("======");
+                    ASL.ASLHelper.InstantiateASLObject("LineRendererBetweenTwoBrush", new Vector3(0, 0, 0), Quaternion.identity, "", "", SetLineRenender);
+                    yield return new WaitForSeconds(0.2f);
                 }
+
+                MyLargeBruchListIndex += LargeBrushListCount - 1 - MyLargeBruchListIndex;
             }
         }
+    }
+
+    private static void SetLineRenender(GameObject _myGameObject)
+    {
+        _myGameObject.transform.parent = ThisGameObject.transform;
+        _myGameObject.GetComponent<LineRenderer>().SetPosition(0, FirstBrushPosition);
+        _myGameObject.GetComponent<LineRenderer>().SetPosition(1, SecondBrushPosition);
+        MyLineRenenderBetweenBrush.Add(_myGameObject);
+    }
+
+    private void DrawLineRendererBetweenTwoBrush()
+    {
+        LineRenderer MyLine = new GameObject("Line").AddComponent<LineRenderer>();
+        MyLine.startColor = Color.yellow;
+        MyLine.endColor = Color.yellow;
+        MyLine.startWidth = 0.01f;
+        MyLine.endWidth = 0.01f;
+        MyLine.positionCount = 2;
+        MyLine.useWorldSpace = true;
     }
 
     private static void GetEachBrushOnWhiteBoard(GameObject _myGameObject)
@@ -85,7 +195,7 @@ public class PlayerDrawRoute : MonoBehaviour
         _myGameObject.transform.parent = ThisGameObject.transform;
         MyBrushList.Add(_myGameObject);
     }
-    
+
     private static void GetEachBrushOnSmallMap(GameObject _myGameObject)
     {
         _myGameObject.transform.parent = ThisGameObject.transform;
@@ -96,6 +206,19 @@ public class PlayerDrawRoute : MonoBehaviour
     {
         _myGameObject.transform.parent = ThisGameObject.transform;
         MyLargerBrushList.Add(_myGameObject);
+        GenerateExtraLineOnMap(_myGameObject);
+    }
+
+    private static void GenerateExtraLineOnMap(GameObject _myGameObject)
+    {
+        if (MyLargerBrushList.Count == 1)
+        {
+            return;
+        }
+        else
+        {
+            _myGameObject.GetComponent<MapBrushRePosition>().SecondToLastBrushPosition = MyLargerBrushList[MyLargerBrushList.Count - 2].transform.position;
+        }
     }
 
     public void EraseLine()
@@ -171,6 +294,14 @@ public class PlayerDrawRoute : MonoBehaviour
             });
         }
 
+        foreach (GameObject LineRenender in MyLineRenenderBetweenBrush)
+        {
+            LineRenender.GetComponent<ASL.ASLObject>().SendAndSetClaim(() =>
+            {
+                LineRenender.GetComponent<ASL.ASLObject>().DeleteObject();
+            });
+        }
+
         MySmallBrushList.Clear();
         MyLargerBrushList.Clear();
     }
@@ -181,8 +312,8 @@ public class PlayerDrawRoute : MonoBehaviour
         {
             if (MySmallBrushList.Count != 0)
             {
-                GameObject LastBrushOnSmallMap = MySmallBrushList[MyBrushList.Count - 1];
-                GameObject LastBrushOnLargeMap = MyLargerBrushList[MyBrushList.Count - 1];
+                GameObject LastBrushOnSmallMap = MySmallBrushList[MySmallBrushList.Count - 1];
+                GameObject LastBrushOnLargeMap = MyLargerBrushList[MyLargerBrushList.Count - 1];
 
                 LastBrushOnSmallMap.GetComponent<ASL.ASLObject>().SendAndSetClaim(() =>
                 {
@@ -196,6 +327,21 @@ public class PlayerDrawRoute : MonoBehaviour
 
                 MySmallBrushList.RemoveAt(MySmallBrushList.Count - 1);
                 MyLargerBrushList.RemoveAt(MyLargerBrushList.Count - 1);
+            }
+        }
+
+        for (int i = 0; i < 9; i++)
+        {
+            if (MyLineRenenderBetweenBrush.Count != 0)
+            {
+                GameObject LastLineRenender = MyLineRenenderBetweenBrush[MyLineRenenderBetweenBrush.Count - 1];
+
+                LastLineRenender.GetComponent<ASL.ASLObject>().SendAndSetClaim(() =>
+                {
+                    LastLineRenender.GetComponent<ASL.ASLObject>().DeleteObject();
+                });
+
+                MyLineRenenderBetweenBrush.RemoveAt(MyLineRenenderBetweenBrush.Count - 1);
             }
         }
     }

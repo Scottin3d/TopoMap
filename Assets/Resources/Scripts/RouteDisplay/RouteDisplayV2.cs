@@ -6,19 +6,20 @@ using ASL;
 
 public class RouteDisplayV2 : MonoBehaviour
 {
+    #region VARIABLES
+
     public static RouteDisplayV2 current;
 
     public float updatesPerSecond = 10f;
     public float heightAboveMarker = 5f;
     public int batchSize = 10;
     
-    private List<GameObject> routeMarkerPool = new List<GameObject>();
+    public List<GameObject> routeMarkerPool = new List<GameObject>();
     private List<GameObject> routeConnectPool = new List<GameObject>();
     private List<GameObject> smallConnectPool = new List<GameObject>();
-    //private List<SplineWalker> pathDisplayPool = new List<SplineWalker>();
 
     private List<Transform> linkedObj = new List<Transform>();
-    int removedNdx = -1;
+    private int nodeCount = 0;
 
     //Map references
     public Transform MapDisplay = null;
@@ -35,7 +36,6 @@ public class RouteDisplayV2 : MonoBehaviour
     public int scaleFactor = 2;
 
     private bool DataCollected = false,
-        GroundSet = false, 
         GraphSet = false,
         DrawPath = false;
 
@@ -48,33 +48,46 @@ public class RouteDisplayV2 : MonoBehaviour
     //Would prefer to fetch this from the player once instantiated
     private Color myColor;
 
+    #endregion
+
+    /// <summary>
+    /// Ensures that the player controller is working, should be moved out
+    /// </summary>
     private void Awake()
     {
         current = this;
         MyController.Initialize();
     }
 
-    // Start is called before the first frame update
+    /// <summary>
+    /// -Instantiate route object pool
+    /// -Initialize and instantiate path display
+    /// -Generate and scan graph
+    /// </summary>
     void Start()
     {
         LargeMap = GameObject.FindWithTag("SpawnLargerMap");
         SmallMap = GameObject.FindWithTag("SpawnSmallMap");
 
-        if(current.gameObject.GetComponent<ASLObject>() != null)
+        /*if(current.gameObject.GetComponent<ASLObject>() != null)
         {
             current.gameObject.GetComponent<ASLObject>()._LocallySetFloatCallback(SyncLists);
-        }
+        }*/
         myColor = new Color(Random.Range(0, 1f), Random.Range(0, 1f), Random.Range(0, 1f), .25f);
         GenerateRoutePool(batchSize);
         StartCoroutine(PathDisplay.Initialize(myColor, traceSpeed, updatesPerSecond));
         StartCoroutine(PathDisplay.GeneratePathPool(batchSize));
         StartCoroutine(PathDisplay.Render());
 
+        StartCoroutine(SetHolomap());
         StartCoroutine(GenerateGraph());
-        StartCoroutine(UpdateRoute());
-        StartCoroutine(DrawMapCurve());
     }
 
+
+    /// <summary>
+    /// Adds a set number of route objects to the pool
+    /// </summary>
+    /// <param name="toAdd">The number of route segments to add to the pool</param>
     private void GenerateRoutePool(int toAdd)
     {
         for(int i = 0; i < toAdd; i++)
@@ -86,8 +99,10 @@ public class RouteDisplayV2 : MonoBehaviour
         DonePooling = true;
     }
 
-    
-
+    /// <summary>
+    /// Gets the color of the route
+    /// </summary>
+    /// <returns>The color assigned to all route segments</returns>
     public Color GetColor()
     {
         return myColor;
@@ -95,111 +110,113 @@ public class RouteDisplayV2 : MonoBehaviour
 
     #region DRAW_DIRECT_ROUTE
 
-    //Update route coroutine split for readability
-    IEnumerator UpdateRoute()
+    /// <summary>
+    /// Draws a route node, then updates the current and previous connector paths on the large and small maps
+    /// </summary>
+    /// <param name="actNdx">The index of the node to be acted upon</param>
+    private void UpdateRouteV2(int actNdx, bool Recheck)
     {
-        GameObject curNode, curPath, smPath;
-        Vector3 scale, dir, pos, nextPos;
-        int ndx;
-        float length; 
-        while (true)
+        while (!DonePooling) Debug.Log("Route checks not cleared");
+        //Debug.Log("ndx of action: " + actNdx);
+        Vector3 pos, scale, nextPos, prevPos;
+
+        if (actNdx >= 0)
         {
-            while (!DonePooling) yield return new WaitForSeconds(0.1f);
-            yield return new WaitForSeconds(1f / updatesPerSecond);
+            scale = new Vector3(1.5f, 0.5f, 1.5f);
+            pos = linkedObj[actNdx].position + heightAboveMarker * Vector3.up;
 
-            for (ndx = 0; ndx < linkedObj.Count; ndx++)
+            GameObject curNode = routeMarkerPool[actNdx];
+            GameObject curRoute = routeConnectPool[actNdx];
+            GameObject smRoute = smallConnectPool[actNdx];
+
+            curNode.SetActive(true);
+            DrawRouteObject(curNode, pos, scale);
+                
+            if (actNdx > 0)
             {
-                curNode = routeMarkerPool[ndx];
-                curPath = routeConnectPool[ndx];
-                smPath = smallConnectPool[ndx];
-
-                curNode.SetActive(true);
-                curPath.SetActive(true);
-                smPath.SetActive(true);
-
-                scale = new Vector3(1.5f, 0.5f, 1.5f);
-                pos = linkedObj[ndx].position;// + PrevHeight;// * Vector3.up;
-                pos.y += heightAboveMarker;
-                DrawRoute(curNode, pos, scale);
-
-                if (ndx < linkedObj.Count - 1)
-                {
-                    nextPos = linkedObj[ndx + 1].position;
-                    nextPos.y += heightAboveMarker;
-                    dir = nextPos - pos;
-                    length = (dir).magnitude / 2f;
-                    scale = new Vector3(.25f, length, .25f);
-                    pos = pos + (length * dir.normalized);
-                    curPath.transform.up = dir;
-                    DrawRoute(curPath, pos, scale);
-
-                    float scaleFactor = CalcSmallScale();
-                    smPath.transform.up = dir;
-                    if (MapDisplay != null)
-                    {
-                        if (scaleFactor > 0)
-                        {
-                            pos = MapDisplay.position + ((pos - 0.5f * heightAboveMarker * Vector3.up) / scaleFactor);
-                            scale = new Vector3(.05f, length / scaleFactor, .05f);
-                        }
-                        else
-                        {
-                            pos = Vector3.zero;
-                            scale = Vector3.zero;
-                        }
-                    }
-                    else
-                    {
-                        if (scaleFactor > 0)
-                        {
-                            pos = SmallMap.transform.position + ((pos - 0.5f * heightAboveMarker * Vector3.up) / scaleFactor);
-                            //- smMap.transform.right / scaleFactor - smMap.transform.right / smMap.GetComponent<GenerateMapFromHeightMap>().mapSize;
-                            scale = new Vector3(0.01f, length / scaleFactor, 0.01f);
-                        }
-                        else
-                        {
-                            pos = Vector3.zero;
-                            scale = Vector3.zero;
-                        }
-                    }
-                    DrawRoute(smPath, pos, scale);
-
-                }
-                else
-                {
-                    curPath.SetActive(false);
-                    smPath.SetActive(false);
-                }
+                GameObject prevNode = routeMarkerPool[actNdx - 1];
+                GameObject prevRoute = routeConnectPool[actNdx - 1];
+                GameObject smPrev = smallConnectPool[actNdx - 1];
+                prevPos = linkedObj[actNdx - 1].position + heightAboveMarker * Vector3.up;
+                if (!Recheck) UpdateRouteV2(actNdx - 1, true);
+                RouteDrawV2(prevPos, pos, prevRoute, smPrev);
             }
-            for (ndx = linkedObj.Count; ndx < routeMarkerPool.Count; ndx++)
+            if (actNdx + 1 < routeConnectPool.Count)
             {
-                routeMarkerPool[ndx].SetActive(false);
-                routeConnectPool[ndx].SetActive(false);
-                smallConnectPool[ndx].SetActive(false);
+                if(actNdx+1 < nodeCount)
+                {
+                    nextPos = linkedObj[actNdx + 1].position + heightAboveMarker * Vector3.up;
+                    RouteDrawV2(pos, nextPos, curRoute, smRoute);
+                } else
+                {
+                    curRoute.SetActive(false);
+                    smRoute.SetActive(false);
+                }
             }
         }
-        
     }
 
-    private float CalcSmallScale()
+    /// <summary>
+    /// Draws the connectors on the large and small maps
+    /// </summary>
+    /// <param name="start">The start point of the route draw on the large map</param>
+    /// <param name="end">The end point of the route draw on the large map</param>
+    /// <param name="route">The route connnector on the large map</param>
+    /// <param name="small">The route connector on the small map</param>
+    private void RouteDrawV2(Vector3 start, Vector3 end, GameObject route, GameObject small)
     {
-        if (TryGetComponent(out MarkerDisplay _md))
+        //Debug.Log("Start: " + start + "; End: " + end);
+        Vector3 dir, scale, pos;
+        float length = 0f;
+
+        route.SetActive(true);
+        small.SetActive(true);
+
+        dir = end - start;
+        length = dir.magnitude / 2f;
+        scale = new Vector3(.25f, length, .25f);
+        pos = start + (length * dir.normalized);
+        route.transform.up = dir;
+        DrawRouteObject(route, pos, scale);
+
+        float scaleFactor = MarkerDisplay.GetScaleFactor();
+        small.transform.up = dir;
+        if (MapDisplay != null)
         {
-            return MarkerDisplay.GetScaleFactor();
+            if (scaleFactor > 0)
+            {
+                pos = MapDisplay.position + ((pos - 0.5f * heightAboveMarker * Vector3.up) / scaleFactor);
+                scale = new Vector3(.05f, length / scaleFactor, .05f);
+            }
+            else
+            {
+                pos = Vector3.zero;
+                scale = Vector3.zero;
+            }
         }
         else
         {
-            if (SmallMap == null || LargeMap == null) return -1;
-
-            GenerateMapFromHeightMap _sm = SmallMap.GetComponent<GenerateMapFromHeightMap>();
-            GenerateMapFromHeightMap _lg = LargeMap.GetComponent<GenerateMapFromHeightMap>();
-            if (_sm == null || _lg == null) return -1;
-
-            return _lg.mapSize / _sm.mapSize;
+            if (scaleFactor > 0)
+            {
+                pos = SmallMap.transform.position + ((pos - 0.5f * heightAboveMarker * Vector3.up) / scaleFactor);
+                scale = new Vector3(0.01f, length / scaleFactor, 0.01f);
+            }
+            else
+            {
+                pos = Vector3.zero;
+                scale = Vector3.zero;
+            }
         }
+        DrawRouteObject(small, pos, scale);
     }
 
-    private void DrawRoute(GameObject _g, Vector3 pos, Vector3 scale)
+    /// <summary>
+    /// Sets the position, scale, and rotation of route objects in ASL space
+    /// </summary>
+    /// <param name="_g">The game object to be modified</param>
+    /// <param name="pos">The position of the game object</param>
+    /// <param name="scale">The local scale of the game object</param>
+    private void DrawRouteObject(GameObject _g, Vector3 pos, Vector3 scale)
     {
         _g.GetComponent<ASLObject>().SendAndSetClaim(() =>
         {
@@ -213,19 +230,26 @@ public class RouteDisplayV2 : MonoBehaviour
 
     #region SCAN_GRAPH
 
-    IEnumerator GenerateGraph()
+    /// <summary>
+    /// Generates a graph. A graph shall not be generated if there is no large map, or if data has already been collected.
+    /// Once heightmap data has been collected, graph paremeters shall be derieved.
+    /// The layer of the holomap chunks (the small map) shall also be set, in addition to the graph
+    /// The graph shall be scanned once set, and data shall be considered collected after that point
+    /// </summary>
+    /// <returns></returns>
+    public static IEnumerator GenerateGraph()
     {
-        if (LargeMap != null && !DataCollected)
+        if (current.LargeMap != null && !current.DataCollected)
         {
             Debug.Log("Generating new graph");
-            data = AstarPath.active.data;
+            current.data = AstarPath.active.data;
             
-            GenerateMapFromHeightMap heightMapData = LargeMap.GetComponent<GenerateMapFromHeightMap>();
+            GenerateMapFromHeightMap heightMapData = current.LargeMap.GetComponent<GenerateMapFromHeightMap>();
 
             while (heightMapData == null)
             {
-                yield return new WaitForSeconds(1 / updatesPerSecond);
-                heightMapData = LargeMap.GetComponent<GenerateMapFromHeightMap>();
+                yield return new WaitForSeconds(1 / current.updatesPerSecond);
+                heightMapData = current.LargeMap.GetComponent<GenerateMapFromHeightMap>();
             }
 
             if(heightMapData.heightmap!= null && heightMapData.heightmap.width >= 32 && heightMapData.heightmap.width % 2 == 0)
@@ -235,26 +259,32 @@ public class RouteDisplayV2 : MonoBehaviour
                 nodeSize = (nodeSize > 0) ? nodeSize : 1;
                 float scanHeight = heightMapData.meshHeight;
 
-                StartCoroutine(SetGround());
-                StartCoroutine(SetHolomap());
-                StartCoroutine(SetGridGraph(2 * graphSize, nodeSize / 2, scanHeight));
+                //current.StartCoroutine(current.SetHolomap());
+                current.StartCoroutine(current.SetGridGraph(graphSize/2, nodeSize*2, scanHeight));
 
-                while(!GraphSet || !GroundSet)
+                while(!current.GraphSet || !heightMapData.IsGenerated)
                 {
-                    yield return new WaitForSeconds(1 / updatesPerSecond);
+                    yield return new WaitForSeconds(1 / current.updatesPerSecond);
                 }
 
-                AstarPath.active.Scan(data.graphs);
+                AstarPath.active.Scan(current.data.graphs);
                 //consider culling nodes with no neighbors
-                DataCollected = !DataCollected;
+                current.DataCollected = !current.DataCollected;
             } else
             {
-                Debug.LogError("Large map does not have valid heightmap set.", LargeMap);
+                Debug.LogError("Large map does not have valid heightmap set.", current.LargeMap);
             }            
         }
         yield return new WaitForSeconds(0.1f);
     }
 
+    /// <summary>
+    /// Sets various parameters of the graph used for pathfinding
+    /// </summary>
+    /// <param name="size">The size of the graph. This is half the size calculated in GenerateGraph.</param>
+    /// <param name="nodeSize">The size of nodes in the graph. This is twice the size calculated in GenerateGraph.</param>
+    /// <param name="scanHeight">The height of the scanning raycasts</param>
+    /// <returns></returns>
     IEnumerator SetGridGraph(int size, float nodeSize, float scanHeight)
     {
         GridGraph graph = data.AddGraph(typeof(GridGraph)) as GridGraph;
@@ -266,6 +296,7 @@ public class RouteDisplayV2 : MonoBehaviour
         graph.SetDimensions(size, size, nodeSize);
         graph.collision.fromHeight = scanHeight * scanFactor;
         graph.collision.heightMask = LayerMask.GetMask("Ground");
+        //set obstacle layer
 
         //Set penalties
         graph.penaltyAngle = true;
@@ -275,25 +306,10 @@ public class RouteDisplayV2 : MonoBehaviour
         yield return new WaitForSeconds(0.1f);
     }
 
-    IEnumerator SetGround()
-    {
-        MeshFilter[] meshes = LargeMap.GetComponentsInChildren<MeshFilter>();
-        while (meshes.Length < 1)
-        {
-            yield return new WaitForSeconds(1 / updatesPerSecond);
-            meshes = LargeMap.GetComponentsInChildren<MeshFilter>();
-        }
-        Debug.Log("Setting " + meshes.Length + " chunks to Ground layer");
-        int ndx = 0;
-        while (ndx < meshes.Length)
-        {
-            meshes[ndx].gameObject.layer = LayerMask.NameToLayer("Ground");
-            ndx++;
-        }
-        GroundSet = true;
-        yield return new WaitForSeconds(0.1f);
-    }
-
+    /// <summary>
+    /// Sets the chunks in the small map to the Holomap layer
+    /// </summary>
+    /// <returns></returns>
     IEnumerator SetHolomap()
     {
         MeshFilter[] meshes = SmallMap.GetComponentsInChildren<MeshFilter>();
@@ -315,8 +331,375 @@ public class RouteDisplayV2 : MonoBehaviour
     #endregion
 
     #region TRACE_PATH
-    //TODO: Move to PathDisplay?
 
+    /// <summary>
+    /// Traces a path between each pair of adjacent markers placed on the map. 
+    /// Markers are considered adjacent if they are indexed next to each other in the linkedObj list
+    /// These paths are combined to create a single path, which is used in BezierTrace
+    /// </summary>
+    /// <returns></returns>
+    IEnumerator DrawMapCurveV2()
+    {
+        while (!DataCollected) yield return new WaitForSeconds(1f / current.updatesPerSecond);
+
+        List<Vector3> posList = new List<Vector3>();
+        List<GraphNode> nodeList = new List<GraphNode>();
+        ABPath tempPath;
+
+        for (int ndx = 0; ndx < linkedObj.Count - 1; ndx++)
+        {
+            tempPath = ABPath.Construct(linkedObj[ndx].position, linkedObj[ndx + 1].position);
+            AstarPath.StartPath(tempPath);
+            tempPath.BlockUntilCalculated();
+
+            if (ndx == 0)
+            {
+                posList.AddRange(tempPath.vectorPath);
+                nodeList.AddRange(tempPath.path);
+            }
+            else
+            {
+                posList.AddRange(tempPath.vectorPath.GetRange(1, tempPath.vectorPath.Count - 1));
+                nodeList.AddRange(tempPath.path.GetRange(1, tempPath.path.Count - 1));
+            }
+        }
+
+        myPath = ABPath.FakePath(posList, nodeList);
+        DrawPath = false;
+        BezierTrace();
+    }
+
+    /// <summary>
+    /// Resets and then traces over the BezierSpline mySpline based on the ABPath created from DrawMapCurve
+    /// </summary>
+    private void BezierTrace()
+    {
+        BezierSpline _bs = mySpline;
+        if (_bs != null) _bs.Reset();
+        if (myPath != null && _bs != null)
+        {
+            List<Vector3> posNodes = myPath.vectorPath;
+            if (posNodes.Count > 1)
+            {
+                _bs.SetCurvePoint(0, posNodes[0]);
+                int ndx;
+                for (ndx = 3; ndx < posNodes.Count; ndx += 3)
+                {
+                    _bs.SetCurvePoint(ndx, posNodes[ndx]);
+                }
+                if(((_bs.GetLastControlPoint() - posNodes[posNodes.Count - 1]).magnitude > 0.5f))
+                {
+                    _bs.SetCurvePoint(ndx, posNodes[posNodes.Count - 1]);
+                }
+            }
+            mySpline = _bs;
+        }
+        PathDisplay.DisplayCheck(mySpline.Length);
+    }
+
+    #endregion
+
+    #region STATIC_FUNCTIONS
+
+    /// <summary>
+    /// Adds a marker at the end of the linkedObj list. 
+    /// If the linkedObj count is greater than the current route segment length, additional route segments shall be pooled
+    /// </summary>
+    /// <param name="_t">The transform of the marker game object to be added</param>
+    public static void AddRouteMarker(Transform _t)
+    {
+        current.linkedObj.Add(_t);
+        current.nodeCount++;
+        current.DonePooling = false;
+        if (current.nodeCount >= current.routeMarkerPool.Count)
+        {
+            Debug.Log("Instantiating new batch");
+            
+            current.GenerateRoutePool(current.batchSize);
+        } else
+        {
+            current.DonePooling = true;
+        }
+        current.UpdateRouteV2(current.linkedObj.Count - 1, false);
+    }
+
+    /// <summary>
+    /// Attempts to insert a marker into the linkedObj list, based on a marker transform.
+    /// If the target cannot be found, the marker will instead be added to the end of the list.
+    /// If the linkedObj count is greater than or equal to the current route segment length after insertion, additional route segments shall be pooled
+    /// </summary>
+    /// <param name="_target">The target transform to search for in the linkedObj list</param>
+    /// <param name="_t">The transform of the marker object to be added</param>
+    /// <returns>The index of the </returns>
+    public static int InsertMarkerAt(Transform _target, Transform _t)
+    {
+        int ndx = (_target != null) ? current.linkedObj.IndexOf(_target) : -1;
+        if(ndx < 0)
+        {
+            AddRouteMarker(_t);
+        } else
+        {
+            current.linkedObj.Insert(ndx + 1, _t);
+            current.nodeCount++;
+            current.DrawPath = true;
+            if (current.linkedObj.Count >= current.routeMarkerPool.Count)
+            {
+                Debug.Log("Instantiating new batch");
+                current.DonePooling = false;
+                current.GenerateRoutePool(current.batchSize);
+            }
+            while (!current.DonePooling) ;
+            current.Reinsertion(current.routeConnectPool.Count - 1, ndx + 1);
+            current.UpdateRouteV2(ndx + 1, false);
+        }
+        return ndx;
+    }
+
+    /// <summary>
+    /// Attempts to remove a marker from the linkedObj list.
+    /// If the marker is not in the linkedObj list, an ASL callback shall be sent to all other clients
+    /// </summary>
+    /// <param name="_t">The transform to be removed</param>
+    /// <param name="fromFloatCallback">Specifies whether this is being called via ASL callback</param>
+    /// <returns>Returns true if removal is successful</returns>
+    public static bool RemoveRouteMarker(Transform _t, bool fromFloatCallback)
+    {
+        int actionNdx = current.linkedObj.IndexOf(_t);
+        if (actionNdx > -1)
+        {
+            current.Reinsertion(actionNdx, current.linkedObj.Count);
+            current.linkedObj.Remove(_t);
+            current.nodeCount--;
+            //if (current.nodeCount < 2) PathDisplay.ClearNotRender();
+            current.DrawPath = true;
+            current.UpdateRouteV2(actionNdx - 1, false);
+
+            /*if (fromFloatCallback)
+            {
+                PlayerMarkerGenerator.RemoveMarker(_t.gameObject);
+            }*/
+            return true;
+        }
+        else
+        {
+            /*if (!fromFloatCallback && current.gameObject.GetComponent<ASLObject>() != null)
+            {
+                current.PrepSearchCallback(_t.gameObject.GetComponent<ASLObject>().m_Id);
+            }*/
+
+            return false;
+        }
+    }
+
+    private void Reinsertion(int removeFrom, int insertAt)
+    {
+        if (removeFrom > routeMarkerPool.Count - 1 || removeFrom < 0) return;
+        if (insertAt > routeMarkerPool.Count - 1 || insertAt < 0) return;
+        if (insertAt > removeFrom) insertAt--;
+
+        GameObject nodeToRemove = routeMarkerPool[removeFrom];
+        GameObject pathToRemove = routeConnectPool[removeFrom];
+        GameObject smallToRemove = smallConnectPool[removeFrom];
+
+        routeMarkerPool.RemoveAt(removeFrom);
+        routeConnectPool.RemoveAt(removeFrom);
+        smallConnectPool.RemoveAt(removeFrom);
+
+        routeMarkerPool.Insert(insertAt, nodeToRemove);
+        routeConnectPool.Insert(insertAt, pathToRemove);
+        smallConnectPool.Insert(insertAt, smallToRemove);
+
+        nodeToRemove.SetActive(false);
+        pathToRemove.SetActive(false);
+        smallToRemove.SetActive(false);
+    }
+
+    /// <summary>
+    /// Gets the count of the linkedObj list
+    /// </summary>
+    public static int NodeCount { get { return current.nodeCount; } }
+
+    /// <summary>
+    /// Clears the current route and purges the linkedObj list
+    /// </summary>
+    public static void ClearRoute()
+    {
+        current.linkedObj.Clear();
+        current.nodeCount = 0;
+        PathDisplay.ClearNotRender();
+        current.DrawPath = true;
+    }
+
+    /// <summary>
+    /// Clears the graph data currently used by the route display
+    /// </summary>
+    public static void ClearMeshData()
+    {
+        foreach (NavGraph graph in current.data.graphs)
+        {
+            current.data.RemoveGraph(graph);
+        }
+        current.DataCollected = false;
+        //current.GroundSet = false;
+        current.GraphSet = false;
+        current.DrawPath = false;
+    }
+
+    /// <summary>
+    /// Copies the current spline data, and uses the copy for display purposes
+    /// </summary>
+    public static void ShowPath()
+    {
+        if(current.linkedObj.Count > 1)
+        {
+            current.DrawPath = true;
+            current.StartCoroutine(current.DrawMapCurveV2());
+            while (current.DrawPath) Debug.Log("Waiting on path draw");
+            current.oldSpline.Copy(current.mySpline);
+            PathDisplay.SetSpline(current.oldSpline);
+            //Debug.Log(PathDisplay.GetSplineLength());
+        }
+    }
+
+    #endregion
+
+    #region CALLBACK_FUNCTIONS
+
+    /// <summary>
+    /// Instantiates a marker within ASL space
+    /// </summary>
+    /// <param name="_myGameObject">The game object that initiated this callback</param>
+    private static void MarkerInstantiation(GameObject _myGameObject)
+    {
+        current.routeMarkerPool.Add(_myGameObject);
+        _myGameObject.GetComponent<ASLObject>().SendAndSetClaim(() =>
+        {
+            _myGameObject.GetComponent<ASLObject>().SendAndSetObjectColor(current.myColor, current.myColor);
+        });
+        _myGameObject.SetActive(false);
+        //Debug.Log("Added marker");
+    }
+
+    /// <summary>
+    /// Instantiates a large route segment within ASL space
+    /// </summary>
+    /// <param name="_myGameObject">The game object that initiated this callback</param>
+    private static void RouteInstantiation(GameObject _myGameObject)
+    {
+        current.routeConnectPool.Add(_myGameObject);
+        _myGameObject.GetComponent<ASLObject>().SendAndSetClaim(() =>
+        {
+            _myGameObject.GetComponent<ASLObject>().SendAndSetObjectColor(current.myColor, current.myColor);
+        });
+        _myGameObject.SetActive(false);
+    }
+
+    /// <summary>
+    /// Instantiates a small route segment within ASL space
+    /// </summary>
+    /// <param name="_myGameObject">The game object that inititated this callback</param>
+    private static void SmallRouteInstantiation(GameObject _myGameObject)
+    {
+        current.smallConnectPool.Add(_myGameObject);
+        _myGameObject.GetComponent<ASLObject>().SendAndSetClaim(() =>
+        {
+            _myGameObject.GetComponent<ASLObject>().SendAndSetObjectColor(current.myColor, current.myColor);
+        });
+        _myGameObject.SetActive(false);
+    }
+
+    #endregion
+
+    //Functions not currently in use
+    #region UNUSED FUNCTIONS
+
+    /// <summary>
+    /// Alternative version of BezierTrace that directly uses the linkedObj list
+    /// </summary>
+    private void BezierTraceV2()
+    {
+        BezierSpline _bs = mySpline;
+        if (_bs != null) _bs.Reset();
+        if (linkedObj.Count > 1 && _bs != null)
+        {
+            for (int ndx = 0; ndx < linkedObj.Count; ndx++)
+            {
+                _bs.SetCurvePoint(ndx * 3, linkedObj[ndx].position);
+            }
+            mySpline = _bs;
+        }
+    }
+
+    /// <summary>
+    /// Sends the string ID of an ASLObject as a float array to all clients
+    /// </summary>
+    /// <param name="id">The ID of the ASLObject to be sent</param>
+    private void PrepSearchCallback(string id)
+    {
+        current.gameObject.GetComponent<ASLObject>().SendAndSetClaim(() =>
+        {
+            //Based on an answer to
+            //https://stackoverflow.com/questions/5322056/how-to-convert-an-ascii-character-into-an-int-in-c/37736710#:~:text=A%20char%20value%20in%20C,it%20with%20(int)c%20.
+            char[] splitId = id.ToCharArray();
+            float[] Ids = new float[splitId.Length];
+            for (int i = 0; i < splitId.Length; i++)
+            {
+                Ids[i] = (float)splitId[i];
+            }
+            current.gameObject.GetComponent<ASLObject>().SendFloatArray(Ids);
+        });
+    }
+
+
+    /// <summary>
+    /// Callback function used in conjunction with RemoveRouteMarker to remove markers not in a player's local linkedObj list
+    /// </summary>
+    /// <param name="_id">The string ID of the ASLObject that iniated this callback</param>
+    /// <param name="_f">The float array sent over ASL</param>
+    public void SyncLists(string _id, float[] _f)
+    {
+        string theID = current.AssembleID(_f);
+        bool foundObject = false;
+        Transform obj = null;
+
+        List<Transform> transforms = ASLObjectTrackingSystem.GetObjects();
+        foreach (Transform _t in transforms)
+        {
+            if (_t.gameObject.GetComponent<ASLObject>().m_Id.Equals(theID))
+            {
+                foundObject = true;
+                obj = _t;
+            }
+        }
+
+        if (foundObject)
+        {
+            RemoveRouteMarker(obj, true);
+        }
+    }
+
+    /// <summary>
+    /// Reassembes an ASLObject ID from a float array, to check if the player has that ASLObject
+    /// </summary>
+    /// <param name="f_id">The float array containing the ID</param>
+    /// <returns>The string ID of the ASLObject to search for</returns>
+    private string AssembleID(float[] f_id)
+    {
+        char[] c_id = new char[f_id.Length];
+        for (int i = 0; i < c_id.Length; i++)
+        {
+            c_id[i] = (char)f_id[i];
+        }
+        return string.Concat(c_id);
+    }
+
+    //Depreciated
+    /// <summary>
+    /// Traces a path between each pair of adjacent markers placed on the map. 
+    /// Markers are considered adjacent if they are indexed next to each other in the linkedObj list
+    /// These paths are combined to create a single path, which is used in BezierTrace
+    /// </summary>
+    /// <returns></returns>
     IEnumerator DrawMapCurve()
     {
         while (true)
@@ -351,225 +734,7 @@ public class RouteDisplayV2 : MonoBehaviour
                 DrawPath = !DrawPath;
                 BezierTrace();
             }
-        }        
-    }
-
-    private void BezierTrace()
-    {
-        BezierSpline _bs = mySpline;
-        if (_bs != null) _bs.Reset();
-        if (myPath != null && _bs != null)
-        {
-            List<Vector3> posNodes = myPath.vectorPath;
-            if (posNodes.Count > 1)
-            {
-                _bs.SetCurvePoint(0, posNodes[0]);
-                int ndx;
-                for (ndx = 3; ndx * 2 < posNodes.Count; ndx += 3)
-                {
-                    _bs.SetCurvePoint(ndx, posNodes[ndx * 2]);
-                }
-                if(posNodes.Count % 3 != 0 && ((_bs.GetLastControlPoint() - posNodes[posNodes.Count - 1]).magnitude > 0.5f))
-                {
-                    _bs.SetCurvePoint(ndx, posNodes[posNodes.Count - 1]);
-                }
-            }
-            mySpline = _bs;
         }
-    }
-
-    #endregion
-
-    #region STATIC_FUNCTIONS
-
-    public static void AddRouteMarker(Transform _t)
-    {
-        current.linkedObj.Add(_t);
-        current.DrawPath = true;
-        if (current.linkedObj.Count > current.routeMarkerPool.Count)
-        {
-            Debug.Log("Instantiating new batch");
-            current.DonePooling = false;
-            current.GenerateRoutePool(current.batchSize);
-        }
-    }
-
-    public static int InsertMarkerAt(Transform _target, Transform _t)
-    {
-        int ndx = (_target != null) ? current.linkedObj.IndexOf(_target) : -1;
-        if(ndx < 0)
-        {
-            AddRouteMarker(_t);
-        } else
-        {
-            current.linkedObj.Insert(ndx, _t);
-            current.DrawPath = true;
-            if (current.linkedObj.Count > current.routeMarkerPool.Count)
-            {
-                Debug.Log("Instantiating new batch");
-                current.DonePooling = false;
-                current.GenerateRoutePool(current.batchSize);
-            }
-        }
-        return ndx;
-    }
-
-    public static bool RemoveRouteMarker(Transform _t, bool fromFloatCallback)
-    {
-        current.removedNdx = current.linkedObj.IndexOf(_t);
-        if (current.removedNdx > -1)
-        {
-            GameObject nodeToRemove = current.routeMarkerPool[current.removedNdx];
-            GameObject pathToRemove = current.routeConnectPool[current.removedNdx];
-            GameObject smallToRemove = current.smallConnectPool[current.removedNdx];
-
-            current.linkedObj.Remove(_t);
-            if (current.linkedObj.Count < 2) PathDisplay.ClearNotRender();
-
-            current.routeMarkerPool.RemoveAt(current.removedNdx);
-            current.routeConnectPool.RemoveAt(current.removedNdx);
-            current.smallConnectPool.RemoveAt(current.removedNdx);
-
-            current.routeMarkerPool.Add(nodeToRemove);
-            current.routeConnectPool.Add(pathToRemove);
-            current.smallConnectPool.Add(smallToRemove);
-            nodeToRemove.SetActive(false);
-            pathToRemove.SetActive(false);
-            smallToRemove.SetActive(false);
-            current.DrawPath = true;
-
-            if (fromFloatCallback)
-            {
-                PlayerMarkerGenerator.RemoveMarker(_t.gameObject);
-            }
-
-            return true;
-        }
-        else
-        {
-            if (!fromFloatCallback && current.gameObject.GetComponent<ASLObject>() != null)
-            {
-                current.PrepSearchCallback(_t.gameObject.GetComponent<ASLObject>().m_Id);
-            }
-
-            return false;
-        }
-    }
-
-    public static void ClearRoute()
-    {
-        current.linkedObj.Clear();
-        PathDisplay.ClearNotRender();
-        current.DrawPath = true;
-    }
-
-    public static void ClearMeshData()
-    {
-        foreach (NavGraph graph in current.data.graphs)
-        {
-            current.data.RemoveGraph(graph);
-        }
-        current.DataCollected = false;
-        current.GroundSet = false;
-        current.GraphSet = false;
-        current.DrawPath = false;
-    }
-
-    public static void ShowPath()
-    {
-        if(current.linkedObj.Count > 1)
-        {
-            current.oldSpline.Copy(current.mySpline);
-            PathDisplay.SetSpline(current.oldSpline);
-        }
-    }
-
-    #endregion
-
-    #region CALLBACK_FUNCTIONS
-
-    private static void MarkerInstantiation(GameObject _myGameObject)
-    {
-        current.routeMarkerPool.Add(_myGameObject);
-        _myGameObject.GetComponent<ASLObject>().SendAndSetClaim(() =>
-        {
-            _myGameObject.GetComponent<ASLObject>().SendAndSetObjectColor(current.myColor, current.myColor);
-        });
-        _myGameObject.SetActive(false);
-        Debug.Log("Added marker");
-    }
-
-    private static void RouteInstantiation(GameObject _myGameObject)
-    {
-        current.routeConnectPool.Add(_myGameObject);
-        _myGameObject.GetComponent<ASLObject>().SendAndSetClaim(() =>
-        {
-            _myGameObject.GetComponent<ASLObject>().SendAndSetObjectColor(current.myColor, current.myColor);
-        });
-        _myGameObject.SetActive(false);
-    }
-
-    private static void SmallRouteInstantiation(GameObject _myGameObject)
-    {
-        current.smallConnectPool.Add(_myGameObject);
-        _myGameObject.GetComponent<ASLObject>().SendAndSetClaim(() =>
-        {
-            _myGameObject.GetComponent<ASLObject>().SendAndSetObjectColor(current.myColor, current.myColor);
-        });
-        _myGameObject.SetActive(false);
-    }
-
-
-    //For reference in the event we need to pass ASLObject ids (which are strings) to the other players
-    private void PrepSearchCallback(string id)
-    {
-        current.gameObject.GetComponent<ASLObject>().SendAndSetClaim(() =>
-        {
-            //Based on an answer to
-            //https://stackoverflow.com/questions/5322056/how-to-convert-an-ascii-character-into-an-int-in-c/37736710#:~:text=A%20char%20value%20in%20C,it%20with%20(int)c%20.
-            char[] splitId = id.ToCharArray();
-            float[] Ids = new float[splitId.Length];
-            for (int i = 0; i < splitId.Length; i++)
-            {
-                Ids[i] = (float)splitId[i];
-            }
-            current.gameObject.GetComponent<ASLObject>().SendFloatArray(Ids);
-        });
-    }
-
-
-    //Locally set float callback method
-    public void SyncLists(string _id, float[] _f)
-    {
-        string theID = current.AssembleID(_f);
-        bool foundObject = false;
-        Transform obj = null;
-
-        List<Transform> transforms = ASLObjectTrackingSystem.GetObjects();
-        foreach (Transform _t in transforms)
-        {
-            if (_t.gameObject.GetComponent<ASLObject>().m_Id.Equals(theID))
-            {
-                foundObject = true;
-                obj = _t;
-            }
-        }
-
-        if (foundObject)
-        {
-            RemoveRouteMarker(obj, true);
-        }
-    }
-
-    //Reassemble ASLObject id from float array
-    private string AssembleID(float[] f_id)
-    {
-        char[] c_id = new char[f_id.Length];
-        for (int i = 0; i < c_id.Length; i++)
-        {
-            c_id[i] = (char)f_id[i];
-        }
-        return string.Concat(c_id);
     }
 
     #endregion
