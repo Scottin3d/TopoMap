@@ -1,8 +1,9 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using Valve.VR;
 
-public abstract class ToolBox : MonoBehaviour
+public class ToolBox : MonoBehaviour
 {
     protected bool isActive;
     //toolbox is the controlling script for the toolbox the player pulls their tools out of.
@@ -25,5 +26,17 @@ public abstract class ToolBox : MonoBehaviour
     public bool isCurrentlyActive()
     {
         return isActive;
+    }
+
+
+    private void OnTriggerStay(Collider other)
+    {
+        //Debug.Log("is it the collider? " + (other.gameObject == UICollider));
+        //Debug.Log("in trigger stay gripstate = " + SteamVR_Actions.default_GrabGrip.state + ".");
+        if (other.gameObject == UICollider && SteamVR_Actions.default_GrabGrip.state)
+        {
+            //trigger reciever
+            reciever.BoxActivated();
+        }
     }
 }
