@@ -469,29 +469,20 @@ public class RouteDisplayV2 : MonoBehaviour
     /// <returns>Returns true if removal is successful</returns>
     public static bool RemoveRouteMarker(Transform _t, bool fromFloatCallback)
     {
+        if (!current.linkedObj.Contains(_t)) return false;
         int actionNdx = current.linkedObj.IndexOf(_t);
         if (actionNdx > -1)
         {
             current.Reinsertion(actionNdx, current.linkedObj.Count);
             current.linkedObj.Remove(_t);
             current.nodeCount--;
-            //if (current.nodeCount < 2) PathDisplay.ClearNotRender();
+            if (current.nodeCount < 2) PathDisplay.ClearNotRender();
             current.DrawPath = true;
             current.UpdateRouteV2(actionNdx - 1, false);
-
-            /*if (fromFloatCallback)
-            {
-                PlayerMarkerGenerator.RemoveMarker(_t.gameObject);
-            }*/
             return true;
         }
         else
         {
-            /*if (!fromFloatCallback && current.gameObject.GetComponent<ASLObject>() != null)
-            {
-                current.PrepSearchCallback(_t.gameObject.GetComponent<ASLObject>().m_Id);
-            }*/
-
             return false;
         }
     }

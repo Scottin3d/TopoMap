@@ -81,6 +81,10 @@ public class PlayerMarkerGenerator : MonoBehaviour
         {
             if (DrawOrigin != null /*&& !FromPlace*/ && !projecting) {
                 if(RouteDisplayV2.RemoveRouteMarker(DrawOrigin.transform, false)) RemoveMarker(DrawOrigin);
+                else
+                {
+
+                }
             } 
         }
     }
@@ -401,6 +405,14 @@ public class PlayerMarkerGenerator : MonoBehaviour
         {
             GameObject LMarker = LargerMapMarkerList[LargerMapMarkerList.Count - 1];
             if (RouteDisplayV2.RemoveRouteMarker(LMarker.transform, false)) RemoveMarker(LMarker);
+            else
+            {
+                float[] _f = new float[0];
+                LMarker.GetComponent<ASL.ASLObject>().SendAndSetClaim(() =>
+                {
+                    LMarker.GetComponent<ASL.ASLObject>().SendFloatArray(_f);
+                });
+            }
         }
     }
 
@@ -416,6 +428,11 @@ public class PlayerMarkerGenerator : MonoBehaviour
                 });
             }
         //}
+    }
+
+    public static void DeletionCallback(GameObject _g)
+    {
+        if (RouteDisplayV2.RemoveRouteMarker(_g.transform, false)) RemoveMarker(_g);
     }
 }
 
