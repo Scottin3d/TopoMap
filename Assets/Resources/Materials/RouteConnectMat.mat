@@ -7,7 +7,7 @@ Material:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: NewRouteMaterial
+  m_Name: RouteConnectMat
   m_Shader: {fileID: -6465566751694194690, guid: af15a46e6c6932c42b65dfd96395c2bd, type: 3}
   m_ShaderKeywords: 
   m_LightmapFlags: 4
@@ -67,6 +67,10 @@ Material:
         m_Texture: {fileID: 0}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
+    - _scrollArrow:
+        m_Texture: {fileID: 2800000, guid: f2b9bf0c2aa2bd143989811e221ae9de, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
     - unity_Lightmaps:
         m_Texture: {fileID: 0}
         m_Scale: {x: 1, y: 1}
@@ -80,6 +84,8 @@ Material:
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     m_Floats:
+    - Vector1_4df8674244d849de8a29a66320451e1e: 0.5
+    - Vector1_c8ea606e6b0b446db8e173ecf635ce1d: 1
     - _AlphaClip: 0
     - _Blend: 0
     - _BumpScale: 1
@@ -106,7 +112,9 @@ Material:
     - _Surface: 0
     - _WorkflowMode: 1
     - _ZWrite: 1
-    - _scrollSpeed: 0.1
+    - _circumference: 1
+    - _height: 1
+    - _scrollSpeed: -1
     - _transparency: 0.85
     m_Colors:
     - _BaseColor: {r: 1, g: 1, b: 1, a: 1}
@@ -115,7 +123,7 @@ Material:
     - _SpecColor: {r: 0.19999996, g: 0.19999996, b: 0.19999996, a: 1}
     - _lineColor: {r: 1, g: 0.49803913, b: 0, a: 0.2470588}
     - _mainColor: {r: 1, g: 0.49803913, b: 0, a: 0.2470588}
-    - _tiling: {r: 16, g: 16, b: 0, a: 0}
+    - _tiling: {r: 1, g: 8, b: 0, a: 0}
   m_BuildTextureStacks: []
 --- !u!114 &2767233821165153461
 MonoBehaviour:
