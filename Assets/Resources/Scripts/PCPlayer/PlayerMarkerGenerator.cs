@@ -146,7 +146,7 @@ public class PlayerMarkerGenerator : MonoBehaviour
                             Vector3 CenterToMarker = (Hit.point - SmallMapCenter) * (LargeMapSize / SmallMapSize);
                             Vector3 NewPositionOnLargeMap = CenterToMarker + LargerMapCenter;
                             Deselect();
-                            ASL.ASLHelper.InstantiateASLObject(DropdownOpionValue, NewPositionOnLargeMap, Quaternion.identity, "", "", GetLargerMapMarker);
+                            ASL.ASLHelper.InstantiateASLObject(DropdownOpionValue, NewPositionOnLargeMap, Quaternion.identity, "", "", GetLargerFromSmaller);
                         }
                         else {
                             Deselect();
