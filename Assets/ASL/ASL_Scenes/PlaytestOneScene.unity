@@ -2194,6 +2194,7 @@ GameObject:
   - component: {fileID: 785958413}
   - component: {fileID: 785958414}
   - component: {fileID: 785958416}
+  - component: {fileID: 785958415}
   m_Layer: 0
   m_Name: RouteHandler
   m_TagString: Untagged
@@ -2227,6 +2228,18 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 03c58412da33e154692db87cbf8c6ff0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!114 &785958415
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 785958412}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 05de2a8567293ec429ab129b41af1693, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!114 &785958416
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2242,7 +2255,7 @@ MonoBehaviour:
   updatesPerSecond: 10
   heightAboveMarker: 10
   batchSize: 10
-  linkedObj: []
+  routeMarkerPool: []
   MapDisplay: {fileID: 0}
   scanFactor: 2
   scaleFactor: 2
