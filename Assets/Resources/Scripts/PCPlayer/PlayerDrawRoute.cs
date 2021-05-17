@@ -18,6 +18,11 @@ public class PlayerDrawRoute : MonoBehaviour
     private static Vector3 SecondBrushPosition = new Vector3();
     private int MyLargeBruchListIndex = 0;
 
+    private static List<GameObject> MyLineRenenderBetweenBrushSmallMap = new List<GameObject>();
+    private static Vector3 FirstBrushPositionSmallMap = new Vector3();
+    private static Vector3 SecondBrushPositionSmallMap = new Vector3();
+    private int MySmallBrushListIndex = 0;
+
     public Dropdown MyEraseDropDown;
     private static GameObject ThisGameObject;
     // Start is called before the first frame update
@@ -27,60 +32,9 @@ public class PlayerDrawRoute : MonoBehaviour
         PlayerCamera = GameObject.Find("PCHandler/Player").GetComponentInChildren<Camera>();
         PlayerTableViewCamera = GameObject.Find("PCHandler/PlayerTopViewCamera").GetComponentInChildren<Camera>();
         StartCoroutine(DrawTheLineIE());
-        StartCoroutine(LinkLastTwoRoute());
+        StartCoroutine(LinkLastTwoRouteOnLargeMap());
+        StartCoroutine(LinkLastTwoRouteOnSmallMap());
     }
-
-    // Update is called once per frame
-    //void Update()
-    //{
-    //    DrawTheLine();
-    //}
-
-    //private void DrawTheLine()
-    //{
-    //    if (Input.GetMouseButton(1))
-    //    {
-    //        if (PlayerCamera.isActiveAndEnabled == true)
-    //        {
-    //            Ray MouseRay = PlayerCamera.ScreenPointToRay(Input.mousePosition);
-    //            RaycastHit Hit;
-    //            if (Physics.Raycast(MouseRay, out Hit))
-    //            {
-    //                if (Hit.collider.tag == "WhiteBoard")
-    //                {
-    //                    ASL.ASLHelper.InstantiateASLObject("Brush", Hit.point, Quaternion.identity, "", "", GetEachBrushOnWhiteBoard);
-    //                }
-    //                if (Hit.collider.tag == "Chunk" && Hit.collider.transform.parent.tag == "SpawnSmallMap")
-    //                {
-    //                    ASL.ASLHelper.InstantiateASLObject("Brush", Hit.point, Quaternion.identity, "", "", GetEachBrushOnSmallMap);
-    //                    int LargeMapSize = LargerMapGenerator.GetComponent<GenerateMapFromHeightMap>().mapSize;
-    //                    int SmallMapSize = SmallMapGenerator.GetComponent<GenerateMapFromHeightMap>().mapSize;
-    //                    Vector3 NewPositionOneLargeMap = ((Hit.point - SmallMapGenerator.transform.position) * (LargeMapSize / SmallMapSize)) + LargerMapGenerator.transform.position;
-    //                    NewPositionOneLargeMap.y += 3f;
-    //                    ASL.ASLHelper.InstantiateASLObject("LargeBrush", NewPositionOneLargeMap, Quaternion.identity, "", "", GetEachBrushOnLargerMap);
-    //                }
-    //            }
-    //        }
-
-    //        if (PlayerTableViewCamera.isActiveAndEnabled == true)
-    //        {
-    //            Ray MouseRay = PlayerTableViewCamera.ScreenPointToRay(Input.mousePosition);
-    //            RaycastHit Hit;
-    //            if (Physics.Raycast(MouseRay, out Hit))
-    //            {
-    //                if (Hit.collider.tag == "Chunk")
-    //                {
-    //                    ASL.ASLHelper.InstantiateASLObject("Brush", Hit.point, Quaternion.identity, "", "", GetEachBrushOnSmallMap);
-    //                    int LargeMapSize = LargerMapGenerator.GetComponent<GenerateMapFromHeightMap>().mapSize;
-    //                    int SmallMapSize = SmallMapGenerator.GetComponent<GenerateMapFromHeightMap>().mapSize;
-    //                    Vector3 NewPositionOneLargeMap = ((Hit.point - SmallMapGenerator.transform.position) * (LargeMapSize / SmallMapSize)) + LargerMapGenerator.transform.position;
-    //                    NewPositionOneLargeMap.y += 3f;
-    //                    ASL.ASLHelper.InstantiateASLObject("LargeBrush", NewPositionOneLargeMap, Quaternion.identity, "", "", GetEachBrushOnLargerMap);
-    //                }
-    //            }
-    //        }
-    //    }
-    //}
 
     IEnumerator DrawTheLineIE()
     {
@@ -132,7 +86,7 @@ public class PlayerDrawRoute : MonoBehaviour
         }
     }
 
-    IEnumerator LinkLastTwoRoute()
+    IEnumerator LinkLastTwoRouteOnLargeMap()
     {
         while (true)
         {
@@ -171,12 +125,49 @@ public class PlayerDrawRoute : MonoBehaviour
         }
     }
 
+    IEnumerator LinkLastTwoRouteOnSmallMap()
+    {
+        while (true)
+        {
+            if (MySmallBrushList.Count <= 1)
+            {
+                yield return null;
+            }
+            else if (MySmallBrushListIndex == MySmallBrushList.Count - 1)
+            {
+                yield return null;
+            }
+            else
+            {
+                yield return new WaitForSeconds(0.5f);
+                int SmallBrushListCount = MySmallBrushList.Count;
+                for (int i = MySmallBrushListIndex; i < SmallBrushListCount - 1; i++)
+                {
+                    FirstBrushPositionSmallMap = new Vector3(MySmallBrushList[i].transform.position.x, MySmallBrushList[i].transform.position.y, MySmallBrushList[i].transform.position.z);
+                    SecondBrushPositionSmallMap = new Vector3(MySmallBrushList[i + 1].transform.position.x, MySmallBrushList[i + 1].transform.position.y, MySmallBrushList[i + 1].transform.position.z);
+                    ASL.ASLHelper.InstantiateASLObject("LineRenderBetweenToBrushSmallMap", new Vector3(0, 0, 0), Quaternion.identity, "", "", SetLineRenenderSmallMap);
+                    yield return new WaitForSeconds(0.2f);
+                }
+
+                MySmallBrushListIndex += SmallBrushListCount - 1 - MySmallBrushListIndex;
+            }
+        }
+    }
+
     private static void SetLineRenender(GameObject _myGameObject)
     {
         _myGameObject.transform.parent = ThisGameObject.transform;
         _myGameObject.GetComponent<LineRenderer>().SetPosition(0, FirstBrushPosition);
         _myGameObject.GetComponent<LineRenderer>().SetPosition(1, SecondBrushPosition);
         MyLineRenenderBetweenBrush.Add(_myGameObject);
+    }
+
+    private static void SetLineRenenderSmallMap(GameObject _myGameObject)
+    {
+        _myGameObject.transform.parent = ThisGameObject.transform;
+        _myGameObject.GetComponent<LineRenderer>().SetPosition(0, FirstBrushPositionSmallMap);
+        _myGameObject.GetComponent<LineRenderer>().SetPosition(1, SecondBrushPositionSmallMap);
+        MyLineRenenderBetweenBrushSmallMap.Add(_myGameObject);
     }
 
     private void DrawLineRendererBetweenTwoBrush()
@@ -302,8 +293,18 @@ public class PlayerDrawRoute : MonoBehaviour
             });
         }
 
+        foreach (GameObject LineRenender in MyLineRenenderBetweenBrushSmallMap)
+        {
+            LineRenender.GetComponent<ASL.ASLObject>().SendAndSetClaim(() =>
+            {
+                LineRenender.GetComponent<ASL.ASLObject>().DeleteObject();
+            });
+        }
+
         MySmallBrushList.Clear();
         MyLargerBrushList.Clear();
+        MyLineRenenderBetweenBrush.Clear();
+        MyLineRenenderBetweenBrushSmallMap.Clear();
     }
 
     private static void EraseLastTenLineOnMap()
@@ -343,6 +344,23 @@ public class PlayerDrawRoute : MonoBehaviour
 
                 MyLineRenenderBetweenBrush.RemoveAt(MyLineRenenderBetweenBrush.Count - 1);
             }
+
+            if (MyLineRenenderBetweenBrushSmallMap.Count != 0)
+            {
+                GameObject LastLineRenender = MyLineRenenderBetweenBrushSmallMap[MyLineRenenderBetweenBrushSmallMap.Count - 1];
+
+                LastLineRenender.GetComponent<ASL.ASLObject>().SendAndSetClaim(() =>
+                {
+                    LastLineRenender.GetComponent<ASL.ASLObject>().DeleteObject();
+                });
+
+                MyLineRenenderBetweenBrushSmallMap.RemoveAt(MyLineRenenderBetweenBrushSmallMap.Count - 1);
+            }
         }
+    }
+
+    public List<GameObject> GetMyLargerBrushList()
+    {
+        return MyLargerBrushList;
     }
 }
