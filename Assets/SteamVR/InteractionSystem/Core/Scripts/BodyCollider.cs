@@ -16,6 +16,9 @@ namespace Valve.VR.InteractionSystem
 	[RequireComponent( typeof( CapsuleCollider ) )]
 	public class BodyCollider : MonoBehaviour
 	{
+
+		//public Rigidbody myBody;
+
 		public Transform head;
 
 		//overall VR player object
@@ -33,6 +36,7 @@ namespace Valve.VR.InteractionSystem
 		//-------------------------------------------------
 		void FixedUpdate()
 		{
+			
 			float distanceFromFloor = Vector3.Dot( head.localPosition, Vector3.up );
 			capsuleCollider.height = Mathf.Max( capsuleCollider.radius, distanceFromFloor );
 			//transform.localPosition = head.localPosition - 0.5f * distanceFromFloor * Vector3.up;
@@ -40,6 +44,8 @@ namespace Valve.VR.InteractionSystem
 			//the following will cause the player to fall with gravity
 			Vector3 newPosition = playerObject.position;
 			newPosition.y = transform.position.y;
+			//newPosition.x = transform.position.x;
+			//newPosition.z = transform.position.z;
 			playerObject.position = newPosition;
 		}
 	}
