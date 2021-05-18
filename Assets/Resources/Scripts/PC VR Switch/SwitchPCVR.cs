@@ -33,6 +33,7 @@ public class SwitchPCVR : MonoBehaviour
     public void ToggleToVR()
     {
         VR.SetActive(true);
+        VRStartupController.enable();//need to re-enable VR specific canvas here
         PC.SetActive(false);
     }
 }

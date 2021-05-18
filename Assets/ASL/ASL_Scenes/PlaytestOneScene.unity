@@ -1991,7 +1991,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Navigation:
-    m_Mode: 3
+    m_Mode: 0
     m_WrapAround: 0
     m_SelectOnUp: {fileID: 0}
     m_SelectOnDown: {fileID: 0}
@@ -2104,7 +2104,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Navigation:
-    m_Mode: 3
+    m_Mode: 0
     m_WrapAround: 0
     m_SelectOnUp: {fileID: 0}
     m_SelectOnDown: {fileID: 0}
@@ -6894,6 +6894,10 @@ PrefabInstance:
       propertyPath: VRToggle
       value: 
       objectReference: {fileID: 684022538}
+    - target: {fileID: 6897538589646759659, guid: 6c21f35d451268d4da0883a9980a2721, type: 3}
+      propertyPath: VRPlayerCanvas
+      value: 
+      objectReference: {fileID: 432528926}
     - target: {fileID: 6897538589646759659, guid: 6c21f35d451268d4da0883a9980a2721, type: 3}
       propertyPath: PlayerToTurnOff
       value: 
