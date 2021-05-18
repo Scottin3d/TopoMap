@@ -40,6 +40,7 @@ public class RouteDisplayV2 : MonoBehaviour
         DrawPath = false;
 
     public BezierSpline mySpline = null, oldSpline = null;
+    private Coroutine drawCoroutine;
 
     private const int gridRes = 16;    //Node resolution of the graph
     [Range(0.1f,10f)]
@@ -68,17 +69,11 @@ public class RouteDisplayV2 : MonoBehaviour
     {
         LargeMap = GameObject.FindWithTag("SpawnLargerMap");
         SmallMap = GameObject.FindWithTag("SpawnSmallMap");
-
-        /*if(current.gameObject.GetComponent<ASLObject>() != null)
-        {
-            current.gameObject.GetComponent<ASLObject>()._LocallySetFloatCallback(SyncLists);
-        }*/
         myColor = new Color(Random.Range(0, 1f), Random.Range(0, 1f), Random.Range(0, 1f), .25f);
         GenerateRoutePool(batchSize);
-        StartCoroutine(PathDisplay.Initialize(myColor, traceSpeed, updatesPerSecond));
-        StartCoroutine(PathDisplay.GeneratePathPool(batchSize));
-        StartCoroutine(PathDisplay.Render());
 
+        PathDisplayV2.SetColor(myColor);
+        PathDisplayV2.SetUPS(updatesPerSecond);
         StartCoroutine(SetHolomap());
         StartCoroutine(GenerateGraph());
     }
@@ -225,7 +220,7 @@ public class RouteDisplayV2 : MonoBehaviour
             _g.GetComponent<ASLObject>().SendAndSetLocalRotation(_g.transform.localRotation);
             
             
-            float[] toSend = { myColor.r, myColor.g, myColor.b, myColor.a, scale.y};
+            float[] toSend = { myColor.r, myColor.g, myColor.b, myColor.a, scale.y, 1f};
             _g.GetComponent<ASLObject>().SendFloatArray(toSend);
             
         });
@@ -263,6 +258,7 @@ public class RouteDisplayV2 : MonoBehaviour
                 float nodeSize = (float)heightMapData.mapSize / graphSize;
                 nodeSize = (nodeSize > 0) ? nodeSize : 1;
                 float scanHeight = heightMapData.meshHeight;
+                PathDisplayV2.SetMapHeight(scanHeight);
 
                 //current.StartCoroutine(current.SetHolomap());
                 current.StartCoroutine(current.SetGridGraph(graphSize/2, nodeSize*2, scanHeight));
@@ -370,8 +366,9 @@ public class RouteDisplayV2 : MonoBehaviour
         }
 
         myPath = ABPath.FakePath(posList, nodeList);
-        DrawPath = false;
         BezierTrace();
+        
+        
     }
 
     /// <summary>
@@ -399,7 +396,8 @@ public class RouteDisplayV2 : MonoBehaviour
             }
             mySpline = _bs;
         }
-        PathDisplay.DisplayCheck(mySpline.Length);
+        PathDisplayV2.DisplayCheck(mySpline.Length);
+        DrawPath = false;
     }
 
     #endregion
@@ -476,7 +474,7 @@ public class RouteDisplayV2 : MonoBehaviour
             current.Reinsertion(actionNdx, current.linkedObj.Count);
             current.linkedObj.Remove(_t);
             current.nodeCount--;
-            if (current.nodeCount < 2) PathDisplay.ClearNotRender();
+            if (current.nodeCount < 2) PathDisplayV2.ClearPath();
             current.DrawPath = true;
             current.UpdateRouteV2(actionNdx - 1, false);
             return true;
@@ -522,7 +520,7 @@ public class RouteDisplayV2 : MonoBehaviour
     {
         current.linkedObj.Clear();
         current.nodeCount = 0;
-        PathDisplay.ClearNotRender();
+        PathDisplayV2.ClearPath();
         current.DrawPath = true;
     }
 
@@ -542,20 +540,47 @@ public class RouteDisplayV2 : MonoBehaviour
     }
 
     /// <summary>
-    /// Copies the current spline data, and uses the copy for display purposes
+    /// Copies the current spline to the old spline, and displays the path using the old spline
     /// </summary>
     public static void ShowPath()
     {
         if(current.linkedObj.Count > 1)
         {
+            //https://answers.unity.com/questions/300864/how-to-stop-a-co-routine-in-c-instantly.html
+            if (current.drawCoroutine != null) current.StopCoroutine(current.drawCoroutine);
+            current.StartCoroutine(HidePath());
             current.DrawPath = true;
             current.StartCoroutine(current.DrawMapCurveV2());
-            while (current.DrawPath) Debug.Log("Waiting on path draw");
+            while (current.DrawPath) { Debug.Log("Waiting on path draw"); }
             current.oldSpline.Copy(current.mySpline);
-            PathDisplay.SetSpline(current.oldSpline);
-            //Debug.Log(PathDisplay.GetSplineLength());
+            current.drawCoroutine = current.StartCoroutine(PathDisplayV2.DrawPath(current.oldSpline));
         }
     }
+
+    public static void ToggleRoute()
+    {
+        //if path is showing, hide path and show route
+        //if route is showing, hide path and show route
+    }
+
+    /// <summary>
+    /// Hides the straight route for path drawing purposes
+    /// </summary>
+    /// <returns></returns>
+    static IEnumerator HidePath()
+    {
+        foreach(GameObject _g in current.routeConnectPool)
+        {
+            _g.SetActive(false);
+        }
+        foreach(GameObject _g in current.smallConnectPool)
+        {
+            _g.SetActive(false);
+        }
+        yield return new WaitForSeconds(1f);
+    }
+
+
 
     #endregion
 
@@ -568,8 +593,8 @@ public class RouteDisplayV2 : MonoBehaviour
     private static void MarkerInstantiation(GameObject _myGameObject)
     {
         current.routeMarkerPool.Add(_myGameObject);
+        _myGameObject.transform.parent = current.gameObject.transform;
         _myGameObject.SetActive(false);
-        //Debug.Log("Added marker");
     }
 
     /// <summary>
@@ -579,6 +604,7 @@ public class RouteDisplayV2 : MonoBehaviour
     private static void RouteInstantiation(GameObject _myGameObject)
     {
         current.routeConnectPool.Add(_myGameObject);
+        _myGameObject.transform.parent = current.gameObject.transform;
         _myGameObject.SetActive(false);
     }
 
@@ -589,6 +615,7 @@ public class RouteDisplayV2 : MonoBehaviour
     private static void SmallRouteInstantiation(GameObject _myGameObject)
     {
         current.smallConnectPool.Add(_myGameObject);
+        _myGameObject.transform.parent = current.gameObject.transform;
         _myGameObject.SetActive(false);
     }
 

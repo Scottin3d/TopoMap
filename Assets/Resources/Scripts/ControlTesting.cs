@@ -57,11 +57,11 @@ public class ControlTesting : MonoBehaviour
             }
             if (Input.GetKeyDown(KeyCode.Alpha3))   //Disable camera
             {
-                PathDisplay.DetatchPathCam();
+                //PathDisplay.DetatchPathCam();
             }
             if (Input.GetKeyDown(KeyCode.Alpha4))   //Toggle ability to see path
             {
-                PathDisplay.ToggleNotRender();
+                //PathDisplay.ToggleNotRender();
             }
         }
     }
