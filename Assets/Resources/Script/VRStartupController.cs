@@ -6,12 +6,17 @@ using Valve.VR;
 
 public class VRStartupController : MonoBehaviour
 {
+    //static reference to the one instance of VRStartupController
+    public static VRStartupController staticReference;
 
     //variable that tracks whether or not VR has been initialized on program startup. Use this to know if your code needs to act for VR or PC.
     public static bool isInVR = false;
 
     //reference to the VR Player Object in the scene. This will remain null if VR is not turned on. Once turned on, if VR is turned off, this Object will simply be deactivated.
     public static GameObject VRPlayerObject = null;
+
+    //reference to the PC canvas that needs to only be present when VR is active
+    public Canvas VRPlayerCanvas = null;
 
     //this is the GameObject representing the spawnpoint of the VR Player. It is used as a position and rotation to put the player in.
     public GameObject VRSpawnPoint = null;
@@ -34,6 +39,7 @@ public class VRStartupController : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
+        staticReference = this;
         VRToggle.onClick.AddListener(onVRToggleButtonPressed);
         if (UnityEngine.XR.XRSettings.isDeviceActive)
         {
@@ -114,6 +120,7 @@ public class VRStartupController : MonoBehaviour
             }
             PlayerToTurnOff.SetActive(true);
             VRPlayerObject.SetActive(false);
+            VRPlayerCanvas.enabled = false; //disables the double-canvas that was occurring when switching between VR and PC
         }
     }
 
@@ -139,5 +146,12 @@ public class VRStartupController : MonoBehaviour
     public static bool isVRDetected()
     {
         return UnityEngine.XR.XRSettings.isDeviceActive;
+    }
+
+    //this is a method to call when enabling VR from outside this class to re-enable the VR systems that need to be enabled
+    public static void enable()
+    {
+        staticReference.VRPlayerCanvas.enabled = true;
+        staticReference.enableVR(true);
     }
 }

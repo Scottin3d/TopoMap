@@ -11,27 +11,29 @@ public class SwitchPCVR : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        var XRDisplaySubsystems = new List<XRDisplaySubsystem>();
-        SubsystemManager.GetInstances<XRDisplaySubsystem>(XRDisplaySubsystems);
-        foreach (var XRDisplay in XRDisplaySubsystems)
-        {
-            Debug.Log(XRDisplay);
-            Debug.Log(XRDisplay.running);
-            if (XRDisplay.running)
-            {
-                PC.SetActive(false);
-            }
-        }
+        VR.SetActive(false);
+        //var XRDisplaySubsystems = new List<XRDisplaySubsystem>();
+        //SubsystemManager.GetInstances<XRDisplaySubsystem>(XRDisplaySubsystems);
+        //foreach (var XRDisplay in XRDisplaySubsystems)
+        //{
+        //    Debug.Log(XRDisplay);
+        //    Debug.Log(XRDisplay.running);
+        //    if (XRDisplay.running)
+        //    {
+        //        PC.SetActive(false);
+        //    }
+        //}
 
-        if (PC.activeSelf)
-        {
-            VR.SetActive(false);
-        }
+        //if (PC.activeSelf)
+        //{
+        //    VR.SetActive(false);
+        //}
     }
 
-    // Update is called once per frame
-    void Update()
+    public void ToggleToVR()
     {
-        
+        VR.SetActive(true);
+        VRStartupController.enable();//need to re-enable VR specific canvas here
+        PC.SetActive(false);
     }
 }

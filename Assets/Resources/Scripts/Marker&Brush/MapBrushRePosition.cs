@@ -8,7 +8,7 @@ public class MapBrushRePosition : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        RepositionRoute();
+        StartCoroutine(RepositionRoute());
     }
 
     IEnumerator RepositionRoute()
