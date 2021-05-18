@@ -212,8 +212,9 @@ public class PlayerMarkerGenerator : MonoBehaviour
     {
         if (DrawOrigin != null)
         {
-            if (DrawOrigin.GetComponent<MeshRenderer>() != null) DrawOrigin.GetComponent<MeshRenderer>().material.color = OriginColor;
-            else DrawOrigin.GetComponentInChildren<MeshRenderer>().material.color = OriginColor;
+            //if (DrawOrigin.GetComponent<MeshRenderer>() != null) DrawOrigin.GetComponent<MeshRenderer>().material.color = OriginColor;
+            //else DrawOrigin.GetComponentInChildren<MeshRenderer>().material.color = OriginColor;
+            DrawOrigin.GetComponent<MarkerObject>().Select(false);
             DrawOrigin = null;
         }
     }
@@ -223,8 +224,8 @@ public class PlayerMarkerGenerator : MonoBehaviour
         if (!_g.Equals(DrawOrigin))
         {
             DrawOrigin = _g;
-            OriginColor = (DrawOrigin.GetComponent<MeshRenderer>() != null) ? 
-                DrawOrigin.GetComponent<MeshRenderer>().material.color : DrawOrigin.GetComponentInChildren<MeshRenderer>().material.color;
+            //OriginColor = (DrawOrigin.GetComponent<MeshRenderer>() != null) ? 
+                //DrawOrigin.GetComponent<MeshRenderer>().material.color : DrawOrigin.GetComponentInChildren<MeshRenderer>().material.color;
             Debug.Log("Set draw origin");
         }
         DrawLineMarker = Instantiate(_g) as GameObject;
@@ -232,9 +233,9 @@ public class PlayerMarkerGenerator : MonoBehaviour
         Destroy(DrawLineMarker.GetComponent<ASL.ASLObject>());
         Destroy(DrawLineMarker.GetComponent<BoxCollider>());
         DrawLineMarker.layer = 11;
-        if (DrawOrigin.GetComponent<MeshRenderer>() != null) DrawOrigin.GetComponent<MeshRenderer>().material.color = SelectedColor;
-        else DrawOrigin.GetComponentInChildren<MeshRenderer>().material.color = SelectedColor;
-
+        //if (DrawOrigin.GetComponent<MeshRenderer>() != null) DrawOrigin.GetComponent<MeshRenderer>().material.color = SelectedColor;
+        //else DrawOrigin.GetComponentInChildren<MeshRenderer>().material.color = SelectedColor;
+        DrawOrigin.GetComponent<MarkerObject>().Select(true);
 
     }
 
@@ -339,8 +340,9 @@ public class PlayerMarkerGenerator : MonoBehaviour
 
                 ASL.ASLHelper.InstantiateASLObject(DropdownOpionValue, NewPositionOnLargeMap, Quaternion.identity, "", "", InsertLargerMapMarker);
             }
-            if (DrawOrigin.GetComponent<MeshRenderer>() != null) DrawOrigin.GetComponent<MeshRenderer>().material.color = OriginColor;
-            else DrawOrigin.GetComponentInChildren<MeshRenderer>().material.color = OriginColor;
+            //if (DrawOrigin.GetComponent<MeshRenderer>() != null) DrawOrigin.GetComponent<MeshRenderer>().material.color = OriginColor;
+            //else DrawOrigin.GetComponentInChildren<MeshRenderer>().material.color = OriginColor;
+            DrawOrigin.GetComponent<MarkerObject>().Select(false);
         }
     }
 

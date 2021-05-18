@@ -14,7 +14,9 @@ public static class PathDisplayV2
     private static float mapHeight;
     private static float UPS;
     private static int outstandingCallbacks;
-    private static bool isDrawing;
+
+    private static bool IsDrawing;
+    private static bool Interrupt;
 
     private static Color myColor;
 
@@ -64,12 +66,13 @@ public static class PathDisplayV2
     {
         drawnPath.Add(_myGameObject);
         _myGameObject.layer = LayerMask.NameToLayer("Markers");
+        _myGameObject.transform.parent = DisplayHelperV2.Instance.gameObject.transform;
         _myGameObject.SetActive(false);
         _myGameObject.GetComponent<ASLObject>().SendAndSetClaim(() =>
         {
             float[] toSend = { myColor.r, myColor.g, myColor.b, myColor.a, _myGameObject.transform.localScale.y, 0.85f };
             _myGameObject.GetComponent<ASLObject>().SendFloatArray(toSend);
-        });
+        });        
         outstandingCallbacks--;
     }
 
@@ -81,6 +84,7 @@ public static class PathDisplayV2
     {
         smallPath.Add(_myGameObject);
         _myGameObject.layer = LayerMask.NameToLayer("Markers");
+        _myGameObject.transform.parent = DisplayHelperV2.Instance.gameObject.transform;
         _myGameObject.SetActive(false);
     }
 
@@ -91,73 +95,79 @@ public static class PathDisplayV2
     /// <returns></returns>
     public static IEnumerator DrawPath(BezierSpline _bs)
     {
-        if (!isDrawing)
+        ClearPath();
+
+        //Find the small map for drawing the small route
+        GameObject smallMap = GameObject.FindWithTag("SpawnSmallMap");
+
+        float delay = (Mathf.Abs(UPS) > 0) ? UPS : 10f;
+        //Pool additional markers if necessary
+        if (_bs.Length > PathCount)
         {
-            isDrawing = true;
-            //Find the small map for drawing the small route
-            GameObject smallMap = GameObject.FindWithTag("SpawnSmallMap");
-
-            float delay = (Mathf.Abs(UPS) > 0) ? UPS : 10f;
-            //Pool additional markers if necessary
-            if (_bs.Length > PathCount)
-            {
-                DisplayHelperV2.Instance.StartCoroutine(PathPooling((int)(_bs.Length - PathCount) - outstandingCallbacks));
-            }
-            SplineDecorator.SetSpline(_bs);
-
-
-            bool NoCallBacks;
-            bool NoSmallbacks;
-            //Begin display
-            for (int ndx = 0; ndx < PathCount + outstandingCallbacks; ndx++)
-            {
-                //Ensure that callbacks are finished
-                NoCallBacks = true;
-                NoSmallbacks = true;
-                while (ndx > drawnPath.Count - 1) { yield return new WaitForSeconds(0.1f / delay); NoCallBacks = false; }
-                Debug.Log("Passed route callbacks");
-                while (ndx > smallPath.Count - 1) { yield return new WaitForSeconds(0.1f / delay); NoSmallbacks = false; }
-                Debug.Log("Passed small callbacks");
-
-                //Delay if no callbacks
-                if (NoCallBacks) yield return new WaitForSeconds(0.1f / delay);
-                if (NoSmallbacks) yield return new WaitForSeconds(0.1f / delay);
-
-                //Give large route segments to spline decorator for drawing
-                SplineDecorator.Decorate(drawnPath);
-
-                //ASL display logic
-                if (ndx < _bs.Length)
-                {
-                    //Position and scale of large route segments
-                    Vector3 pos = drawnPath[ndx].transform.position;
-                    Vector3 scale = drawnPath[ndx].transform.localScale;
-                    DrawRouteObject(drawnPath[ndx], pos, scale);
-
-                    //Set position of small route segments
-                    //TODO: fix small route display
-                    if (smallMap != null)
-                    {
-                        //Set active and get position and scale for small route segments
-                        smallPath[ndx].SetActive(true);
-                        smallPath[ndx].transform.up = drawnPath[ndx].transform.up;
-                        pos = smallMap.transform.position + pos / MarkerDisplay.GetScaleFactor();
-                        scale = new Vector3(0.01f, scale.y / MarkerDisplay.GetScaleFactor(), 0.01f);
-                        DrawRouteObject(smallPath[ndx], pos, scale);
-                    }
-                    else
-                    {
-                        smallPath[ndx].SetActive(false);
-                    }
-
-
-                }
-                else { drawnPath[ndx].SetActive(false); smallPath[ndx].SetActive(false); }
-
-            }
-            isDrawing = false;
+            DisplayHelperV2.Instance.StartCoroutine(PathPooling((int)(_bs.Length - PathCount) - outstandingCallbacks));
         }
-        
+        //Get stepsize for tracing
+        float stepSize = PathCount + outstandingCallbacks;
+        if (_bs.Loop || stepSize == 1)
+        {
+            stepSize = 1f / stepSize;
+        }
+        else if (stepSize > _bs.Length)
+        {
+            stepSize = 1f / (_bs.Length - 1);
+        }
+        else
+        {
+            stepSize = 1f / (stepSize - 1);
+        }
+
+        //Begin display
+        Vector3 pos, scale, dir;
+        bool NoCallBacks, NoSmallBacks;
+        for (int ndx = 0, p = 0; ndx < PathCount + outstandingCallbacks; ndx++, p++)
+        {
+            //Ensure that callbacks are finished
+            NoCallBacks = true;
+            NoSmallBacks = true;
+            while (ndx > drawnPath.Count - 1) { yield return new WaitForSeconds(0.001f / delay); NoCallBacks = false; }
+            Debug.Log("Passed route callbacks");
+            while (ndx > smallPath.Count - 1) { yield return new WaitForSeconds(0.001f / delay); NoSmallBacks = false; }
+            Debug.Log("Passed small callbacks");
+
+            //Delay if no callbacks
+            if (NoCallBacks) yield return new WaitForSeconds(0.001f / delay);
+            if (NoSmallBacks) yield return new WaitForSeconds(0.001f / delay);
+
+            //ASL display logic
+            if (ndx < _bs.Length)
+            {
+                //Position and scale of large route segments
+                drawnPath[ndx].SetActive(true);
+                smallPath[ndx].SetActive(true);
+
+                //Position, scale, and direction of large route segments
+                pos = _bs.GetPoint(p * stepSize) + 2f * Vector3.up;
+                scale = drawnPath[ndx].transform.localScale;
+                dir = _bs.GetDirection(p * stepSize);
+                drawnPath[ndx].transform.up = dir;
+                DrawRouteObject(drawnPath[ndx], pos, scale);
+                
+                if (smallMap != null)
+                {
+                    //Position, scale, and direction of small route segments
+                    pos = smallMap.transform.position + pos / MarkerDisplay.GetScaleFactor();
+                    scale = new Vector3(0.02f, scale.y / MarkerDisplay.GetScaleFactor(), 0.02f);
+                    smallPath[ndx].transform.up = dir;
+                    DrawRouteObject(smallPath[ndx], pos, scale);
+                }
+                else
+                {
+                    smallPath[ndx].SetActive(false);
+                }
+
+            }
+            else { drawnPath[ndx].SetActive(false); smallPath[ndx].SetActive(false); }
+        }             
         yield return new WaitForSeconds(1f);
     }
 
@@ -207,11 +217,9 @@ public static class PathDisplayV2
         {
             DisplayHelperV2.Instance.StartCoroutine(PathPooling((int)(splineLength - PathCount)));
         }
-        Debug.Log("Callbacks: " + outstandingCallbacks);
+        //Debug.Log("Callbacks: " + outstandingCallbacks);
     }
 }
-
-
 
 //From https://www.reddit.com/r/Unity3D/comments/3y2scl/how_to_call_a_coroutine_from_a/
 //Used in the event we need to call a coroutine from inside PathDisplayV2

@@ -40,6 +40,7 @@ public class RouteDisplayV2 : MonoBehaviour
         DrawPath = false;
 
     public BezierSpline mySpline = null, oldSpline = null;
+    private Coroutine drawCoroutine;
 
     private const int gridRes = 16;    //Node resolution of the graph
     [Range(0.1f,10f)]
@@ -73,7 +74,6 @@ public class RouteDisplayV2 : MonoBehaviour
 
         PathDisplayV2.SetColor(myColor);
         PathDisplayV2.SetUPS(updatesPerSecond);
-        SplineDecorator.SetForwardLook(true);
         StartCoroutine(SetHolomap());
         StartCoroutine(GenerateGraph());
     }
@@ -546,13 +546,21 @@ public class RouteDisplayV2 : MonoBehaviour
     {
         if(current.linkedObj.Count > 1)
         {
+            //https://answers.unity.com/questions/300864/how-to-stop-a-co-routine-in-c-instantly.html
+            if (current.drawCoroutine != null) current.StopCoroutine(current.drawCoroutine);
             current.StartCoroutine(HidePath());
             current.DrawPath = true;
             current.StartCoroutine(current.DrawMapCurveV2());
             while (current.DrawPath) { Debug.Log("Waiting on path draw"); }
             current.oldSpline.Copy(current.mySpline);
-            current.StartCoroutine(PathDisplayV2.DrawPath(current.oldSpline));
+            current.drawCoroutine = current.StartCoroutine(PathDisplayV2.DrawPath(current.oldSpline));
         }
+    }
+
+    public static void ToggleRoute()
+    {
+        //if path is showing, hide path and show route
+        //if route is showing, hide path and show route
     }
 
     /// <summary>
@@ -572,6 +580,8 @@ public class RouteDisplayV2 : MonoBehaviour
         yield return new WaitForSeconds(1f);
     }
 
+
+
     #endregion
 
     #region CALLBACK_FUNCTIONS
@@ -583,6 +593,7 @@ public class RouteDisplayV2 : MonoBehaviour
     private static void MarkerInstantiation(GameObject _myGameObject)
     {
         current.routeMarkerPool.Add(_myGameObject);
+        _myGameObject.transform.parent = current.gameObject.transform;
         _myGameObject.SetActive(false);
     }
 
@@ -593,6 +604,7 @@ public class RouteDisplayV2 : MonoBehaviour
     private static void RouteInstantiation(GameObject _myGameObject)
     {
         current.routeConnectPool.Add(_myGameObject);
+        _myGameObject.transform.parent = current.gameObject.transform;
         _myGameObject.SetActive(false);
     }
 
@@ -603,6 +615,7 @@ public class RouteDisplayV2 : MonoBehaviour
     private static void SmallRouteInstantiation(GameObject _myGameObject)
     {
         current.smallConnectPool.Add(_myGameObject);
+        _myGameObject.transform.parent = current.gameObject.transform;
         _myGameObject.SetActive(false);
     }
 
