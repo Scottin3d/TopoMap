@@ -108,3 +108,4 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0bfb5237c49c13c4fa0fa8a2dac98fea, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  SecondToLastBrushPosition: {x: 0, y: 0, z: 0}

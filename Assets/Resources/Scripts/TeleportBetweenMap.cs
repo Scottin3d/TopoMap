@@ -12,17 +12,22 @@ public class TeleportBetweenMap : MonoBehaviour
     private int ClickTime = 0;
     private bool IfDoubleClick = false;
 
+    private Vector3 LastPositionInSmallMap;
+    private Vector3 LastPositionInLargeMap;
+
     //public GameObject SpaceShip;
     //private Animator SpaceShipAnimator;
     // Start is called before the first frame update
     void Start()
     {
-        //SpaceShipAnimator = SpaceShip.GetComponent<Animator>();
+        LastPositionInLargeMap = LargeMap.transform.position + new Vector3(0, 50, 0);
+        LastPositionInSmallMap = SmallMap.transform.position + new Vector3(0, 0, 3);
     }
 
     // Update is called once per frame
     void Update()
     {
+        UpdateMyLastPosition();
         Teleport();
     }
 
@@ -58,7 +63,7 @@ public class TeleportBetweenMap : MonoBehaviour
         {
             AtSmallMap = false;
             Player.GetComponent<CharacterController>().enabled = false;
-            Player.transform.position = LargeMap.transform.position + new Vector3(0, 50, 0);
+            Player.transform.position = LastPositionInLargeMap;
             Player.GetComponent<CharacterController>().enabled = true;
             //Player.transform.position = LargeMap.transform.parent.transform.position + new Vector3(0, 10, 0);
         }
@@ -67,14 +72,26 @@ public class TeleportBetweenMap : MonoBehaviour
             Debug.Log("To small");
             AtSmallMap = true;
             Player.GetComponent<CharacterController>().enabled = false;
-            Player.transform.position = SmallMap.transform.position + new Vector3(0, 0, 3);
+            Player.transform.position = LastPositionInSmallMap;
             Player.GetComponent<CharacterController>().enabled = true;
             //Player.transform.position = SmallMap.transform.parent.transform.position;
         }
     }
 
-    private void TeleportToMapAnimation()
+    private void UpdateMyLastPosition()
     {
+        if (AtSmallMap)
+        {
+            LastPositionInSmallMap = Player.transform.position;
+        }
+        else
+        {
+            LastPositionInLargeMap = Player.transform.position;
+        }
+    }
 
+    public bool GetAtSmallMap()
+    {
+        return AtSmallMap;
     }
 }
