@@ -14,40 +14,42 @@ public class RouteDisplayV2 : MonoBehaviour
     public float heightAboveMarker = 5f;
     public int batchSize = 10;
     
-    public List<GameObject> routeMarkerPool = new List<GameObject>();
-    private List<GameObject> routeConnectPool = new List<GameObject>();
-    private List<GameObject> smallConnectPool = new List<GameObject>();
+    private static List<GameObject> routeMarkerPool = new List<GameObject>();
+    private static List<GameObject> routeConnectPool = new List<GameObject>();
+    private static List<GameObject> smallConnectPool = new List<GameObject>();
 
-    private List<Transform> linkedObj = new List<Transform>();
-    private int nodeCount = 0;
+    private static List<Transform> linkedObj = new List<Transform>();
+    private static int nodeCount = 0;
 
     //Map references
     public Transform MapDisplay = null;
     private GameObject SmallMap;
     private GameObject LargeMap;
 
-    private bool DonePooling = false;
+    private static bool DonePooling = false;
+    private static bool RouteRendering = true;
 
     //Data used in MapPath functions
-    private AstarData data;
-    public ABPath myPath;
+    private static AstarData data;
+    public ABPath myPath;   //This is public because of RtDisplayEditor
     public float scanFactor = 2f;
     [Range(1,5)]
     public int scaleFactor = 2;
 
-    private bool DataCollected = false,
-        GraphSet = false,
-        DrawPath = false;
+    private static bool DataCollected = false;
+    private static bool GraphSet = false;
+    private static bool DrawPath = false;
 
     public BezierSpline mySpline = null, oldSpline = null;
-    private Coroutine drawCoroutine;
+    private static Coroutine drawCoroutine;
+    private static Coroutine renderCoroutine;
 
-    private const int gridRes = 16;    //Node resolution of the graph
-    [Range(0.1f,10f)]
-    public float traceSpeed = 0.3f;    //inverse Approximate time to trace 3 path nodes
+    //private const int gridRes = 16;    //Node resolution of the graph
+    //[Range(0.1f,10f)]
+    //public float traceSpeed = 0.3f;    //inverse Approximate time to trace 3 path nodes
 
     //Would prefer to fetch this from the player once instantiated
-    private Color myColor;
+    private static Color myColor;
 
     #endregion
 
@@ -78,12 +80,27 @@ public class RouteDisplayV2 : MonoBehaviour
         StartCoroutine(GenerateGraph());
     }
 
+    public static void Init(BezierSpline _ms, BezierSpline _os, GameObject _lm, GameObject _sm, Color _c, float _UPS, float _dispHeight, int _batchSize)
+    {
+        current.LargeMap = _lm;
+        current.SmallMap = _sm;
+        myColor = _c;
+        current.batchSize = _batchSize;
+        GenerateRoutePool(_batchSize);
+
+        current.updatesPerSecond = _UPS;
+        current.heightAboveMarker = _dispHeight;
+
+        current.StartCoroutine(SetHolomap());
+        current.StartCoroutine(GenerateGraph());
+    }
+
 
     /// <summary>
     /// Adds a set number of route objects to the pool
     /// </summary>
     /// <param name="toAdd">The number of route segments to add to the pool</param>
-    private void GenerateRoutePool(int toAdd)
+    private static void GenerateRoutePool(int toAdd)
     {
         for(int i = 0; i < toAdd; i++)
         {
@@ -109,7 +126,7 @@ public class RouteDisplayV2 : MonoBehaviour
     /// Draws a route node, then updates the current and previous connector paths on the large and small maps
     /// </summary>
     /// <param name="actNdx">The index of the node to be acted upon</param>
-    private void UpdateRouteV2(int actNdx, bool Recheck)
+    private static void UpdateRouteV2(int actNdx, bool Recheck)
     {
         while (!DonePooling) Debug.Log("Route checks not cleared");
         //Debug.Log("ndx of action: " + actNdx);
@@ -118,7 +135,7 @@ public class RouteDisplayV2 : MonoBehaviour
         if (actNdx >= 0)
         {
             scale = new Vector3(1.5f, 0.5f, 1.5f);
-            pos = linkedObj[actNdx].position + heightAboveMarker * Vector3.up;
+            pos = linkedObj[actNdx].position + current.heightAboveMarker * Vector3.up;
 
             GameObject curNode = routeMarkerPool[actNdx];
             GameObject curRoute = routeConnectPool[actNdx];
@@ -132,7 +149,7 @@ public class RouteDisplayV2 : MonoBehaviour
                 GameObject prevNode = routeMarkerPool[actNdx - 1];
                 GameObject prevRoute = routeConnectPool[actNdx - 1];
                 GameObject smPrev = smallConnectPool[actNdx - 1];
-                prevPos = linkedObj[actNdx - 1].position + heightAboveMarker * Vector3.up;
+                prevPos = linkedObj[actNdx - 1].position + current.heightAboveMarker * Vector3.up;
                 if (!Recheck) UpdateRouteV2(actNdx - 1, true);
                 RouteDrawV2(prevPos, pos, prevRoute, smPrev);
             }
@@ -140,7 +157,7 @@ public class RouteDisplayV2 : MonoBehaviour
             {
                 if(actNdx+1 < nodeCount)
                 {
-                    nextPos = linkedObj[actNdx + 1].position + heightAboveMarker * Vector3.up;
+                    nextPos = linkedObj[actNdx + 1].position + current.heightAboveMarker * Vector3.up;
                     RouteDrawV2(pos, nextPos, curRoute, smRoute);
                 } else
                 {
@@ -156,9 +173,9 @@ public class RouteDisplayV2 : MonoBehaviour
     /// </summary>
     /// <param name="start">The start point of the route draw on the large map</param>
     /// <param name="end">The end point of the route draw on the large map</param>
-    /// <param name="route">The route connnector on the large map</param>
+    /// <param name="route">The route connector on the large map</param>
     /// <param name="small">The route connector on the small map</param>
-    private void RouteDrawV2(Vector3 start, Vector3 end, GameObject route, GameObject small)
+    private static void RouteDrawV2(Vector3 start, Vector3 end, GameObject route, GameObject small)
     {
         //Debug.Log("Start: " + start + "; End: " + end);
         Vector3 dir, scale, pos;
@@ -169,19 +186,19 @@ public class RouteDisplayV2 : MonoBehaviour
 
         dir = end - start;
         length = dir.magnitude / 2f;
-        scale = new Vector3(.25f, length, .25f);
+        scale = (RouteRendering) ? new Vector3(.25f, length, .25f) : new Vector3(0, length, 0);
         pos = start + (length * dir.normalized);
         route.transform.up = dir;
         DrawRouteObject(route, pos, scale);
 
         float scaleFactor = MarkerDisplay.GetScaleFactor();
         small.transform.up = dir;
-        if (MapDisplay != null)
+        if (current.MapDisplay != null)
         {
             if (scaleFactor > 0)
             {
-                pos = MapDisplay.position + ((pos - 0.5f * heightAboveMarker * Vector3.up) / scaleFactor);
-                scale = new Vector3(.05f, length / scaleFactor, .05f);
+                pos = current.MapDisplay.position + ((pos - 0.5f * current.heightAboveMarker * Vector3.up) / scaleFactor);
+                scale = (RouteRendering) ? new Vector3(.05f, length / scaleFactor, .05f) : new Vector3(0, length / scaleFactor, 0);
             }
             else
             {
@@ -193,8 +210,8 @@ public class RouteDisplayV2 : MonoBehaviour
         {
             if (scaleFactor > 0)
             {
-                pos = SmallMap.transform.position + ((pos - 0.5f * heightAboveMarker * Vector3.up) / scaleFactor);
-                scale = new Vector3(0.01f, length / scaleFactor, 0.01f);
+                pos = current.SmallMap.transform.position + ((pos - 0.5f * current.heightAboveMarker * Vector3.up) / scaleFactor);
+                scale = (RouteRendering) ? new Vector3(0.01f, length / scaleFactor, 0.01f) : new Vector3(0, length / scaleFactor, 0);
             }
             else
             {
@@ -206,12 +223,51 @@ public class RouteDisplayV2 : MonoBehaviour
     }
 
     /// <summary>
+    /// Sets the scale of connectors on the large and small maps
+    /// </summary>
+    /// <param name="route">The route connector on the large map</param>
+    /// <param name="small">The route connector on the small map</param>
+    private static void RouteDrawV2(GameObject route, GameObject small)
+    {
+        route.SetActive(true);
+        small.SetActive(true);
+
+        float length = route.transform.localScale.y;
+        Vector3 scale = (RouteRendering) ? new Vector3(0.25f, length, 0.25f) : new Vector3(0, length, 0);
+        DrawRouteObject(route, route.transform.position,scale);
+
+        float scaleFactor = MarkerDisplay.GetScaleFactor();
+        if(current.MapDisplay != null)
+        {
+            if (scaleFactor > 0)
+            {
+                scale = (RouteRendering) ? new Vector3(.05f, length / scaleFactor, .05f) : new Vector3(0, length / scaleFactor, 0);
+            }
+            else
+            {
+                scale = Vector3.zero;
+            }
+        } else
+        {
+            if (scaleFactor > 0)
+            {
+                scale = (RouteRendering) ? new Vector3(0.01f, length / scaleFactor, 0.01f) : new Vector3(0, length / scaleFactor, 0);
+            }
+            else
+            {
+                scale = Vector3.zero;
+            }
+        }
+        DrawRouteObject(small, small.transform.position, scale);
+    }
+
+    /// <summary>
     /// Sets the position, scale, and rotation of route objects in ASL space
     /// </summary>
     /// <param name="_g">The game object to be modified</param>
     /// <param name="pos">The position of the game object</param>
     /// <param name="scale">The local scale of the game object</param>
-    private void DrawRouteObject(GameObject _g, Vector3 pos, Vector3 scale)
+    private static void DrawRouteObject(GameObject _g, Vector3 pos, Vector3 scale)
     {
         _g.GetComponent<ASLObject>().SendAndSetClaim(() =>
         {
@@ -230,6 +286,8 @@ public class RouteDisplayV2 : MonoBehaviour
 
     #region SCAN_GRAPH
 
+    public static void ReceiveGraphData(AstarData _ad) { data = _ad; }
+
     /// <summary>
     /// Generates a graph. A graph shall not be generated if there is no large map, or if data has already been collected.
     /// Once heightmap data has been collected, graph paremeters shall be derieved.
@@ -239,10 +297,10 @@ public class RouteDisplayV2 : MonoBehaviour
     /// <returns></returns>
     public static IEnumerator GenerateGraph()
     {
-        if (current.LargeMap != null && !current.DataCollected)
+        if (current.LargeMap != null && !DataCollected)
         {
             Debug.Log("Generating new graph");
-            current.data = AstarPath.active.data;
+            data = AstarPath.active.data;
             
             GenerateMapFromHeightMap heightMapData = current.LargeMap.GetComponent<GenerateMapFromHeightMap>();
 
@@ -258,19 +316,19 @@ public class RouteDisplayV2 : MonoBehaviour
                 float nodeSize = (float)heightMapData.mapSize / graphSize;
                 nodeSize = (nodeSize > 0) ? nodeSize : 1;
                 float scanHeight = heightMapData.meshHeight;
-                PathDisplayV2.SetMapHeight(scanHeight);
+                //PathDisplayV2.SetMapHeight(scanHeight);
 
                 //current.StartCoroutine(current.SetHolomap());
-                current.StartCoroutine(current.SetGridGraph(graphSize/2, nodeSize*2, scanHeight));
+                current.StartCoroutine(SetGridGraph(graphSize/2, nodeSize*2, scanHeight));
 
-                while(!current.GraphSet || !heightMapData.IsGenerated)
+                while(!GraphSet || !heightMapData.IsGenerated)
                 {
                     yield return new WaitForSeconds(1 / current.updatesPerSecond);
                 }
 
-                AstarPath.active.Scan(current.data.graphs);
+                AstarPath.active.Scan(data.graphs);
                 //consider culling nodes with no neighbors
-                current.DataCollected = !current.DataCollected;
+                DataCollected = !DataCollected;
             } else
             {
                 Debug.LogError("Large map does not have valid heightmap set.", current.LargeMap);
@@ -286,16 +344,16 @@ public class RouteDisplayV2 : MonoBehaviour
     /// <param name="nodeSize">The size of nodes in the graph. This is twice the size calculated in GenerateGraph.</param>
     /// <param name="scanHeight">The height of the scanning raycasts</param>
     /// <returns></returns>
-    IEnumerator SetGridGraph(int size, float nodeSize, float scanHeight)
+    static IEnumerator SetGridGraph(int size, float nodeSize, float scanHeight)
     {
         GridGraph graph = data.AddGraph(typeof(GridGraph)) as GridGraph;
 
-        graph.center = LargeMap.transform.position;
+        graph.center = current.LargeMap.transform.position;
         graph.neighbours = NumNeighbours.Six;
         graph.maxClimb = 0f;
 
         graph.SetDimensions(size, size, nodeSize);
-        graph.collision.fromHeight = scanHeight * scanFactor;
+        graph.collision.fromHeight = scanHeight * current.scanFactor;
         graph.collision.heightMask = LayerMask.GetMask("Ground");
         //set obstacle layer
 
@@ -311,13 +369,13 @@ public class RouteDisplayV2 : MonoBehaviour
     /// Sets the chunks in the small map to the Holomap layer
     /// </summary>
     /// <returns></returns>
-    IEnumerator SetHolomap()
+    static IEnumerator SetHolomap()
     {
-        MeshFilter[] meshes = SmallMap.GetComponentsInChildren<MeshFilter>();
+        MeshFilter[] meshes = current.SmallMap.GetComponentsInChildren<MeshFilter>();
         while(meshes.Length < 1)
         {
-            yield return new WaitForSeconds(1 / updatesPerSecond);
-            meshes = SmallMap.GetComponentsInChildren<MeshFilter>();
+            yield return new WaitForSeconds(1 / current.updatesPerSecond);
+            meshes = current.SmallMap.GetComponentsInChildren<MeshFilter>();
         }
         Debug.Log("Setting " + meshes.Length + " chunks to Holomap layer");
         int ndx = 0;
@@ -339,7 +397,7 @@ public class RouteDisplayV2 : MonoBehaviour
     /// These paths are combined to create a single path, which is used in BezierTrace
     /// </summary>
     /// <returns></returns>
-    IEnumerator DrawMapCurveV2()
+    public static IEnumerator DrawMapCurveV2()
     {
         while (!DataCollected) yield return new WaitForSeconds(1f / current.updatesPerSecond);
 
@@ -365,7 +423,7 @@ public class RouteDisplayV2 : MonoBehaviour
             }
         }
 
-        myPath = ABPath.FakePath(posList, nodeList);
+        current.myPath = ABPath.FakePath(posList, nodeList);
         BezierTrace();
         
         
@@ -374,13 +432,13 @@ public class RouteDisplayV2 : MonoBehaviour
     /// <summary>
     /// Resets and then traces over the BezierSpline mySpline based on the ABPath created from DrawMapCurve
     /// </summary>
-    private void BezierTrace()
+    private static void BezierTrace()
     {
-        BezierSpline _bs = mySpline;
+        BezierSpline _bs = current.mySpline;
         if (_bs != null) _bs.Reset();
-        if (myPath != null && _bs != null)
+        if (current.myPath != null && _bs != null)
         {
-            List<Vector3> posNodes = myPath.vectorPath;
+            List<Vector3> posNodes = current.myPath.vectorPath;
             if (posNodes.Count > 1)
             {
                 _bs.SetCurvePoint(0, posNodes[0]);
@@ -394,15 +452,17 @@ public class RouteDisplayV2 : MonoBehaviour
                     _bs.SetCurvePoint(ndx, posNodes[posNodes.Count - 1]);
                 }
             }
-            mySpline = _bs;
+            current.mySpline = _bs;
         }
-        PathDisplayV2.DisplayCheck(mySpline.Length);
+        PathDisplayV2.DisplayCheck(current.mySpline.Length);
         DrawPath = false;
     }
 
+    public static bool IsDrawing { get { return DrawPath; } }
+
     #endregion
 
-    #region STATIC_FUNCTIONS
+    #region INSERTION/REMOVAL
 
     /// <summary>
     /// Adds a marker at the end of the linkedObj list. 
@@ -411,19 +471,19 @@ public class RouteDisplayV2 : MonoBehaviour
     /// <param name="_t">The transform of the marker game object to be added</param>
     public static void AddRouteMarker(Transform _t)
     {
-        current.linkedObj.Add(_t);
-        current.nodeCount++;
-        current.DonePooling = false;
-        if (current.nodeCount >= current.routeMarkerPool.Count)
+        linkedObj.Add(_t);
+        nodeCount++;
+        DonePooling = false;
+        if (nodeCount >= routeMarkerPool.Count)
         {
             Debug.Log("Instantiating new batch");
             
-            current.GenerateRoutePool(current.batchSize);
+            GenerateRoutePool(current.batchSize);
         } else
         {
-            current.DonePooling = true;
+            DonePooling = true;
         }
-        current.UpdateRouteV2(current.linkedObj.Count - 1, false);
+        UpdateRouteV2(linkedObj.Count - 1, false);
     }
 
     /// <summary>
@@ -436,24 +496,24 @@ public class RouteDisplayV2 : MonoBehaviour
     /// <returns>The index of the </returns>
     public static int InsertMarkerAt(Transform _target, Transform _t)
     {
-        int ndx = (_target != null) ? current.linkedObj.IndexOf(_target) : -1;
+        int ndx = (_target != null) ? linkedObj.IndexOf(_target) : -1;
         if(ndx < 0)
         {
             AddRouteMarker(_t);
         } else
         {
-            current.linkedObj.Insert(ndx + 1, _t);
-            current.nodeCount++;
-            current.DrawPath = true;
-            if (current.linkedObj.Count >= current.routeMarkerPool.Count)
+            linkedObj.Insert(ndx + 1, _t);
+            nodeCount++;
+            DrawPath = true;
+            if (linkedObj.Count >= routeMarkerPool.Count)
             {
                 Debug.Log("Instantiating new batch");
-                current.DonePooling = false;
-                current.GenerateRoutePool(current.batchSize);
+                DonePooling = false;
+                GenerateRoutePool(current.batchSize);
             }
-            while (!current.DonePooling) ;
-            current.Reinsertion(current.routeConnectPool.Count - 1, ndx + 1);
-            current.UpdateRouteV2(ndx + 1, false);
+            while (!DonePooling) ;
+            Reinsertion(routeConnectPool.Count - 1, ndx + 1);
+            UpdateRouteV2(ndx + 1, false);
         }
         return ndx;
     }
@@ -467,16 +527,16 @@ public class RouteDisplayV2 : MonoBehaviour
     /// <returns>Returns true if removal is successful</returns>
     public static bool RemoveRouteMarker(Transform _t, bool fromFloatCallback)
     {
-        if (!current.linkedObj.Contains(_t)) return false;
-        int actionNdx = current.linkedObj.IndexOf(_t);
+        if (!linkedObj.Contains(_t)) return false;
+        int actionNdx = linkedObj.IndexOf(_t);
         if (actionNdx > -1)
         {
-            current.Reinsertion(actionNdx, current.linkedObj.Count);
-            current.linkedObj.Remove(_t);
-            current.nodeCount--;
-            if (current.nodeCount < 2) PathDisplayV2.ClearPath();
-            current.DrawPath = true;
-            current.UpdateRouteV2(actionNdx - 1, false);
+            Reinsertion(actionNdx, linkedObj.Count);
+            linkedObj.Remove(_t);
+            nodeCount--;
+            if (nodeCount < 2) PathDisplayV2.ClearPath();
+            DrawPath = true;
+            UpdateRouteV2(actionNdx - 1, false);
             return true;
         }
         else
@@ -485,7 +545,12 @@ public class RouteDisplayV2 : MonoBehaviour
         }
     }
 
-    private void Reinsertion(int removeFrom, int insertAt)
+    /// <summary>
+    /// Reinserts route segments from one point in their respective lists to a different point
+    /// </summary>
+    /// <param name="removeFrom">The index of the segments to be moved</param>
+    /// <param name="insertAt">The index to reinsert the segments</param>
+    private static void Reinsertion(int removeFrom, int insertAt)
     {
         if (removeFrom > routeMarkerPool.Count - 1 || removeFrom < 0) return;
         if (insertAt > routeMarkerPool.Count - 1 || insertAt < 0) return;
@@ -511,17 +576,21 @@ public class RouteDisplayV2 : MonoBehaviour
     /// <summary>
     /// Gets the count of the linkedObj list
     /// </summary>
-    public static int NodeCount { get { return current.nodeCount; } }
+    public static int NodeCount { get { return nodeCount; } }
+
+    #endregion
+
+    #region DISPLAY
 
     /// <summary>
     /// Clears the current route and purges the linkedObj list
     /// </summary>
     public static void ClearRoute()
     {
-        current.linkedObj.Clear();
-        current.nodeCount = 0;
+        linkedObj.Clear();
+        nodeCount = 0;
         PathDisplayV2.ClearPath();
-        current.DrawPath = true;
+        DrawPath = true;
     }
 
     /// <summary>
@@ -529,58 +598,75 @@ public class RouteDisplayV2 : MonoBehaviour
     /// </summary>
     public static void ClearMeshData()
     {
-        foreach (NavGraph graph in current.data.graphs)
+        foreach (NavGraph graph in data.graphs)
         {
-            current.data.RemoveGraph(graph);
+            data.RemoveGraph(graph);
         }
-        current.DataCollected = false;
+        DataCollected = false;
         //current.GroundSet = false;
-        current.GraphSet = false;
-        current.DrawPath = false;
+        GraphSet = false;
+        DrawPath = false;
     }
 
     /// <summary>
+    /// Stops active draw and render coroutines
+    /// Hides the straight drawn route
+    /// Gets the path to be traced and gives that to the spline
     /// Copies the current spline to the old spline, and displays the path using the old spline
     /// </summary>
     public static void ShowPath()
     {
-        if(current.linkedObj.Count > 1)
+        if(linkedObj.Count > 1)
         {
             //https://answers.unity.com/questions/300864/how-to-stop-a-co-routine-in-c-instantly.html
-            if (current.drawCoroutine != null) current.StopCoroutine(current.drawCoroutine);
+            if (drawCoroutine != null) current.StopCoroutine(drawCoroutine);
+            if (renderCoroutine != null) current.StopCoroutine(renderCoroutine);
             current.StartCoroutine(HidePath());
-            current.DrawPath = true;
-            current.StartCoroutine(current.DrawMapCurveV2());
-            while (current.DrawPath) { Debug.Log("Waiting on path draw"); }
+            DrawPath = true; RouteRendering = false;
+            current.StartCoroutine(DrawMapCurveV2());
+            while (DrawPath) { Debug.Log("Waiting on path draw"); }
             current.oldSpline.Copy(current.mySpline);
-            current.drawCoroutine = current.StartCoroutine(PathDisplayV2.DrawPath(current.oldSpline));
+            drawCoroutine = current.StartCoroutine(PathDisplayV2.DrawPath(current.oldSpline));
         }
     }
 
+    /// <summary>
+    /// Toggles whether the route (drawn with straight lines) or the path (drawn on a curve) is being displayed
+    /// </summary>
     public static void ToggleRoute()
     {
-        //if path is showing, hide path and show route
-        //if route is showing, hide path and show route
+        if (renderCoroutine != null) current.StopCoroutine(renderCoroutine);
+        renderCoroutine = current.StartCoroutine(PathDisplayV2.ToggleRenderer(current.oldSpline));
+        RouteRendering = !RouteRendering;
+        if (RouteRendering)
+        {
+            for(int ndx = 0; ndx < NodeCount - 1; ndx++)
+            {
+                RouteDrawV2(routeConnectPool[ndx], smallConnectPool[ndx]);
+            }
+        } else
+        {
+            current.StartCoroutine(HidePath());
+        }
     }
 
     /// <summary>
     /// Hides the straight route for path drawing purposes
     /// </summary>
     /// <returns></returns>
-    static IEnumerator HidePath()
+    public static IEnumerator HidePath()
     {
-        foreach(GameObject _g in current.routeConnectPool)
+        RouteRendering = false;
+        foreach(GameObject _g in routeConnectPool)
         {
             _g.SetActive(false);
         }
-        foreach(GameObject _g in current.smallConnectPool)
+        foreach(GameObject _g in smallConnectPool)
         {
             _g.SetActive(false);
         }
         yield return new WaitForSeconds(1f);
     }
-
-
 
     #endregion
 
@@ -592,7 +678,7 @@ public class RouteDisplayV2 : MonoBehaviour
     /// <param name="_myGameObject">The game object that initiated this callback</param>
     private static void MarkerInstantiation(GameObject _myGameObject)
     {
-        current.routeMarkerPool.Add(_myGameObject);
+        routeMarkerPool.Add(_myGameObject);
         _myGameObject.transform.parent = current.gameObject.transform;
         _myGameObject.SetActive(false);
     }
@@ -603,7 +689,7 @@ public class RouteDisplayV2 : MonoBehaviour
     /// <param name="_myGameObject">The game object that initiated this callback</param>
     private static void RouteInstantiation(GameObject _myGameObject)
     {
-        current.routeConnectPool.Add(_myGameObject);
+        routeConnectPool.Add(_myGameObject);
         _myGameObject.transform.parent = current.gameObject.transform;
         _myGameObject.SetActive(false);
     }
@@ -614,7 +700,7 @@ public class RouteDisplayV2 : MonoBehaviour
     /// <param name="_myGameObject">The game object that inititated this callback</param>
     private static void SmallRouteInstantiation(GameObject _myGameObject)
     {
-        current.smallConnectPool.Add(_myGameObject);
+        smallConnectPool.Add(_myGameObject);
         _myGameObject.transform.parent = current.gameObject.transform;
         _myGameObject.SetActive(false);
     }

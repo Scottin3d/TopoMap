@@ -61,7 +61,7 @@ public class ControlTesting : MonoBehaviour
             }
             if (Input.GetKeyDown(KeyCode.Alpha4))   //Toggle ability to see path
             {
-                //PathDisplay.ToggleNotRender();
+                RouteDisplayV2.ToggleRoute();
             }
         }
     }

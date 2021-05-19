@@ -15,6 +15,7 @@ public class MarkerObject : MonoBehaviour
     void Start()
     {
         if (gameObject.GetComponent<ASLObject>() != null) gameObject.GetComponent<ASLObject>()._LocallySetFloatCallback(MarkerCallback);
+        //Debug.Log("This marker has the ASL Object script: " + (gameObject.GetComponent<ASLObject>() != null));
         theMesh = (gameObject.GetComponent<MeshRenderer>() != null) ?
             gameObject.GetComponent<MeshRenderer>() : gameObject.GetComponentInChildren<MeshRenderer>();
         Debug.Assert(theMesh != null);

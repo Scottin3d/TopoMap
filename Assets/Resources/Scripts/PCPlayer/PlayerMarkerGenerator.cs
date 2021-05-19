@@ -409,7 +409,7 @@ public class PlayerMarkerGenerator : MonoBehaviour
             if (RouteDisplayV2.RemoveRouteMarker(LMarker.transform, false)) RemoveMarker(LMarker);
             else
             {
-                float[] _f = new float[0];
+                float[] _f = new float[1];
                 LMarker.GetComponent<ASL.ASLObject>().SendAndSetClaim(() =>
                 {
                     LMarker.GetComponent<ASL.ASLObject>().SendFloatArray(_f);
