@@ -5058,6 +5058,32 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8743cdd5e8bc3914ea280a540bb76d35, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!114 &1549362515
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1549362511}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ca27549d5c35ba64894e90a513443335, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!114 &1549362516
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1549362511}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a5a1d4f663df9654e88914b8390ef0b5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  LargerMapGenerator: {fileID: 631668594}
+  SmallMapGenerator: {fileID: 468696374}
 --- !u!4 &1549362519 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 6897538589646759658, guid: 6c21f35d451268d4da0883a9980a2721, type: 3}

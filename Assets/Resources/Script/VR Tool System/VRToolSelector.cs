@@ -300,21 +300,25 @@ public class VRToolSelector : MonoBehaviour
         {
             //activate tool
             Debug.Log("HotSpot0 active");
+            MarkerTool.deactivate();
         }
         else if(theSpot == HotSpot_1)
         {
             //activate tool
             Debug.Log("HotSpot1 active");
+            MarkerTool.deactivate();
         }
         else if (theSpot == HotSpot_2)
         {
             //activate tool
             Debug.Log("HotSpot2 active");
+            MarkerTool.activate();
         }
         else if (theSpot == HotSpot_3)
         {
             //activate tool
             Debug.Log("HotSpot3 active");
+            MarkerTool.deactivate();
         }
         else
         {
@@ -333,15 +337,19 @@ public class VRToolSelector : MonoBehaviour
         {
             case toolSelectionState.None:
                 //remove current tool
+                MarkerTool.deactivate();
                 break;
             case toolSelectionState.Road:
                 //activate road tool
+                MarkerTool.deactivate();
                 break;
             case toolSelectionState.Marker:
                 //activate marker tool
+                MarkerTool.activate();
                 break;
             case toolSelectionState.Flashlight:
                 //activate flashlight
+                MarkerTool.deactivate();
                 break;
             default:
                 break;
