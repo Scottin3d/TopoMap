@@ -25,6 +25,7 @@ public class MarkerObject : MonoBehaviour
 
     private void MarkerCallback(string _id, float[] _f)
     {
+        Debug.Log("A marker has made a callback");
         PlayerMarkerGenerator.DeletionCallback(gameObject);
     }
 
