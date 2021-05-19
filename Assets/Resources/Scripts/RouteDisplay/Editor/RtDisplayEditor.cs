@@ -3,14 +3,14 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEditor;
 
-[CustomEditor(typeof(RouteDisplayV2))]
+[CustomEditor(typeof(DisplayManager))]
 public class RtDisplayEditor : Editor
 {
-    private RouteDisplayV2 display;
+    private DisplayManager display;
 
     private void OnSceneGUI()
     {
-        display = target as RouteDisplayV2;
+        display = target as DisplayManager;
         if(display.myPath != null)
         {
             Handles.color = display.GetColor();

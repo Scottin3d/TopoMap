@@ -73,7 +73,7 @@ public static class PathDisplayV2
     {
         drawnPath.Add(_myGameObject);
         _myGameObject.layer = LayerMask.NameToLayer("Markers");
-        _myGameObject.transform.parent = DisplayHelperV2.Instance.gameObject.transform;
+        _myGameObject.transform.parent = PathHelper.Instance.gameObject.transform;
         _myGameObject.SetActive(false);
         _myGameObject.GetComponent<ASLObject>().SendAndSetClaim(() =>
         {
@@ -91,7 +91,7 @@ public static class PathDisplayV2
     {
         smallPath.Add(_myGameObject);
         _myGameObject.layer = LayerMask.NameToLayer("Markers");
-        _myGameObject.transform.parent = DisplayHelperV2.Instance.gameObject.transform;
+        _myGameObject.transform.parent = PathHelper.Instance.gameObject.transform;
         _myGameObject.SetActive(false);
     }
 
@@ -111,7 +111,7 @@ public static class PathDisplayV2
         //Pool additional markers if necessary
         if (_bs.Length > PathCount)
         {
-            DisplayHelperV2.Instance.StartCoroutine(PathPooling((int)(_bs.Length - PathCount) - outstandingCallbacks));
+            PathHelper.Instance.StartCoroutine(PathPooling((int)(_bs.Length - PathCount) - outstandingCallbacks));
         }
         //Get stepsize for tracing
         float stepSize = StepSize(_bs);
@@ -305,7 +305,7 @@ public static class PathDisplayV2
     {
         if (PathCount < (int)splineLength)
         {
-            DisplayHelperV2.Instance.StartCoroutine(PathPooling((int)(splineLength - PathCount)));
+            PathHelper.Instance.StartCoroutine(PathPooling((int)(splineLength - PathCount)));
         }
         //Debug.Log("Callbacks: " + outstandingCallbacks);
     }
@@ -313,15 +313,15 @@ public static class PathDisplayV2
 
 //From https://www.reddit.com/r/Unity3D/comments/3y2scl/how_to_call_a_coroutine_from_a/
 //Used in the event we need to call a coroutine from inside PathDisplayV2
-public class DisplayHelperV2 : MonoBehaviour
+public class PathHelper : MonoBehaviour
 {
-    private static DisplayHelperV2 _Instance;
+    private static PathHelper _Instance;
 
-    public static DisplayHelperV2 Instance
+    public static PathHelper Instance
     {
         get
         {
-            if (_Instance == null) _Instance = new GameObject("PathDisplayHelper").AddComponent<DisplayHelperV2>();
+            if (_Instance == null) _Instance = new GameObject("PathDisplayHelper").AddComponent<PathHelper>();
             return _Instance;
         }
     }

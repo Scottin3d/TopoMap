@@ -53,7 +53,7 @@ public class ControlTesting : MonoBehaviour
         {   //keyboard + mouse
             if (Input.GetKeyDown(KeyCode.Alpha2))   //Switch to new path
             {
-                RouteDisplayV2.ShowPath();
+                DisplayManager.ShowPath();
             }
             if (Input.GetKeyDown(KeyCode.Alpha3))   //Disable camera
             {
@@ -61,7 +61,7 @@ public class ControlTesting : MonoBehaviour
             }
             if (Input.GetKeyDown(KeyCode.Alpha4))   //Toggle ability to see path
             {
-                RouteDisplayV2.ToggleRoute();
+                DisplayManager.DisplayToggle();
             }
         }
     }

@@ -22,7 +22,6 @@ public class DisplayManager : MonoBehaviour
     public int scaleFactor = 2;
 
     private static bool GraphSet = false;
-    private static bool DrawPath = false;
 
     public BezierSpline mySpline = null, oldSpline = null;
     private static Coroutine drawCoroutine;
@@ -42,7 +41,7 @@ public class DisplayManager : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        Debug.Assert(MapDisplay != null);
+        //Debug.Assert(MapDisplay != null);
         Debug.Assert(mySpline != null);
         Debug.Assert(oldSpline != null);
 
@@ -50,17 +49,13 @@ public class DisplayManager : MonoBehaviour
         SmallMap = GameObject.FindWithTag("SpawnSmallMap");
         myColor = new Color(Random.Range(0, 1f), Random.Range(0, 1f), Random.Range(0, 1f), .25f);
 
-        RouteDisplayV2.Init(mySpline, oldSpline, LargeMap, SmallMap, myColor, updatesPerSecond, heightAboveMarker, batchSize);
+        RouteDisplayV2.Init(mySpline, LargeMap, SmallMap, myColor, updatesPerSecond, heightAboveMarker, batchSize);
         PathDisplayV2.Init(SmallMap, myColor, updatesPerSecond);
 
         GraphHasChanged();
     }
 
-    // Update is called once per frame
-    void Update()
-    {
-        
-    }
+    public Color GetColor() { return myColor; }
 
     #region CREATE_GRAPH
 
@@ -190,7 +185,7 @@ public class DisplayManager : MonoBehaviour
             if (renderCoroutine != null) _dm.StopCoroutine(renderCoroutine);
             _dm.StartCoroutine(RouteDisplayV2.HidePath());
             _dm.StartCoroutine(RouteDisplayV2.DrawMapCurveV2());
-            while (!RouteDisplayV2.IsDrawing) { Debug.Log("Waiting on path draw"); }
+            while (RouteDisplayV2.IsDrawing) { Debug.Log("Waiting on path draw"); }
             PathDisplayV2.DisplayCheck(_dm.mySpline.Length);
             _dm.oldSpline.Copy(_dm.mySpline);
             drawCoroutine = _dm.StartCoroutine(PathDisplayV2.DrawPath(_dm.oldSpline));

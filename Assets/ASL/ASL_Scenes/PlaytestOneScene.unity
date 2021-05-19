@@ -2421,9 +2421,8 @@ GameObject:
   m_Component:
   - component: {fileID: 785958413}
   - component: {fileID: 785958414}
-  - component: {fileID: 785958416}
   m_Layer: 0
-  m_Name: RouteHandler
+  m_Name: RouteDisplayHandler
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -2452,31 +2451,17 @@ MonoBehaviour:
   m_GameObject: {fileID: 785958412}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 03c58412da33e154692db87cbf8c6ff0, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
---- !u!114 &785958416
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 785958412}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: c898ef4bf03a0c746bea49737d93341b, type: 3}
+  m_Script: {fileID: 11500000, guid: bc3a2331d160aeb49828f8518d110ed1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   updatesPerSecond: 10
   heightAboveMarker: 10
   batchSize: 10
-  routeMarkerPool: []
   MapDisplay: {fileID: 0}
   scanFactor: 2
   scaleFactor: 2
   mySpline: {fileID: 1714597436}
   oldSpline: {fileID: 139236885}
-  traceSpeed: 1
 --- !u!1 &830439850
 GameObject:
   m_ObjectHideFlags: 0
