@@ -114,6 +114,6 @@ public class VRTracedInput : MonoBehaviour
     //this function will call classes which need to know when the player holds down grip
     private void messageOnGrip(Vector3 position)
     {
-
+        RoadTool.placeRoad(position);
     }
 }
