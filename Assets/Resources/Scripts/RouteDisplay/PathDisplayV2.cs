@@ -15,8 +15,10 @@ public static class PathDisplayV2
 
     private static bool IsRendering;
 
+    private static BezierSpline _bs;
     private static GameObject smallMap;
     private static Color myColor;
+
 
 
     public static void SetBatchSize(int size)
@@ -34,8 +36,9 @@ public static class PathDisplayV2
     public static int PathCount {  get { return drawnPath.Count; } }
     public static int SmallCount { get { return smallPath.Count; } }
 
-    public static void Init(GameObject _sm, Color _c, float _up)
+    public static void Init(BezierSpline _spl, GameObject _sm, Color _c, float _up)
     {
+        _bs = _spl;
         smallMap = _sm;
         myColor = _c;
         UPS = (Mathf.Abs(_up) > 10) ? Mathf.Abs(_up) : 10f;
@@ -102,7 +105,7 @@ public static class PathDisplayV2
     /// </summary>
     /// <param name="_bs">The bezier curve to trace</param>
     /// <returns></returns>
-    public static IEnumerator DrawPath(BezierSpline _bs)
+    public static IEnumerator DrawPath()
     {
         ClearPath();
         IsRendering = true;
@@ -114,7 +117,7 @@ public static class PathDisplayV2
             PathHelper.Instance.StartCoroutine(PathPooling((int)(_bs.Length - PathCount) - outstandingCallbacks));
         }
         //Get stepsize for tracing
-        float stepSize = StepSize(_bs);
+        float stepSize = StepSize();
 
         //Begin display
         for (int ndx = 0, p = 0; ndx < PathCount + outstandingCallbacks; ndx++, p++)
@@ -126,14 +129,18 @@ public static class PathDisplayV2
             Debug.Log("Passed small callbacks");
 
             //ASL display logic
-            ASL_Display(ndx, p, _bs, stepSize);
+            ASL_Display(ndx, p, stepSize);
         }             
         yield return new WaitForSeconds(1f);
     }
 
-    static float StepSize(BezierSpline _bs)
+    /// <summary>
+    /// Gets the step size along the bezier spline, based on how many path segments are required
+    /// </summary>
+    /// <returns></returns>
+    static float StepSize()
     {
-        float stepSize = PathCount + outstandingCallbacks;
+        float stepSize = _bs.Length;
         if (_bs.Loop || stepSize == 1)
         {
             stepSize = 1f / stepSize;
@@ -159,7 +166,7 @@ public static class PathDisplayV2
     /// <param name="p">The point along the spline to render</param>
     /// <param name="_bs">The Bezier curve to render on</param>
     /// <param name="stepSize">The distance between each route segment relative to the curve</param>
-    static void ASL_Display(int ndx, int p, BezierSpline _bs, float stepSize)
+    static void ASL_Display(int ndx, int p, float stepSize)
     {
         //Transform variables
         Vector3 pos, scale, dir;
@@ -196,7 +203,11 @@ public static class PathDisplayV2
         else { drawnPath[ndx].SetActive(false); smallPath[ndx].SetActive(false); }
     }
 
-    public static IEnumerator ToggleRenderer(BezierSpline _bs)
+    /// <summary>
+    /// Toggles whether the path is visible or not
+    /// </summary>
+    /// <returns></returns>
+    public static IEnumerator ToggleRenderer()
     {
         float delay = (Mathf.Abs(UPS) > 0) ? Mathf.Abs(UPS) : 10f;
         Vector3 scale;
@@ -204,8 +215,8 @@ public static class PathDisplayV2
         IsRendering = !IsRendering;
         if (IsRendering)
         {
-            float stepSize = StepSize(_bs);
-            //show all paths up to bezier spline
+            float stepSize = StepSize();
+            //show all paths up to length bezier spline
             for (int ndx = 0; ndx < PathCount; ndx++)
             {
                 if (ndx > PathCount - 1 || ndx > SmallCount - 1)
@@ -241,7 +252,7 @@ public static class PathDisplayV2
         }
         else
         {
-            //
+            //Hide all paths up to length of bezier spline
             for (int ndx = 0; ndx < PathCount + outstandingCallbacks; ndx++)
             {
                 if (ndx > PathCount - 1 || ndx > SmallCount - 1)

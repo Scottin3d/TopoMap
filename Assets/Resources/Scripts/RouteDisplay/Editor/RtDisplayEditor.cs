@@ -11,12 +11,12 @@ public class RtDisplayEditor : Editor
     private void OnSceneGUI()
     {
         display = target as DisplayManager;
-        if(display.myPath != null)
+        if(RouteDisplayV2.myPath != null)
         {
             Handles.color = display.GetColor();
-            for(int ndx = 0; ndx < display.myPath.vectorPath.Count - 1; ndx++)
+            for(int ndx = 0; ndx < RouteDisplayV2.myPath.vectorPath.Count - 1; ndx++)
             {
-                Handles.DrawLine(display.myPath.vectorPath[ndx], display.myPath.vectorPath[ndx + 1], 5);
+                Handles.DrawLine(RouteDisplayV2.myPath.vectorPath[ndx], RouteDisplayV2.myPath.vectorPath[ndx + 1], 5);
             }
         }
     }

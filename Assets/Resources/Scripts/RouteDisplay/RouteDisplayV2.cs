@@ -242,11 +242,17 @@ public static class RouteDisplayV2
 
     #region SCAN_GRAPH
 
-    public static void ReceiveGraphData(AstarData _ad) { data = _ad; DataCollected = true; }
-   
+
+
     #endregion
 
     #region TRACE_PATH
+
+    /// <summary>
+    /// Get graph data from the display manager
+    /// </summary>
+    /// <param name="_ad">The AstarData from the display manager</param>
+    public static void ReceiveGraphData(AstarData _ad) { data = _ad; DataCollected = true; }
 
     /// <summary>
     /// Traces a path between each pair of adjacent markers placed on the map. 
@@ -257,7 +263,7 @@ public static class RouteDisplayV2
     public static IEnumerator DrawMapCurveV2()
     {
         while (!DataCollected) yield return new WaitForSeconds(1f / updatesPerSecond);
-
+        DrawPath = true;
         List<Vector3> posList = new List<Vector3>();
         List<GraphNode> nodeList = new List<GraphNode>();
         ABPath tempPath;
@@ -311,8 +317,11 @@ public static class RouteDisplayV2
         DrawPath = false;
     }
 
+    /// <summary>
+    /// Gets whether DrawPath is true or not
+    /// </summary>
     public static bool IsDrawing { get { return DrawPath; } }
-
+    
     #endregion
 
     #region INSERTION/REMOVAL
@@ -357,7 +366,6 @@ public static class RouteDisplayV2
         {
             linkedObj.Insert(ndx + 1, _t);
             nodeCount++;
-            DrawPath = true;
             if (linkedObj.Count >= routeMarkerPool.Count)
             {
                 Debug.Log("Instantiating new batch");
@@ -388,7 +396,6 @@ public static class RouteDisplayV2
             linkedObj.Remove(_t);
             nodeCount--;
             if (nodeCount < 2) PathDisplayV2.ClearPath();
-            DrawPath = true;
             UpdateRouteV2(actionNdx - 1, false);
             return true;
         }
@@ -435,8 +442,6 @@ public static class RouteDisplayV2
 
     #region DISPLAY
 
-    /**/
-
     /// <summary>
     /// Toggles whether the route (drawn with straight lines) or the path (drawn on a curve) is being displayed
     /// </summary>
@@ -451,7 +456,7 @@ public static class RouteDisplayV2
             }
         } else
         {
-            RouteHelper.Instance.StartCoroutine(HidePath());
+            RouteHelper.Instance.StartCoroutine(HideRoute());
         }
     }
 
@@ -459,7 +464,7 @@ public static class RouteDisplayV2
     /// Hides the straight route for path drawing purposes
     /// </summary>
     /// <returns></returns>
-    public static IEnumerator HidePath()
+    public static IEnumerator HideRoute()
     {
         RouteRendering = false;
         foreach(GameObject _g in routeConnectPool)
@@ -471,6 +476,26 @@ public static class RouteDisplayV2
             _g.SetActive(false);
         }
         yield return new WaitForSeconds(1f);
+    }
+
+    /// <summary>
+    /// Clears the route display and deletes all the markers "owned" by the player
+    /// </summary>
+    public static void ClearRoute()
+    {
+        nodeCount = 0;
+        mySpline.Reset();
+        myPath = null;
+        foreach (Transform _t in linkedObj)
+        {
+            PlayerMarkerGenerator.RemoveMarker(_t.gameObject);
+        }
+        foreach (GameObject _g in routeMarkerPool)
+        {
+            _g.SetActive(false);
+        }
+        linkedObj.Clear();
+        RouteRendering = true;
     }
 
     #endregion
@@ -593,76 +618,6 @@ private string AssembleID(float[] f_id)
         c_id[i] = (char)f_id[i];
     }
     return string.Concat(c_id);
-}
-
-//Depreciated
-/// <summary>
-/// Traces a path between each pair of adjacent markers placed on the map. 
-/// Markers are considered adjacent if they are indexed next to each other in the linkedObj list
-/// These paths are combined to create a single path, which is used in BezierTrace
-/// </summary>
-/// <returns></returns>
-IEnumerator DrawMapCurve()
-{
-    while (true)
-    {
-        yield return new WaitForSeconds(1f / updatesPerSecond);
-
-        if (DrawPath && DataCollected && data.gridGraph != null)
-        {
-            List<Vector3> posList = new List<Vector3>();
-            List<GraphNode> nodeList = new List<GraphNode>();
-            ABPath tempPath;
-
-            for (int ndx = 0; ndx < linkedObj.Count - 1; ndx++)
-            {
-                tempPath = ABPath.Construct(linkedObj[ndx].position, linkedObj[ndx + 1].position);
-                AstarPath.StartPath(tempPath);
-                tempPath.BlockUntilCalculated();
-
-                if (ndx == 0)
-                {
-                    posList.AddRange(tempPath.vectorPath);
-                    nodeList.AddRange(tempPath.path);
-                }
-                else
-                {
-                    posList.AddRange(tempPath.vectorPath.GetRange(1, tempPath.vectorPath.Count - 1));
-                    nodeList.AddRange(tempPath.path.GetRange(1, tempPath.path.Count - 1));
-                }
-            }
-
-            myPath = ABPath.FakePath(posList, nodeList);
-            DrawPath = !DrawPath;
-            BezierTrace();
-        }
-    }
-}
-
-/// <summary>
-/// Clears the current route and purges the linkedObj list
-/// </summary>
-public static void ClearRoute()
-{
-    linkedObj.Clear();
-    nodeCount = 0;
-    PathDisplayV2.ClearPath();
-    DrawPath = true;
-}
-
-/// <summary>
-/// Clears the graph data currently used by the route display
-/// </summary>
-public static void ClearMeshData()
-{
-    foreach (NavGraph graph in data.graphs)
-    {
-        data.RemoveGraph(graph);
-    }
-    DataCollected = false;
-    //current.GroundSet = false;
-    GraphSet = false;
-    DrawPath = false;
 }
 */
     #endregion

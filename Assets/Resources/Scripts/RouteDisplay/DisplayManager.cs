@@ -16,7 +16,6 @@ public class DisplayManager : MonoBehaviour
     private static GameObject SmallMap;
 
     private static AstarData data;
-    public ABPath myPath;
     public float scanFactor = 2f;
     [Range(1, 5)]
     public int scaleFactor = 2;
@@ -41,7 +40,6 @@ public class DisplayManager : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        //Debug.Assert(MapDisplay != null);
         Debug.Assert(mySpline != null);
         Debug.Assert(oldSpline != null);
 
@@ -50,8 +48,9 @@ public class DisplayManager : MonoBehaviour
         myColor = new Color(Random.Range(0, 1f), Random.Range(0, 1f), Random.Range(0, 1f), .25f);
 
         RouteDisplayV2.Init(mySpline, LargeMap, SmallMap, myColor, updatesPerSecond, heightAboveMarker, batchSize);
-        PathDisplayV2.Init(SmallMap, myColor, updatesPerSecond);
+        PathDisplayV2.Init(oldSpline, SmallMap, myColor, updatesPerSecond);
 
+        StartCoroutine(SetHolomap());
         GraphHasChanged();
     }
 
@@ -64,8 +63,15 @@ public class DisplayManager : MonoBehaviour
     /// </summary>
     public static void GraphHasChanged()
     {
+        if(data != null)
+        {
+            foreach (NavGraph graph in data.graphs)
+            {
+                data.RemoveGraph(graph);
+            }
+        }
+        GraphSet = false;
         _dm.StartCoroutine(GenerateGraph());
-        _dm.StartCoroutine(SetHolomap());
     }
 
     /// <summary>
@@ -183,20 +189,29 @@ public class DisplayManager : MonoBehaviour
         {
             if (drawCoroutine != null) _dm.StopCoroutine(drawCoroutine);
             if (renderCoroutine != null) _dm.StopCoroutine(renderCoroutine);
-            _dm.StartCoroutine(RouteDisplayV2.HidePath());
+            _dm.StartCoroutine(RouteDisplayV2.HideRoute());
             _dm.StartCoroutine(RouteDisplayV2.DrawMapCurveV2());
             while (RouteDisplayV2.IsDrawing) { Debug.Log("Waiting on path draw"); }
             PathDisplayV2.DisplayCheck(_dm.mySpline.Length);
             _dm.oldSpline.Copy(_dm.mySpline);
-            drawCoroutine = _dm.StartCoroutine(PathDisplayV2.DrawPath(_dm.oldSpline));
+            drawCoroutine = _dm.StartCoroutine(PathDisplayV2.DrawPath());
         }
     }
 
     public static void DisplayToggle()
     {
         if (renderCoroutine != null) _dm.StopCoroutine(renderCoroutine);
-        renderCoroutine = _dm.StartCoroutine(PathDisplayV2.ToggleRenderer(_dm.oldSpline));
+        renderCoroutine = _dm.StartCoroutine(PathDisplayV2.ToggleRenderer());
         RouteDisplayV2.ToggleRoute();
+    }
+
+    public static void ResetDisplay()
+    {
+        if (drawCoroutine != null) _dm.StopCoroutine(drawCoroutine);
+        if (renderCoroutine != null) _dm.StopCoroutine(renderCoroutine);
+        _dm.StartCoroutine(RouteDisplayV2.HideRoute());
+        RouteDisplayV2.ClearRoute();
+        PathDisplayV2.ClearPath();
     }
 
     #endregion

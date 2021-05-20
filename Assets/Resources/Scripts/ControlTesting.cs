@@ -63,6 +63,10 @@ public class ControlTesting : MonoBehaviour
             {
                 DisplayManager.DisplayToggle();
             }
+            if (Input.GetKeyDown(KeyCode.Alpha5))
+            {
+                DisplayManager.ResetDisplay();
+            }
         }
     }
 }
