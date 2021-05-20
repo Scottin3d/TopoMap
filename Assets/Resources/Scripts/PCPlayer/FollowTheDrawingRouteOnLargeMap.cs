@@ -31,6 +31,11 @@ public class FollowTheDrawingRouteOnLargeMap : MonoBehaviour
 
     private void StartFollowTheRoute()
     {
+        if (TeleportManger.GetComponent<TeleportBetweenMap>().GetAtSmallMap())
+        {
+            return;
+        }
+
         if (Input.GetKeyDown(KeyCode.Alpha3) && StartFollowingRoute == false)
         {
             GetRouteList();
@@ -45,7 +50,7 @@ public class FollowTheDrawingRouteOnLargeMap : MonoBehaviour
             }
         }
 
-        if (StartFollowingRoute == true && CurIndex < BrushListLength - 1)
+        if (StartFollowingRoute == true && CurIndex <= BrushListLength - 1)
         {
             Player.GetComponent<CharacterController>().enabled = false;
             Player.GetComponent<CharacterController>().detectCollisions = false;
@@ -85,8 +90,8 @@ public class FollowTheDrawingRouteOnLargeMap : MonoBehaviour
                 FirstBrush = MyLargerBrushListFromPlayerDrawRoute[CurIndex].transform.position;
                 SecondBrush = MyLargerBrushListFromPlayerDrawRoute[CurIndex + 1].transform.position;
 
-                FirstBrush.y += 3f;
-                SecondBrush.y += 3f;
+                FirstBrush.y += 3.5f;
+                SecondBrush.y += 3.5f;
 
                 CurIndex++;
             }
@@ -98,8 +103,8 @@ public class FollowTheDrawingRouteOnLargeMap : MonoBehaviour
         FirstBrush = MyLargerBrushListFromPlayerDrawRoute[CurIndex].transform.position;
         SecondBrush = MyLargerBrushListFromPlayerDrawRoute[CurIndex + 1].transform.position;
 
-        FirstBrush.y += 3f;
-        SecondBrush.y += 3f;
+        FirstBrush.y += 3.5f;
+        SecondBrush.y += 3.5f;
 
         Player.transform.position = FirstBrush;
         CurIndex++;

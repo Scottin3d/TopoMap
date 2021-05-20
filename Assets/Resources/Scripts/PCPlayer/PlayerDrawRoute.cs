@@ -25,6 +25,9 @@ public class PlayerDrawRoute : MonoBehaviour
 
     public Dropdown MyEraseDropDown;
     private static GameObject ThisGameObject;
+
+    private Dictionary<string, Vector3> OtherPlayerList = new Dictionary<string, Vector3>();
+
     // Start is called before the first frame update
     void Start()
     {
@@ -92,14 +95,10 @@ public class PlayerDrawRoute : MonoBehaviour
         {
             if (MyLargerBrushList.Count <= 1)
             {
-                //Debug.Log("No Marker");
                 yield return null;
             }
             else if (MyLargeBruchListIndex == MyLargerBrushList.Count - 1)
             {
-                //Debug.Log(MyLargeBruchListIndex);
-                //Debug.Log(MyLargerBrushList.Count);
-                //Debug.Log("=====");
                 yield return null;
             }
             else
@@ -111,13 +110,28 @@ public class PlayerDrawRoute : MonoBehaviour
                 {
                     FirstBrushPosition = new Vector3(MyLargerBrushList[i].transform.position.x, MyLargerBrushList[i].transform.position.y, MyLargerBrushList[i].transform.position.z);
                     SecondBrushPosition = new Vector3(MyLargerBrushList[i + 1].transform.position.x, MyLargerBrushList[i + 1].transform.position.y, MyLargerBrushList[i + 1].transform.position.z);
-                    FirstBrushPosition.y += 2.5f;
-                    SecondBrushPosition.y += 2.5f;
-                    //Debug.Log(FirstBrushPosition);
-                    //Debug.Log(SecondBrushPosition);
-                    //Debug.Log("======");
-                    ASL.ASLHelper.InstantiateASLObject("LineRendererBetweenTwoBrush", new Vector3(0, 0, 0), Quaternion.identity, "", "", SetLineRenender);
-                    yield return new WaitForSeconds(0.2f);
+                    //FirstBrushPosition.y += 2.5f;
+                    //SecondBrushPosition.y += 2.5f;
+
+                    Vector3 CenterOfTwoBrush = (FirstBrushPosition + SecondBrushPosition) / 2;
+                    float DistanceBetweenTwoBrush = Vector3.Distance(FirstBrushPosition, SecondBrushPosition);
+                    int NumberOfExtraBrushNeeded = Mathf.RoundToInt(DistanceBetweenTwoBrush / 1f);
+
+                    //Add several brush between two brush
+                    for (int o = 1; o < NumberOfExtraBrushNeeded; o++)
+                    {
+                        float X = GetNewXYZ(FirstBrushPosition.x, SecondBrushPosition.x, DistanceBetweenTwoBrush, 1f, o);
+                        float Y = GetNewXYZ(FirstBrushPosition.y, SecondBrushPosition.y, DistanceBetweenTwoBrush, 1f, o);
+                        float Z = GetNewXYZ(FirstBrushPosition.z, SecondBrushPosition.z, DistanceBetweenTwoBrush, 1f, o);
+                        Vector3 NewPosition = new Vector3(X, Y, Z);
+
+                        ASL.ASLHelper.InstantiateASLObject("LargeBrush", NewPosition, Quaternion.identity, "", "", SetLineRenender);
+
+                        yield return new WaitForSeconds(0.02f);
+                    }
+
+                    //ASL.ASLHelper.InstantiateASLObject("LineRendererBetweenTwoBrush", new Vector3(0, 0, 0), Quaternion.identity, "", "", SetLineRenender);
+                    //yield return new WaitForSeconds(0.2f);
                 }
 
                 MyLargeBruchListIndex += LargeBrushListCount - 1 - MyLargeBruchListIndex;
@@ -145,8 +159,27 @@ public class PlayerDrawRoute : MonoBehaviour
                 {
                     FirstBrushPositionSmallMap = new Vector3(MySmallBrushList[i].transform.position.x, MySmallBrushList[i].transform.position.y, MySmallBrushList[i].transform.position.z);
                     SecondBrushPositionSmallMap = new Vector3(MySmallBrushList[i + 1].transform.position.x, MySmallBrushList[i + 1].transform.position.y, MySmallBrushList[i + 1].transform.position.z);
-                    ASL.ASLHelper.InstantiateASLObject("LineRenderBetweenToBrushSmallMap", new Vector3(0, 0, 0), Quaternion.identity, "", "", SetLineRenenderSmallMap);
-                    yield return new WaitForSeconds(0.2f);
+
+                    Vector3 CenterOfTwoBrush = (FirstBrushPositionSmallMap + SecondBrushPositionSmallMap) / 2;
+                    float DistanceBetweenTwoBrush = Vector3.Distance(FirstBrushPositionSmallMap, SecondBrushPositionSmallMap);
+                    int NumberOfExtraBrushNeeded = Mathf.RoundToInt(DistanceBetweenTwoBrush / 0.015f);
+
+                    //Add several brush between two brush
+                    for (int o = 1; o < NumberOfExtraBrushNeeded; o++)
+                    {
+                        float X = GetNewXYZ(FirstBrushPositionSmallMap.x, SecondBrushPositionSmallMap.x, DistanceBetweenTwoBrush, 0.015f, o);
+                        float Y = GetNewXYZ(FirstBrushPositionSmallMap.y, SecondBrushPositionSmallMap.y, DistanceBetweenTwoBrush, 0.015f, o);
+                        float Z = GetNewXYZ(FirstBrushPositionSmallMap.z, SecondBrushPositionSmallMap.z, DistanceBetweenTwoBrush, 0.015f, o);
+                        Vector3 NewPosition = new Vector3 (X, Y, Z);
+
+                        ASL.ASLHelper.InstantiateASLObject("Brush", NewPosition, Quaternion.identity, "", "", SetLineRenenderSmallMap);
+
+                        yield return new WaitForSeconds(0.01f);
+                    }
+
+                    yield return new WaitForSeconds(0.015f);
+                    //ASL.ASLHelper.InstantiateASLObject("LineRenderBetweenToBrushSmallMap", new Vector3(0, 0, 0), Quaternion.identity, "", "", SetLineRenenderSmallMap);
+                    //yield return new WaitForSeconds(0.2f);
                 }
 
                 MySmallBrushListIndex += SmallBrushListCount - 1 - MySmallBrushListIndex;
@@ -154,19 +187,39 @@ public class PlayerDrawRoute : MonoBehaviour
         }
     }
 
+    private float GetNewXYZ(float xyz1, float xyz2, float L, float M, int o)
+    {
+        float NewXYZ = xyz1 + (xyz2 - xyz1) / L * M * o;
+        return NewXYZ;
+    }
+
+    //private static void SetLineRenender(GameObject _myGameObject)
+    //{
+    //    _myGameObject.transform.parent = ThisGameObject.transform;
+    //    _myGameObject.GetComponent<LineRenderer>().SetPosition(0, FirstBrushPosition);
+    //    _myGameObject.GetComponent<LineRenderer>().SetPosition(1, SecondBrushPosition);
+    //    MyLineRenenderBetweenBrush.Add(_myGameObject);
+    //}
+
+    //New Version
     private static void SetLineRenender(GameObject _myGameObject)
     {
         _myGameObject.transform.parent = ThisGameObject.transform;
-        _myGameObject.GetComponent<LineRenderer>().SetPosition(0, FirstBrushPosition);
-        _myGameObject.GetComponent<LineRenderer>().SetPosition(1, SecondBrushPosition);
         MyLineRenenderBetweenBrush.Add(_myGameObject);
     }
 
+    //private static void SetLineRenenderSmallMap(GameObject _myGameObject)
+    //{
+    //    _myGameObject.transform.parent = ThisGameObject.transform;
+    //    _myGameObject.GetComponent<LineRenderer>().SetPosition(0, FirstBrushPositionSmallMap);
+    //    _myGameObject.GetComponent<LineRenderer>().SetPosition(1, SecondBrushPositionSmallMap);
+    //    MyLineRenenderBetweenBrushSmallMap.Add(_myGameObject);
+    //}
+
+    //New Version
     private static void SetLineRenenderSmallMap(GameObject _myGameObject)
     {
         _myGameObject.transform.parent = ThisGameObject.transform;
-        _myGameObject.GetComponent<LineRenderer>().SetPosition(0, FirstBrushPositionSmallMap);
-        _myGameObject.GetComponent<LineRenderer>().SetPosition(1, SecondBrushPositionSmallMap);
         MyLineRenenderBetweenBrushSmallMap.Add(_myGameObject);
     }
 
@@ -189,6 +242,7 @@ public class PlayerDrawRoute : MonoBehaviour
 
     private static void GetEachBrushOnSmallMap(GameObject _myGameObject)
     {
+        Debug.Log("Add Brush");
         _myGameObject.transform.parent = ThisGameObject.transform;
         MySmallBrushList.Add(_myGameObject);
     }
@@ -197,20 +251,20 @@ public class PlayerDrawRoute : MonoBehaviour
     {
         _myGameObject.transform.parent = ThisGameObject.transform;
         MyLargerBrushList.Add(_myGameObject);
-        GenerateExtraLineOnMap(_myGameObject);
+        //GenerateExtraLineOnMap(_myGameObject);
     }
 
-    private static void GenerateExtraLineOnMap(GameObject _myGameObject)
-    {
-        if (MyLargerBrushList.Count == 1)
-        {
-            return;
-        }
-        else
-        {
-            _myGameObject.GetComponent<MapBrushRePosition>().SecondToLastBrushPosition = MyLargerBrushList[MyLargerBrushList.Count - 2].transform.position;
-        }
-    }
+    //private static void GenerateExtraLineOnMap(GameObject _myGameObject)
+    //{
+    //    if (MyLargerBrushList.Count == 1)
+    //    {
+    //        return;
+    //    }
+    //    else
+    //    {
+    //        _myGameObject.GetComponent<MapBrushRePosition>().SecondToLastBrushPosition = MyLargerBrushList[MyLargerBrushList.Count - 2].transform.position;
+    //    }
+    //}
 
     public void EraseLine()
     {
@@ -359,8 +413,18 @@ public class PlayerDrawRoute : MonoBehaviour
         }
     }
 
+    IEnumerator SendMyBrushListToOther()
+    {
+        yield return new WaitForSeconds(10f);
+    }
+
     public List<GameObject> GetMyLargerBrushList()
     {
         return MyLargerBrushList;
+    }
+
+    public Dictionary<string, Vector3> GetOtherPlayersList()
+    {
+        return OtherPlayerList;
     }
 }

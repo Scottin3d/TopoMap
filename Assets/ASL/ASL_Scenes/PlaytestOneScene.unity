@@ -444,6 +444,10 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 3822088180943592132, guid: 9a2a8920f4639b742af327f29dec352e, type: 3}
+      propertyPath: m_Options.m_Options.Array.data[1].m_Text
+      value: EraseAll
+      objectReference: {fileID: 0}
     - target: {fileID: 3822088181790609015, guid: 9a2a8920f4639b742af327f29dec352e, type: 3}
       propertyPath: m_Options.m_Options.Array.data[1].m_Text
       value: Tree
