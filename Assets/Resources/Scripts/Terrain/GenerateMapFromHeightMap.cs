@@ -187,14 +187,14 @@ public partial class GenerateMapFromHeightMap : MonoBehaviour {
                 // check corners
                 // left
                 if (row - 1 >= 0) {
-                    mapChunks[row, col].chunkNeighbors[(int)MapChunkNeighbor.TopLeft] = mapChunks[row - 1, col - 1];
-                    mapChunks[row, col].chunkNeighborObjects[(int)MapChunkNeighbor.TopLeft] = mapChunksGameObjects[row - 1, col - 1];
+                    mapChunks[row, col].chunkNeighbors[(int)MapChunkNeighbor.BottomLeft] = mapChunks[row - 1, col - 1];
+                    mapChunks[row, col].chunkNeighborObjects[(int)MapChunkNeighbor.BottomLeft] = mapChunksGameObjects[row - 1, col - 1];
 
                 }
                 // right
                 if (row + 1 <= numberOfChunks - 1) {
-                    mapChunks[row, col].chunkNeighbors[(int)MapChunkNeighbor.TopRight] = mapChunks[row + 1, col - 1];
-                    mapChunks[row, col].chunkNeighborObjects[(int)MapChunkNeighbor.TopRight] = mapChunksGameObjects[row + 1, col - 1];
+                    mapChunks[row, col].chunkNeighbors[(int)MapChunkNeighbor.BottomRight] = mapChunks[row + 1, col - 1];
+                    mapChunks[row, col].chunkNeighborObjects[(int)MapChunkNeighbor.BottomRight] = mapChunksGameObjects[row + 1, col - 1];
 
                 }
             }
