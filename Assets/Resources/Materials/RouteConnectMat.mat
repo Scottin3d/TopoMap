@@ -115,7 +115,7 @@ Material:
     - _circumference: 1
     - _height: 1
     - _scrollSpeed: -1
-    - _transparency: 0.85
+    - _transparency: 0
     m_Colors:
     - _BaseColor: {r: 1, g: 1, b: 1, a: 1}
     - _Color: {r: 1, g: 1, b: 1, a: 1}

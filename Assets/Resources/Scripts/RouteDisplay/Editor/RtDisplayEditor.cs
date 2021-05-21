@@ -3,20 +3,20 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEditor;
 
-[CustomEditor(typeof(RouteDisplayV2))]
+[CustomEditor(typeof(DisplayManager))]
 public class RtDisplayEditor : Editor
 {
-    private RouteDisplayV2 display;
+    private DisplayManager display;
 
     private void OnSceneGUI()
     {
-        display = target as RouteDisplayV2;
-        if(display.myPath != null)
+        display = target as DisplayManager;
+        if(RouteDisplayV2.myPath != null)
         {
             Handles.color = display.GetColor();
-            for(int ndx = 0; ndx < display.myPath.vectorPath.Count - 1; ndx++)
+            for(int ndx = 0; ndx < RouteDisplayV2.myPath.vectorPath.Count - 1; ndx++)
             {
-                Handles.DrawLine(display.myPath.vectorPath[ndx], display.myPath.vectorPath[ndx + 1], 5);
+                Handles.DrawLine(RouteDisplayV2.myPath.vectorPath[ndx], RouteDisplayV2.myPath.vectorPath[ndx + 1], 5);
             }
         }
     }

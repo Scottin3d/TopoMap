@@ -212,8 +212,7 @@ public class PlayerMarkerGenerator : MonoBehaviour
     {
         if (DrawOrigin != null)
         {
-            if (DrawOrigin.GetComponent<MeshRenderer>() != null) DrawOrigin.GetComponent<MeshRenderer>().material.color = OriginColor;
-            else DrawOrigin.GetComponentInChildren<MeshRenderer>().material.color = OriginColor;
+            DrawOrigin.GetComponent<MarkerObject>().Select(false);
             DrawOrigin = null;
         }
     }
@@ -223,8 +222,6 @@ public class PlayerMarkerGenerator : MonoBehaviour
         if (!_g.Equals(DrawOrigin))
         {
             DrawOrigin = _g;
-            OriginColor = (DrawOrigin.GetComponent<MeshRenderer>() != null) ? 
-                DrawOrigin.GetComponent<MeshRenderer>().material.color : DrawOrigin.GetComponentInChildren<MeshRenderer>().material.color;
             Debug.Log("Set draw origin");
         }
         DrawLineMarker = Instantiate(_g) as GameObject;
@@ -232,9 +229,7 @@ public class PlayerMarkerGenerator : MonoBehaviour
         Destroy(DrawLineMarker.GetComponent<ASL.ASLObject>());
         Destroy(DrawLineMarker.GetComponent<BoxCollider>());
         DrawLineMarker.layer = 11;
-        if (DrawOrigin.GetComponent<MeshRenderer>() != null) DrawOrigin.GetComponent<MeshRenderer>().material.color = SelectedColor;
-        else DrawOrigin.GetComponentInChildren<MeshRenderer>().material.color = SelectedColor;
-
+        DrawOrigin.GetComponent<MarkerObject>().Select(true);
 
     }
 
@@ -339,8 +334,9 @@ public class PlayerMarkerGenerator : MonoBehaviour
 
                 ASL.ASLHelper.InstantiateASLObject(DropdownOpionValue, NewPositionOnLargeMap, Quaternion.identity, "", "", InsertLargerMapMarker);
             }
-            if (DrawOrigin.GetComponent<MeshRenderer>() != null) DrawOrigin.GetComponent<MeshRenderer>().material.color = OriginColor;
-            else DrawOrigin.GetComponentInChildren<MeshRenderer>().material.color = OriginColor;
+            //if (DrawOrigin.GetComponent<MeshRenderer>() != null) DrawOrigin.GetComponent<MeshRenderer>().material.color = OriginColor;
+            //else DrawOrigin.GetComponentInChildren<MeshRenderer>().material.color = OriginColor;
+            DrawOrigin.GetComponent<MarkerObject>().Select(false);
         }
     }
 
@@ -407,7 +403,7 @@ public class PlayerMarkerGenerator : MonoBehaviour
             if (RouteDisplayV2.RemoveRouteMarker(LMarker.transform, false)) RemoveMarker(LMarker);
             else
             {
-                float[] _f = new float[0];
+                float[] _f = new float[1];
                 LMarker.GetComponent<ASL.ASLObject>().SendAndSetClaim(() =>
                 {
                     LMarker.GetComponent<ASL.ASLObject>().SendFloatArray(_f);
@@ -430,9 +426,25 @@ public class PlayerMarkerGenerator : MonoBehaviour
         //}
     }
 
-    public static void DeletionCallback(GameObject _g)
+    /// <summary>
+    /// Force the deletion of a game object. To be called only if a MarkerObject is not "owned" by any player
+    /// </summary>
+    /// <param name="_g"></param>
+    public static void ForceDeletion(GameObject _g)
     {
-        if (RouteDisplayV2.RemoveRouteMarker(_g.transform, false)) RemoveMarker(_g);
+        LargerMapMarkerList.Remove(_g);
+        if(_g.GetComponent<ASL.ASLObject>() != null)
+        {
+            ASLObjectTrackingSystem.RemoveObjectToTrack(_g.GetComponent<ASL.ASLObject>());
+            _g.GetComponent<ASL.ASLObject>().SendAndSetClaim(() =>
+            {
+                _g.GetComponent<ASL.ASLObject>().DeleteObject();
+            });
+        } else
+        {
+            Destroy(_g.transform);
+        }
+        
     }
 }
 
