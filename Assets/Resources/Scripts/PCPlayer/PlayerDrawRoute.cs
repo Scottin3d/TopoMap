@@ -127,7 +127,7 @@ public class PlayerDrawRoute : MonoBehaviour
 
                         ASL.ASLHelper.InstantiateASLObject("LargeBrush", NewPosition, Quaternion.identity, "", "", SetLineRenender);
 
-                        yield return new WaitForSeconds(0.02f);
+                        yield return new WaitForSeconds(0.05f);
                     }
 
                     //ASL.ASLHelper.InstantiateASLObject("LineRendererBetweenTwoBrush", new Vector3(0, 0, 0), Quaternion.identity, "", "", SetLineRenender);
@@ -174,10 +174,10 @@ public class PlayerDrawRoute : MonoBehaviour
 
                         ASL.ASLHelper.InstantiateASLObject("Brush", NewPosition, Quaternion.identity, "", "", SetLineRenenderSmallMap);
 
-                        yield return new WaitForSeconds(0.01f);
+                        yield return new WaitForSeconds(0.05f);
                     }
 
-                    yield return new WaitForSeconds(0.015f);
+                    //yield return new WaitForSeconds(0.015f);
                     //ASL.ASLHelper.InstantiateASLObject("LineRenderBetweenToBrushSmallMap", new Vector3(0, 0, 0), Quaternion.identity, "", "", SetLineRenenderSmallMap);
                     //yield return new WaitForSeconds(0.2f);
                 }
