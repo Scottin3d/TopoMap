@@ -42,7 +42,7 @@ public class Generator_PCInterface : MonoBehaviour
                 Vector3 spawnPos = Vector3.zero;
                 if(Hit.collider.transform.parent.tag == "SpawnSmallMap")
                 {
-                    spawnPos(Hit.point - _PCgen.smallMap.position) * MarkerDisplay.GetScaleFactor() + _PCgen.largeMap.position;
+                    //spawnPos(Hit.point - _PCgen.smallMap.position) * MarkerDisplay.GetScaleFactor() + _PCgen.largeMap.position;
                     //Instantiate on small map(DropdownOptionValue, spawnPos, true)
                 } else
                 {
