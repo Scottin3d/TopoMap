@@ -198,6 +198,12 @@ public class DisplayManager : MonoBehaviour
         }
     }
 
+    public static void ClearPath()
+    {
+        if (drawCoroutine != null) _dm.StopCoroutine(drawCoroutine);
+        PathDisplayV2.ClearPath();
+    }
+
     public static void DisplayToggle()
     {
         if (renderCoroutine != null) _dm.StopCoroutine(renderCoroutine);

@@ -7,9 +7,9 @@ OcclusionCullingSettings:
   m_OcclusionBakeSettings:
     smallestOccluder: 5
     smallestHole: 0.25
-    backfaceThreshold: 100
-  m_SceneGUID: 00000000000000000000000000000000
-  m_OcclusionCullingData: {fileID: 0}
+    backfaceThreshold: 90
+  m_SceneGUID: 9903a08b28a2f6e41a3bbb95dacd4c89
+  m_OcclusionCullingData: {fileID: 36300000, guid: f1804a98145b11f488af4b04768c9585, type: 2}
 --- !u!104 &2
 RenderSettings:
   m_ObjectHideFlags: 0
@@ -5403,7 +5403,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 2800132393438457105, guid: 0fbcb4297ffb1e24cafa5c7f0f1a2852, type: 3}
       propertyPath: far clip plane
-      value: 100
+      value: 500
       objectReference: {fileID: 0}
     - target: {fileID: 2800132393438457105, guid: 0fbcb4297ffb1e24cafa5c7f0f1a2852, type: 3}
       propertyPath: m_CullingMask.m_Bits

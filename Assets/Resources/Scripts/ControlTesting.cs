@@ -67,6 +67,20 @@ public class ControlTesting : MonoBehaviour
             {
                 DisplayManager.ResetDisplay();
             }
+
+            //get active camera
+            if (Input.GetMouseButtonDown(0))
+            {
+
+            }
+            if (Input.GetMouseButton(0))
+            {
+
+            }
+            if (Input.GetMouseButtonUp(0))
+            {
+
+            }
         }
     }
 }
