@@ -5,7 +5,8 @@ using UnityEngine.UI;
 
 public class ProductImageLoader : MonoBehaviour
 {
-    public RawImage MyRawImage;
+    public RawImage PCRawImage;
+    public RawImage VRRawImage;
 
     public GameObject PlayerTeleportObject;
     public Camera PlayerCamera;
@@ -34,83 +35,144 @@ public class ProductImageLoader : MonoBehaviour
     private List<GameObject> PrefabList = new List<GameObject>();
     private List<string> PathList = new List<string>();
 
-    private int ImageListIndex = 0;
-    private int PrefabListIndex = 0;
-    private int PathListIndex = 0;
+    private int PCImageListIndex = 0;
+    private int PCPrefabListIndex = 0;
+    private int PCPathListIndex = 0;
+
+    private int VRImageListIndex = 0;
+    private int VRPrefabListIndex = 0;
+    private int VRPathListIndex = 0;
 
     // Start is called before the first frame update
     void Start()
     {
         AddImage_PrefabList();
-        MyRawImage.GetComponent<RawImage>().texture = ImageList[ImageListIndex];
+        PCRawImage.GetComponent<RawImage>().texture = ImageList[PCImageListIndex];
+        VRRawImage.GetComponent<RawImage>().texture = ImageList[VRImageListIndex];
 
-        if (PlayerTeleportObject.GetComponent<TeleportBetweenMap>().GetAtSmallMap())
-        {
-            MyRawImage.enabled = false;
-        }
-        else
-        {
-            MyRawImage.enabled = true;
-        }
+        //if (PlayerTeleportObject.GetComponent<TeleportBetweenMap>().GetAtSmallMap())
+        //{
+        //    PCRawImage.enabled = false;
+        //}
+        //else
+        //{
+        //    PCRawImage.enabled = true;
+        //}
+
+        //Set both Raw Image to inactive, because player initially spawn at small map
+        PCRawImage.enabled = false;
+        VRRawImage.enabled = false;
     }
 
     // Update is called once per frame
     void Update()
     {
-        AbleOrDisableRawImageUI();
+        //AbleOrDisableRawImageUI();
 
-        if (!PlayerTeleportObject.GetComponent<TeleportBetweenMap>().GetAtSmallMap())
-        {
-            SwitchImage();
-            InstantiateLargeMapProduct();
-        }
+        //if (!PlayerTeleportObject.GetComponent<TeleportBetweenMap>().GetAtSmallMap())
+        //{
+        //    SwitchImage();
+        //    InstantiateLargeMapProduct();
+        //}
     }
 
-    private void InstantiateLargeMapProduct()
+    public void PC_SetRawImageInactiveWhenAtSmallMap()
     {
-        if (Input.GetKeyDown(KeyCode.Z))
-        {
-            GetRaycastHitPoint();
-        }
+        PCRawImage.enabled = false;
     }
 
-    private void SwitchImage()
+    public void VR_SetRawImageInactiveWhenAtSmallMap()
     {
-        if (Input.GetKeyDown(KeyCode.PageDown))
-        {
-            if (ImageListIndex == ImageList.Count - 1)
-            {
-                ImageListIndex = 0;
-                PrefabListIndex = 0;
-                PathListIndex = 0;
-            }
-            else
-            {
-                ImageListIndex++;
-                PrefabListIndex++;
-                PathListIndex++;
-            }
+        VRRawImage.enabled = false;
+    }
 
-            MyRawImage.GetComponent<RawImage>().texture = ImageList[ImageListIndex];
+    public void PC_SetRawImageActiveWhenAtSmallMap()
+    {
+        PCRawImage.enabled = true;
+    }
+
+    public void VR_SetRawImageActiveWhenAtSmallMap()
+    {
+        VRRawImage.enabled = true;
+    }
+
+    public List<string> GetPathList()
+    {
+        return PathList;
+    }
+
+    public int GetPCPathListIndex()
+    {
+        return PCPathListIndex;
+    }
+
+    public int GetVRPathListIndex()
+    {
+        return VRPathListIndex;
+    }
+
+    public void PC_SwitchToNextImage()
+    {
+        if (PCImageListIndex == ImageList.Count - 1)
+        {
+            PCImageListIndex = 0;
+            PCPathListIndex = 0;
+        }
+        else
+        {
+            PCImageListIndex++;
+            PCPathListIndex++;
         }
 
-        if (Input.GetKeyDown(KeyCode.PageUp))
-        {
-            if (ImageListIndex == 0)
-            {
-                ImageListIndex = ImageList.Count - 1;
-                PrefabListIndex = ImageList.Count - 1;
-                PathListIndex = ImageList.Count - 1;
-            }
-            else
-            {
-                ImageListIndex--;
-                PrefabListIndex--;
-                PathListIndex--;
-            }
+        PCRawImage.GetComponent<RawImage>().texture = ImageList[PCImageListIndex];
+    }
 
-            MyRawImage.GetComponent<RawImage>().texture = ImageList[ImageListIndex];
+    public void VR_SwitchToNextImage()
+    {
+        if (VRImageListIndex == ImageList.Count - 1)
+        {
+            VRImageListIndex = 0;
+            VRPathListIndex = 0;
         }
+        else
+        {
+            VRImageListIndex++;
+            VRPathListIndex++;
+        }
+
+        VRRawImage.GetComponent<RawImage>().texture = ImageList[VRImageListIndex];
+    }
+
+    public void PC_SwitchToPreviousImage()
+    {
+        if (PCImageListIndex == 0)
+        {
+            PCImageListIndex = ImageList.Count - 1;
+            PCPathListIndex = ImageList.Count - 1;
+        }
+        else
+        {
+            PCImageListIndex--;
+            PCPathListIndex--;
+        }
+
+        PCRawImage.GetComponent<RawImage>().texture = ImageList[PCImageListIndex];
+    }
+
+    public void VR_SwitchToPreviousImage()
+    {
+        if (VRImageListIndex == 0)
+        {
+            VRImageListIndex = ImageList.Count - 1;
+            VRPathListIndex = ImageList.Count - 1;
+        }
+        else
+        {
+            VRImageListIndex--;
+            VRPathListIndex--;
+        }
+
+        VRRawImage.GetComponent<RawImage>().texture = ImageList[VRImageListIndex];
     }
 
     private void AddImage_PrefabList()
@@ -133,36 +195,83 @@ public class ProductImageLoader : MonoBehaviour
         PathList.Add(TreeTwoPathString);
         PathList.Add(TreeThreePathString);
     }
-    
-    private void AbleOrDisableRawImageUI()
-    {
-        if (PlayerTeleportObject.GetComponent<TeleportBetweenMap>().GetAtSmallMap())
-        {
-            MyRawImage.enabled = false;
-        }
-        else
-        {
-            MyRawImage.enabled = true;
-        }
-    }
 
-    private void GetRaycastHitPoint()
+    private void SwitchImage()
     {
-        Ray MouseRay = PlayerCamera.ScreenPointToRay(Input.mousePosition);
-        RaycastHit Hit;
-
-        if (Physics.Raycast(MouseRay, out Hit))
+        if (Input.GetKeyDown(KeyCode.PageDown))
         {
-            if (Hit.collider.tag == "Chunk")
+            if (PCImageListIndex == ImageList.Count - 1)
             {
-                string Path = PathList[PathListIndex];
-                ASL.ASLHelper.InstantiateASLObject(Path, Hit.point, Quaternion.identity, "", "", GetCreatedProject);
+                PCImageListIndex = 0;
+                PCPrefabListIndex = 0;
+                PCPathListIndex = 0;
             }
+            else
+            {
+                PCImageListIndex++;
+                PCPrefabListIndex++;
+                PCPathListIndex++;
+            }
+
+            PCRawImage.GetComponent<RawImage>().texture = ImageList[PCImageListIndex];
+        }
+
+        if (Input.GetKeyDown(KeyCode.PageUp))
+        {
+            if (PCImageListIndex == 0)
+            {
+                PCImageListIndex = ImageList.Count - 1;
+                PCPrefabListIndex = ImageList.Count - 1;
+                PCPathListIndex = ImageList.Count - 1;
+            }
+            else
+            {
+                PCImageListIndex--;
+                PCPrefabListIndex--;
+                PCPathListIndex--;
+            }
+
+            PCRawImage.GetComponent<RawImage>().texture = ImageList[PCImageListIndex];
         }
     }
 
-    private static void GetCreatedProject(GameObject _myGameObject)
-    {
+    //private void InstantiateLargeMapProduct()
+    //{
+    //    if (Input.GetKeyDown(KeyCode.Z))
+    //    {
+    //        GetRaycastHitPoint();
+    //    }
+    //}
 
-    }
+    //private void AbleOrDisableRawImageUI()
+    //{
+    //    if (PlayerTeleportObject.GetComponent<TeleportBetweenMap>().GetAtSmallMap())
+    //    {
+    //        PCRawImage.enabled = false;
+    //    }
+    //    else
+    //    {
+    //        PCRawImage.enabled = true;
+    //    }
+    //}
+
+    //private void GetRaycastHitPoint()
+    //{
+    //    Ray MouseRay = PlayerCamera.ScreenPointToRay(Input.mousePosition);
+    //    RaycastHit Hit;
+
+    //    if (Physics.Raycast(MouseRay, out Hit))
+    //    {
+    //        if (Hit.collider.tag == "Chunk")
+    //        {
+    //            string Path = PathList[PCPathListIndex];
+    //            ASL.ASLHelper.InstantiateASLObject(Path, Hit.point, Quaternion.identity, "", "", GetCreatedProject);
+    //        }
+    //    }
+    //}
+
+    //private static void GetCreatedProject(GameObject _myGameObject)
+    //{
+
+    //}
 }

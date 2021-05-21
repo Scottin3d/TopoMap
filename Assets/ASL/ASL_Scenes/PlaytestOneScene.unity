@@ -1269,6 +1269,63 @@ MonoBehaviour:
   smallMap: {fileID: 468696375}
   updatesPerSecond: 10
   playerMaker: {fileID: 1375720642727765894, guid: e10b86d10312ae0408de2cd61b96943a, type: 3}
+--- !u!1 &418769535
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 418769536}
+  - component: {fileID: 418769537}
+  m_Layer: 0
+  m_Name: PlayerPlaceFunctionOnLargeMap
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &418769536
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 418769535}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: -0.94636476, y: 17.846846, z: 27.925304}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_RootOrder: 17
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &418769537
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 418769535}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 58ad3e6e058388946af74b428b54977a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  PCRawImage: {fileID: 1533181499}
+  VRRawImage: {fileID: 0}
+  PlayerTeleportObject: {fileID: 1553241175}
+  PlayerCamera: {fileID: 1117161112}
+  BuildingImage: {fileID: 2800000, guid: befb979a75b95784b9396b9e946cbe69, type: 3}
+  BuildingPrefab: {fileID: 1640908652775104, guid: cd87e5026d1695148aabe96121c526ef, type: 3}
+  Bush: {fileID: 2800000, guid: accd7aa2c7965464a99282321e762cd8, type: 3}
+  BushPrefab: {fileID: 1783979763778466, guid: bd1a894f239d58d4dbf63f27e28096bd, type: 3}
+  TreeOne: {fileID: 2800000, guid: fc8c961b69ffe7e44845c9a7eb1c66f0, type: 3}
+  TreeOnePrefab: {fileID: 1612273161005096, guid: ae9772ea62bbc724eb9b8ef81109f733, type: 3}
+  TreeTwo: {fileID: 2800000, guid: a8fecc48a7c95854b8e4aea397c5cf07, type: 3}
+  TreeTwoPrefab: {fileID: 1458573784885960, guid: 6910e2407cd484a42a0c2598114751a0, type: 3}
+  TreeThree: {fileID: 2800000, guid: ab06b92d435266e43be65525136f3535, type: 3}
+  TreeThreePrefab: {fileID: 1369031296425274, guid: 22a3fd8d3e59a1149bdcd775c0e87241, type: 3}
 --- !u!1 &432528923
 GameObject:
   m_ObjectHideFlags: 0
@@ -3173,12 +3230,13 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 998910489}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 58ad3e6e058388946af74b428b54977a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  MyRawImage: {fileID: 1533181499}
+  PCRawImage: {fileID: 0}
+  VRRawImage: {fileID: 0}
   PlayerTeleportObject: {fileID: 1553241175}
   PlayerCamera: {fileID: 1117161112}
   BuildingImage: {fileID: 2800000, guid: befb979a75b95784b9396b9e946cbe69, type: 3}
@@ -3191,6 +3249,21 @@ MonoBehaviour:
   TreeTwoPrefab: {fileID: 1458573784885960, guid: 6910e2407cd484a42a0c2598114751a0, type: 3}
   TreeThree: {fileID: 2800000, guid: ab06b92d435266e43be65525136f3535, type: 3}
   TreeThreePrefab: {fileID: 1369031296425274, guid: 22a3fd8d3e59a1149bdcd775c0e87241, type: 3}
+--- !u!114 &998910491
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 998910489}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6b75a484e5dbdbc4093c394e2d64eed3, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  PlayerLargePlaceFunction: {fileID: 418769535}
+  PlayerTeleportObject: {fileID: 1553241175}
+  PlayerCamera: {fileID: 1117161112}
 --- !u!1 &1051719864
 GameObject:
   m_ObjectHideFlags: 0

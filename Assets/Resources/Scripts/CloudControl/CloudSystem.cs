@@ -12,7 +12,7 @@ public class CloudSystem : MonoBehaviour
     void Start()
     {
         int XZ_Range = BigMap.GetComponent<GenerateMapFromHeightMap>().mapSize / 2;
-        int YHeight = 130;
+        int YHeight = 150;
 
         //for (int x = 0; x <= XZ_Range; x += 10)
         //{
