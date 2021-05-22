@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.EventSystems;
 using ASL;
 
 public static class Marker_DragDrawV2
@@ -8,6 +9,95 @@ public static class Marker_DragDrawV2
     private static GameObject drawOrigin;
     private static GameObject drawLine;
     private static GameObject drawProjection;
+
+    private static int fingerID = -1;
+
+    #region RAYCAST_INPUT
+
+    public static void ClickCast(bool LShift, bool ToTable, Ray mouseRay, GameObject _sm, GameObject _lm, string optionValue)
+    {
+        RaycastHit hit;
+        if (Physics.Raycast(mouseRay, out hit, 1000f))
+        {
+            if (EventSystem.current.IsPointerOverGameObject(fingerID)) return;
+
+            if (LShift)
+            {
+                
+                Vector3 markerPos = Vector3.zero;
+                if (ToTable)
+                {
+                    markerPos = (hit.point - _sm.transform.position) * MarkerDisplay.GetScaleFactor() + _lm.transform.position;
+                }
+                else
+                {
+                    markerPos = hit.point;
+                }
+                MarkerGeneratorV2.InstantiateMarker(optionValue, markerPos, ToTable);
+            }
+            else if (hit.collider.gameObject.layer == LayerMask.NameToLayer("Markers"))
+            {
+                MarkerGeneratorV2.SelectObject(hit.collider.gameObject);
+            }
+            else
+            {
+                MarkerGeneratorV2.DeselectObject();
+            }
+        }
+        else
+        {
+            MarkerGeneratorV2.DeselectObject();
+        }
+    }
+
+    public static void HoldCast(Ray mouseRay, float drawTime)
+    {
+        bool FromLargeMap = OriginLargeMap();
+        int layerMask = (FromLargeMap) ? LayerMask.GetMask("Ground") : LayerMask.GetMask("Holomap");
+        RaycastHit hit;
+        if (Physics.Raycast(mouseRay, out hit, 1000f, layerMask))
+        {
+            if (EventSystem.current.IsPointerOverGameObject(fingerID)) DrawCast(Vector3.zero, FromLargeMap, false);
+
+            DrawCast(hit.point, FromLargeMap, drawTime <= 0f);
+        }
+        else
+        {
+            DrawCast(Vector3.zero, FromLargeMap, false);
+        }
+    }
+
+    public static void ReleaseCast(Ray mouseRay, GameObject _sm, GameObject _lm, string optionValue, float drawTime)
+    {
+        bool FromLargeMap = OriginLargeMap();
+        int layerMask = (FromLargeMap) ? LayerMask.GetMask("Ground") : LayerMask.GetMask("Holomap");
+
+        Vector3 markerPos = Vector3.zero;
+
+        RaycastHit hit;
+        if (Physics.Raycast(mouseRay, out hit, 1000f, layerMask))
+        {
+            if (EventSystem.current.IsPointerOverGameObject(fingerID)) DrawFinish(Vector3.zero, optionValue, false);
+            if (!FromLargeMap)
+            {
+                markerPos = (hit.point - _sm.transform.position) * MarkerDisplay.GetScaleFactor() + _lm.transform.position;
+            }
+            else
+            {
+                markerPos = hit.point;
+            }
+
+            DrawFinish(markerPos, optionValue, drawTime <= 0f);
+        }
+        else
+        {
+            DrawFinish(Vector3.zero, optionValue, false);
+        }
+    }
+
+    #endregion
+
+    #region POST_RAYCAST
 
     public static void SetDrawOrigin(GameObject _g)
     {
@@ -63,5 +153,14 @@ public static class Marker_DragDrawV2
 
         drawLine.SetActive(false);
         Transform.Destroy(drawProjection);
+    }
+
+    #endregion
+
+    public static bool HasDrawOrigin { get { return drawOrigin != null; } }
+
+    public static bool OriginLargeMap()
+    {
+        return (ASLObjectTrackingSystem.GetObjects().Contains(drawOrigin.transform));
     }
 }

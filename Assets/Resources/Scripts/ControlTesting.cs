@@ -33,6 +33,7 @@ public static class MyController {
 public class ControlTesting : MonoBehaviour
 {
     private static ControlTesting _Instance;
+    
 
     public static ControlTesting Instance
     {
@@ -43,6 +44,28 @@ public class ControlTesting : MonoBehaviour
         }
     }
 
+    public PC_Interface _pc;
+    public GameObject Player;
+    private GameObject FlashLight;
+    private GameObject projectionMarker;
+
+    void Awake()
+    {
+        if (_Instance == null) _Instance = this;
+    }
+
+    void Start()
+    {
+        //Debug.Assert(Player != null, "Please set player object in inspector");
+        //Debug.Assert(_pc != null, "Please set PC interface in inspector");
+        //ASLHelper.InstantiateASLObject("PlayerFlashLight", new Vector3(0, 60, 0), Quaternion.identity, "", "", InstantiateFlashlight);
+
+
+        //projectionMarker = Instantiate(Resources.Load("MyPrefabs/PlayerMarker") as GameObject);
+        //Destroy(projectionMarker.GetComponent<BoxCollider>());
+        //projectionMarker.SetActive(false);
+    }
+
     void Update()   //currently only intended for use with GetKeyDown and GetKeyUp
     {
         if (MyController.GetControlType)    //vr controller
@@ -51,6 +74,37 @@ public class ControlTesting : MonoBehaviour
         }
         else
         {   //keyboard + mouse
+            if(_pc != null) //Inputs specific to non-vr
+            {
+                if (Input.GetKeyDown(KeyCode.V))    //Toggle between table camera and player camera
+                {
+                    PC_Interface.ToggleCameras();
+                }
+                if (Input.GetKeyDown(KeyCode.P))    //Toggle cursor lock
+                {
+                    PC_Interface.ToggleLocked();
+                }
+                if (Input.GetKeyDown(KeyCode.Y))    //Toggle flashlight
+                {
+
+                }
+                PC_Interface.ProjectMarker(projectionMarker);
+                PC_Interface.Paint(Input.GetMouseButton(1));
+
+                if (Input.GetMouseButtonDown(0))    //Raycast to either place marker or select/deselect a marker
+                {
+                    PC_Interface.OnClickLMB(Input.GetKeyDown(KeyCode.LeftShift));
+                }
+                if (Input.GetMouseButton(0))        //Drag + draw cast
+                {
+                    PC_Interface.OnHoldLMB();
+                }
+                if (Input.GetMouseButtonUp(0))      //Finish drag + draw
+                {
+                    PC_Interface.OnHoldLMB();
+                }
+            }
+            
             if (Input.GetKeyDown(KeyCode.Alpha2))   //Switch to new path
             {
                 DisplayManager.ShowPath();
@@ -63,24 +117,28 @@ public class ControlTesting : MonoBehaviour
             {
                 DisplayManager.DisplayToggle();
             }
-            if (Input.GetKeyDown(KeyCode.Alpha5))
+            if (Input.GetKeyDown(KeyCode.Alpha5))   //Reset route and path
             {
                 DisplayManager.ResetDisplay();
             }
-
-            //get active camera
-            if (Input.GetMouseButtonDown(0))
+            if (Input.GetKeyDown(KeyCode.Backspace))//Delete last placed marker
             {
-
+                MarkerGeneratorV2.DeleteLastPlaced();
             }
-            if (Input.GetMouseButton(0))
+            if (Input.GetKeyDown(KeyCode.Minus))    //Delete selected marker
             {
-
+                MarkerGeneratorV2.DeleteSelected();
             }
-            if (Input.GetMouseButtonUp(0))
+            if (Input.GetKeyDown(KeyCode.T))        //Teleport between the large map and small map
             {
 
             }
         }
+    }
+
+    private static void InstantiateFlashlight(GameObject _myGameObject)
+    {
+        _Instance.FlashLight = _myGameObject;
+        _myGameObject.SetActive(false);
     }
 }

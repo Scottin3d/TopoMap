@@ -22,11 +22,12 @@ public static class MarkerGeneratorV2
         }
     }
 
-    public static void DeslectObject()
+    public static void DeselectObject()
     {
         if(selectedObject != null)
         {
             if (selectedObject.GetComponent<MarkerObject>() != null) selectedObject.GetComponent<MarkerObject>().Select(false);
+            selectedObject = null;
         }
     }    
 
@@ -72,8 +73,7 @@ public static class MarkerGeneratorV2
         ASLObjectTrackingSystem.AddObjectToTrack(_myGameObject.GetComponent<ASL.ASLObject>());
         RouteDisplayV2.AddRouteMarker(_myGameObject.transform);
         markerList.Add(_myGameObject);
-
-        //set draw origin
+        Marker_DragDrawV2.SetDrawOrigin(_myGameObject);
     }
 
     /// <summary>
@@ -133,15 +133,21 @@ public static class MarkerGeneratorV2
     /// </summary>
     public static void DeleteAll()
     {
-        while (MarkerCount > 0) CallDelete(markerList[0]);
+        int ndx = 0;
+        while (MarkerCount > ndx) if(!CallDelete(markerList[ndx])) ndx++;
     }
 
     /// <summary>
     /// Private deletion call for readability
     /// </summary>
     /// <param name="_g">The game object being deleted</param>
-    private static void CallDelete(GameObject _g)
+    private static bool CallDelete(GameObject _g)
     {
+        MarkerObject _mo = _g.GetComponent<MarkerObject>();
+        if(_mo != null)
+        {
+            if (_mo.IsSelected) return false;
+        }
         ASLObject _asl = _g.GetComponent<ASLObject>();
         if(_asl != null)
         {
@@ -161,6 +167,7 @@ public static class MarkerGeneratorV2
                 {
                     _asl.SendFloatArray(_f);
                 });
+                return false;
             }
         } else
         {
@@ -168,6 +175,7 @@ public static class MarkerGeneratorV2
             markerList.Remove(_g);
             Transform.Destroy(_g.transform);
         }
+        return true;
     }
 
     #endregion

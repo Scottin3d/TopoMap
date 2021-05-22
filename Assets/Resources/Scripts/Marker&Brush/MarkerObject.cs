@@ -32,9 +32,12 @@ public class MarkerObject : MonoBehaviour
     /// <param name="_f"></param>
     private void MarkerCallback(string _id, float[] _f)
     {
+        if (Selected) return;
         if (RouteDisplayV2.RemoveRouteMarker(gameObject.transform, true)) PlayerMarkerGenerator.RemoveMarker(gameObject);
         else OnFailedCallback();
     }
+
+    public bool IsSelected { get { return Selected; } }
 
 
     /// <summary>
