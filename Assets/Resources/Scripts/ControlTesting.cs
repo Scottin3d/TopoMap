@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using ASL;
 
 public static class MyController {
     private static bool IsVR = false;
@@ -20,7 +21,7 @@ public static class MyController {
         IsVR = !IsVR;
     }
 
-    public static bool GetControlType {
+    public static bool InVR {
         get {
             return IsVR;
         }
@@ -48,6 +49,7 @@ public class ControlTesting : MonoBehaviour
     public GameObject Player;
     private GameObject FlashLight;
     private GameObject projectionMarker;
+    private GameObject VRprojectionMarker;
 
     void Awake()
     {
@@ -64,11 +66,12 @@ public class ControlTesting : MonoBehaviour
         //projectionMarker = Instantiate(Resources.Load("MyPrefabs/PlayerMarker") as GameObject);
         //Destroy(projectionMarker.GetComponent<BoxCollider>());
         //projectionMarker.SetActive(false);
+        StartCoroutine(PC_Interface.PaintMap());
     }
 
     void Update()   //currently only intended for use with GetKeyDown and GetKeyUp
     {
-        if (MyController.GetControlType)    //vr controller
+        if (MyController.InVR)    //vr controller
         {
             //whatever the vr controls are
         }
@@ -78,7 +81,7 @@ public class ControlTesting : MonoBehaviour
             {
                 if (Input.GetKeyDown(KeyCode.V))    //Toggle between table camera and player camera
                 {
-                    PC_Interface.ToggleCameras();
+                    PC_Interface.ToggleCamerasPC();
                 }
                 if (Input.GetKeyDown(KeyCode.P))    //Toggle cursor lock
                 {

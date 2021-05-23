@@ -10,7 +10,8 @@ public class PC_Interface : MonoBehaviour
     public static PC_Interface _pcInterface;
     private static int fingerID = -1;
 
-    public Dropdown MyDropdownList;
+    public Dropdown markerDropdown;
+    public Dropdown eraseDropdown;
 
     public Camera PlayerCamera;
     public Camera TableViewCamera;
@@ -23,6 +24,8 @@ public class PC_Interface : MonoBehaviour
     private static bool Projecting = false;
     private static bool IsPainting = false;
     private static bool IsPaused = false;
+    private static bool IsFlashlightOn = false;
+    private static bool IsVR = false;
 
     public static bool IsProjecting { get { return Projecting; } }
 
@@ -36,6 +39,8 @@ public class PC_Interface : MonoBehaviour
     {
         Debug.Assert(PlayerCamera != null, "Please set player camera in inspector.");
         Debug.Assert(TableViewCamera != null, "Please set table view camera in inspector.");
+        Debug.Assert(LargeMap != null, "Please set large map in inspector.");
+        Debug.Assert(SmallMap != null, "Please set small map in inspector.");
 
         PlayerCamera.enabled = true;
         TableViewCamera.enabled = false;
@@ -46,31 +51,62 @@ public class PC_Interface : MonoBehaviour
 
     #region MARKER_PROJECTION
 
+    /// <summary>
+    /// Projects marker onto the holomap (small map).
+    /// </summary>
+    /// <param name="_marker">The marker used for projection</param>
     public static void ProjectMarker(GameObject _marker)
     {
         if (_marker == null) return;
         if (IsViewingTable)
         {
             Ray mouseRay = _pcInterface.TableViewCamera.ScreenPointToRay(Input.mousePosition);
-            ProjectCast(_marker, mouseRay);
+            ProjectCast(_marker, null, mouseRay);
         } else
         {
             Ray mouseRay = _pcInterface.PlayerCamera.ScreenPointToRay(Input.mousePosition);
-            ProjectCast(_marker, mouseRay);
+            ProjectCast(_marker, null, mouseRay);
+        }
+    }
+
+    /// <summary>
+    /// Projects marker onto the holomap (small map). VR only.
+    /// </summary>
+    /// <param name="_marker">The marker used for projection</param>
+    /// <param name="VRmarker">The VR pointer</param>
+    public static void ProjectMarker(GameObject _marker, GameObject VRmarker)
+    {
+        if (_marker == null) return;
+        if (IsViewingTable)
+        {
+            Ray mouseRay = _pcInterface.TableViewCamera.ScreenPointToRay(Input.mousePosition);
+            ProjectCast(_marker, VRmarker, mouseRay);
+        }
+        else
+        {
+            Ray mouseRay = _pcInterface.PlayerCamera.ScreenPointToRay(Input.mousePosition);
+            ProjectCast(_marker, VRmarker, mouseRay);
         }
     }
 
     //TODO: move to separate script
-    private static void ProjectCast(GameObject _marker, Ray mouseRay)
+    private static void ProjectCast(GameObject _marker, GameObject VRmarker, Ray mouseRay)
     {
         RaycastHit hit;
         if(Physics.Raycast(mouseRay, out hit, 100f))
         {
             if (EventSystem.current.IsPointerOverGameObject(fingerID))
             {
+                if (VRmarker != null) VRmarker.SetActive(false);
                 _marker.SetActive(false);
             } else
             {
+                if (VRmarker != null)
+                {
+                    VRmarker.transform.position = hit.point;
+                    VRmarker.transform.localScale = new Vector3(0.3f, 0.3f, 0.3f);
+                    VRmarker.SetActive(hit.collider.gameObject.layer == LayerMask.NameToLayer("Holomap"));
+                }
                 _marker.transform.position = hit.point;
                 _marker.SetActive(hit.collider.gameObject.layer == LayerMask.NameToLayer("Holomap"));
             }
@@ -79,11 +115,11 @@ public class PC_Interface : MonoBehaviour
 
     #endregion
 
-    #region DRAG_DRAW_CAST
+    #region PC_DRAG/DRAW CAST
 
     public static void OnClickLMB(bool LShift)
     {
-        string optionValue = _pcInterface.MyDropdownList.options[_pcInterface.MyDropdownList.value].text;
+        string optionValue = _pcInterface.markerDropdown.options[_pcInterface.markerDropdown.value].text;
         if (IsViewingTable)
         {
             Ray mouseRay = _pcInterface.TableViewCamera.ScreenPointToRay(Input.mousePosition);
@@ -112,7 +148,7 @@ public class PC_Interface : MonoBehaviour
 
     public static void OnReleaseLMB()
     {
-        string optionValue = _pcInterface.MyDropdownList.options[_pcInterface.MyDropdownList.value].text;
+        string optionValue = _pcInterface.markerDropdown.options[_pcInterface.markerDropdown.value].text;
         if (IsViewingTable)
         {
             Ray mouseRay = _pcInterface.TableViewCamera.ScreenPointToRay(Input.mousePosition);
@@ -129,7 +165,6 @@ public class PC_Interface : MonoBehaviour
 
     #endregion
 
-    //TODO: Move to different script?
     #region BRUSH_DRAW
 
     public static void Paint(bool ShouldPaint)
@@ -137,21 +172,43 @@ public class PC_Interface : MonoBehaviour
         IsPainting = ShouldPaint;
     }
 
-    static IEnumerator PaintMap()
+    public static IEnumerator PaintMap()
     {
         while (true)
         {
             if (IsPainting)
             {
-                if (IsViewingTable)
+                if (MyController.InVR)
                 {
 
                 } else
                 {
-
+                    if (IsViewingTable)
+                    {
+                        Ray mouseRay = _pcInterface.TableViewCamera.ScreenPointToRay(Input.mousePosition);
+                        BrushGeneratorV2.DrawBrush(mouseRay, _pcInterface.SmallMap.transform.position, _pcInterface.LargeMap.transform.position);
+                    }
+                    else
+                    {
+                        Ray mouseRay = _pcInterface.PlayerCamera.ScreenPointToRay(Input.mousePosition);
+                        BrushGeneratorV2.DrawBrush(mouseRay, _pcInterface.SmallMap.transform.position, _pcInterface.LargeMap.transform.position);
+                    }
                 }
+                
             }
             yield return new WaitForSeconds(0.05f);
+        }
+    }
+
+    public static void ErasePC()
+    {
+        if (_pcInterface.eraseDropdown.options[_pcInterface.eraseDropdown.value].text == "EraseAll")
+        {
+            BrushGeneratorV2.EraseLine();
+        }
+        if (_pcInterface.eraseDropdown.options[_pcInterface.eraseDropdown.value].text == "EraseLastTen")
+        {
+            BrushGeneratorV2.EraseCount(10);
         }
     }
 
@@ -159,6 +216,9 @@ public class PC_Interface : MonoBehaviour
 
     #region VIEW_FUNCTIONS
 
+    /// <summary>
+    /// Toggles whether the mouse cursor is visible and unlocked
+    /// </summary>
     public static void ToggleLocked()
     {
         if (IsPaused)
@@ -174,7 +234,7 @@ public class PC_Interface : MonoBehaviour
         //lock camera based on new state of paused
     }
 
-    public static void ToggleCameras()
+    public static void ToggleCamerasPC()
     {
         if (IsViewingTable)
         {
@@ -199,16 +259,26 @@ public class PC_Interface : MonoBehaviour
         }
     }
 
-    //TODO: Move to different script
     public static void UpdateFlashlight(GameObject playerBody, ASLObject _aslFlashlight)
     {
+        if (!_aslFlashlight.gameObject.activeSelf)
+        {
+            return;
+        }
+        _aslFlashlight.gameObject.transform.position = _pcInterface.PlayerCamera.transform.position;
+        _aslFlashlight.gameObject.transform.rotation = _pcInterface.PlayerCamera.transform.rotation;
 
+        _aslFlashlight.SendAndSetClaim(() =>
+        {
+            _aslFlashlight.SendAndSetWorldRotation(_pcInterface.PlayerCamera.transform.rotation);
+            _aslFlashlight.SendAndSetWorldPosition(_pcInterface.PlayerCamera.transform.position);
+        });
     }
 
-    //TODO: move to different script
     public static void ToggleFlashlight(GameObject flashlight)
     {
-
+        IsFlashlightOn = !IsFlashlightOn;
+        flashlight.SetActive(IsFlashlightOn);
     }
 
     #endregion
