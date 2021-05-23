@@ -13,7 +13,13 @@ public class PlayerDrawRoute : MonoBehaviour
     private static List<GameObject> MySmallBrushList = new List<GameObject>();
     private static List<GameObject> MyLargerBrushList = new List<GameObject>();
 
+    private static int MyFirstBrushPositionIndex = 0;
+    private static int MySecondBrushPositionIndex = 0;
+    private static int CurLoopIndex = 0;
+
     private static List<GameObject> MyLineRenenderBetweenBrush = new List<GameObject>();
+    private static List<GameObject> TempList = new List<GameObject>();
+    private static List<List<GameObject>> ExtraListBetweenOriginBrush = new List<List<GameObject>>();
     private static Vector3 FirstBrushPosition = new Vector3();
     private static Vector3 SecondBrushPosition = new Vector3();
     private int MyLargeBruchListIndex = 0;
@@ -26,8 +32,6 @@ public class PlayerDrawRoute : MonoBehaviour
     public Dropdown MyEraseDropDown;
     private static GameObject ThisGameObject;
 
-    private Dictionary<string, Vector3> OtherPlayerList = new Dictionary<string, Vector3>();
-
     // Start is called before the first frame update
     void Start()
     {
@@ -37,6 +41,11 @@ public class PlayerDrawRoute : MonoBehaviour
         StartCoroutine(DrawTheLineIE());
         StartCoroutine(LinkLastTwoRouteOnLargeMap());
         StartCoroutine(LinkLastTwoRouteOnSmallMap());
+    }
+
+    private void Update()
+    {
+        //Debug.Log(MyLargerBrushList.Count);
     }
 
     IEnumerator DrawTheLineIE()
@@ -103,11 +112,13 @@ public class PlayerDrawRoute : MonoBehaviour
             }
             else
             {
-                yield return new WaitForSeconds(0.5f);
-                //01234567
+                yield return new WaitForSeconds(0.25f);
                 int LargeBrushListCount = MyLargerBrushList.Count;
                 for (int i = MyLargeBruchListIndex; i < LargeBrushListCount - 1; i++)
                 {
+                    MyFirstBrushPositionIndex = i;
+                    MySecondBrushPositionIndex = i + 1;
+
                     FirstBrushPosition = new Vector3(MyLargerBrushList[i].transform.position.x, MyLargerBrushList[i].transform.position.y, MyLargerBrushList[i].transform.position.z);
                     SecondBrushPosition = new Vector3(MyLargerBrushList[i + 1].transform.position.x, MyLargerBrushList[i + 1].transform.position.y, MyLargerBrushList[i + 1].transform.position.z);
                     //FirstBrushPosition.y += 2.5f;
@@ -120,20 +131,75 @@ public class PlayerDrawRoute : MonoBehaviour
                     //Add several brush between two brush
                     for (int o = 1; o < NumberOfExtraBrushNeeded; o++)
                     {
+                        CurLoopIndex = i;
+
                         float X = GetNewXYZ(FirstBrushPosition.x, SecondBrushPosition.x, DistanceBetweenTwoBrush, 1f, o);
                         float Y = GetNewXYZ(FirstBrushPosition.y, SecondBrushPosition.y, DistanceBetweenTwoBrush, 1f, o);
                         float Z = GetNewXYZ(FirstBrushPosition.z, SecondBrushPosition.z, DistanceBetweenTwoBrush, 1f, o);
-                        Vector3 NewPosition = new Vector3(X, Y, Z);
+                        //Spawm a little bit higher, so the large brush can reposition.
+                        Vector3 NewPosition = new Vector3(X, Y + 50f, Z);
 
                         ASL.ASLHelper.InstantiateASLObject("LargeBrush", NewPosition, Quaternion.identity, "", "", SetLineRenender);
 
                         yield return new WaitForSeconds(0.05f);
                     }
 
-                    //ASL.ASLHelper.InstantiateASLObject("LineRendererBetweenTwoBrush", new Vector3(0, 0, 0), Quaternion.identity, "", "", SetLineRenender);
-                    //yield return new WaitForSeconds(0.2f);
+                    /*
+                    //After this for loop, temp list contain all the new brush between two point.
+                    //Add temp list into CombineList, so we know the new brush list that between point A and B is here.
+                    //Then clear templist
+                    List<GameObject> TempListCopy = TempList.ConvertAll(G => new GameObject());
+
+                    //foreach (GameObject A in TempList)
+                    //{
+                    //    TempListCopy.Add(A);
+                    //}
+
+                    ExtraListBetweenOriginBrush.Add(TempListCopy);
+                    TempList.Clear();
+                    yield return new WaitForSeconds(0.05f);
+                    */
                 }
 
+                /*
+                ////After this for loop, MyLargerBrushList still contain the original brush. Combine contain the new list between each original brush.
+                ////Now combine the ExtraListBetweenOriginBrush into the MyLargerBrushList
+                ////0 1 2 3 4
+                //// 5 2 3 4
+                //int BrushListCount = MyLargerBrushList.Count - 1;
+                //int ExtraListIndex = 0;
+                //int ExtraLength = 0;
+                //for (int i = MyLargeBruchListIndex; i < BrushListCount; i++)
+                //{
+                //    List<GameObject> T = ExtraListBetweenOriginBrush[ExtraListIndex];
+                //    ExtraListIndex++;
+                //    ExtraLength += T.Count;
+                //    Debug.Log(T.Count);
+
+                //    for (int o = 0; o < T.Count - 1; o++)
+                //    {
+                //        MyLargerBrushList.Insert(o + i + 1, T[o]);
+                //    }
+
+                //    BrushListCount += T.Count;
+                //    i += T.Count;
+                //    //"0" 1 2 3 4 5 "1" 1 2 "2" 1 2 3 "3" 1 2 3 4 "4"
+                //}
+
+                ////LargeBrushListCount is original length (mins 1 is the index, mins),
+                ////0 1 2
+                //// 5 2
+                ////"0" 1 2 3 4 5 "1" 1 2 "2"
+                ////0 += 3 - 1 - 0 + 7  + 1 ==== 10
+                //MyLargeBruchListIndex += LargeBrushListCount - 1 - MyLargeBruchListIndex + ExtraLength + 1;
+                //ExtraListBetweenOriginBrush.Clear();
+                */
+
+                //LargeBrushListCount is original length (mins 1 is the index, mins),
+                //0 1 2
+                //0 += 3 - 1 - 0 ==== 2
+                //3 4 5 6
+                //2 += 7 - 1 - 2 ==== 6
                 MyLargeBruchListIndex += LargeBrushListCount - 1 - MyLargeBruchListIndex;
             }
         }
@@ -193,14 +259,6 @@ public class PlayerDrawRoute : MonoBehaviour
         return NewXYZ;
     }
 
-    //private static void SetLineRenender(GameObject _myGameObject)
-    //{
-    //    _myGameObject.transform.parent = ThisGameObject.transform;
-    //    _myGameObject.GetComponent<LineRenderer>().SetPosition(0, FirstBrushPosition);
-    //    _myGameObject.GetComponent<LineRenderer>().SetPosition(1, SecondBrushPosition);
-    //    MyLineRenenderBetweenBrush.Add(_myGameObject);
-    //}
-
     //New Version
     private static void SetLineRenender(GameObject _myGameObject)
     {
@@ -251,20 +309,7 @@ public class PlayerDrawRoute : MonoBehaviour
     {
         _myGameObject.transform.parent = ThisGameObject.transform;
         MyLargerBrushList.Add(_myGameObject);
-        //GenerateExtraLineOnMap(_myGameObject);
     }
-
-    //private static void GenerateExtraLineOnMap(GameObject _myGameObject)
-    //{
-    //    if (MyLargerBrushList.Count == 1)
-    //    {
-    //        return;
-    //    }
-    //    else
-    //    {
-    //        _myGameObject.GetComponent<MapBrushRePosition>().SecondToLastBrushPosition = MyLargerBrushList[MyLargerBrushList.Count - 2].transform.position;
-    //    }
-    //}
 
     public void EraseLine()
     {
@@ -423,8 +468,13 @@ public class PlayerDrawRoute : MonoBehaviour
         return MyLargerBrushList;
     }
 
-    public Dictionary<string, Vector3> GetOtherPlayersList()
+    public List<List<GameObject>> GetExtraListBetweenOriginBrush()
     {
-        return OtherPlayerList;
+        return ExtraListBetweenOriginBrush;
+    }
+
+    public List<GameObject> GetMyLineRenenderBetweenBrush()
+    {
+        return MyLineRenenderBetweenBrush;
     }
 }

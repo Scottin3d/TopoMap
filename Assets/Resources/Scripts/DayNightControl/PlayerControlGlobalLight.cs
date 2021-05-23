@@ -20,7 +20,7 @@ public class PlayerControlGlobalLight : MonoBehaviour
 
     void Start()
     {
-        LightRotation = Quaternion.Euler(90, 0, 0);
+        LightRotation = Quaternion.Euler(90, 270, 0);
     }
 
     void Update()
@@ -31,7 +31,7 @@ public class PlayerControlGlobalLight : MonoBehaviour
     //Change direction of the light for all the user.
     public void SetLight()
     {
-        LightRotation = Quaternion.Euler(LightSlider.value, 0, 0);
+        LightRotation = Quaternion.Euler(LightSlider.value, 270, 0);
         MyDirectionalSunLight.GetComponent<ASL.ASLObject>().SendAndSetClaim(() =>
         {
             MyDirectionalSunLight.GetComponent<ASL.ASLObject>().SendAndSetWorldRotation(LightRotation);
