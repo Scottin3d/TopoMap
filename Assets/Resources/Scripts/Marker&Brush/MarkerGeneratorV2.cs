@@ -141,12 +141,12 @@ public static class MarkerGeneratorV2
     /// Private deletion call for readability
     /// </summary>
     /// <param name="_g">The game object being deleted</param>
-    private static bool CallDelete(GameObject _g)
+    public static bool CallDelete(GameObject _g)
     {
         MarkerObject _mo = _g.GetComponent<MarkerObject>();
         if(_mo != null)
         {
-            if (_mo.IsSelected) return false;
+            if (_mo.IsSelected && !_g.Equals(selectedObject)) return false;
         }
         ASLObject _asl = _g.GetComponent<ASLObject>();
         if(_asl != null)

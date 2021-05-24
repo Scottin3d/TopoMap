@@ -45,9 +45,9 @@ public class ControlTesting : MonoBehaviour
         }
     }
 
-    public PC_Interface _pc;
     public GameObject Player;
     private GameObject FlashLight;
+    private ASLObject aslFlash;
     private GameObject projectionMarker;
     private GameObject VRprojectionMarker;
 
@@ -58,14 +58,13 @@ public class ControlTesting : MonoBehaviour
 
     void Start()
     {
-        //Debug.Assert(Player != null, "Please set player object in inspector");
-        //Debug.Assert(_pc != null, "Please set PC interface in inspector");
-        //ASLHelper.InstantiateASLObject("PlayerFlashLight", new Vector3(0, 60, 0), Quaternion.identity, "", "", InstantiateFlashlight);
+        Debug.Assert(Player != null);
+        ASLHelper.InstantiateASLObject("PlayerFlashLight", new Vector3(0, 60, 0), Quaternion.identity, "", "", InstantiateFlashlight);
 
 
-        //projectionMarker = Instantiate(Resources.Load("MyPrefabs/PlayerMarker") as GameObject);
-        //Destroy(projectionMarker.GetComponent<BoxCollider>());
-        //projectionMarker.SetActive(false);
+        projectionMarker = Instantiate(Resources.Load("MyPrefabs/PlayerMarker") as GameObject);
+        Destroy(projectionMarker.GetComponent<BoxCollider>());
+        projectionMarker.SetActive(false);
         StartCoroutine(PC_Interface.PaintMap());
     }
 
@@ -77,37 +76,34 @@ public class ControlTesting : MonoBehaviour
         }
         else
         {   //keyboard + mouse
-            if(_pc != null) //Inputs specific to non-vr
+            #region NON-VR SPECIFIC
+            if (Input.GetKeyDown(KeyCode.V))    //Toggle between table camera and player camera
             {
-                if (Input.GetKeyDown(KeyCode.V))    //Toggle between table camera and player camera
-                {
-                    PC_Interface.ToggleCamerasPC();
-                }
-                if (Input.GetKeyDown(KeyCode.P))    //Toggle cursor lock
-                {
-                    PC_Interface.ToggleLocked();
-                }
-                if (Input.GetKeyDown(KeyCode.Y))    //Toggle flashlight
-                {
-
-                }
-                PC_Interface.ProjectMarker(projectionMarker);
-                PC_Interface.Paint(Input.GetMouseButton(1));
-
-                if (Input.GetMouseButtonDown(0))    //Raycast to either place marker or select/deselect a marker
-                {
-                    PC_Interface.OnClickLMB(Input.GetKeyDown(KeyCode.LeftShift));
-                }
-                if (Input.GetMouseButton(0))        //Drag + draw cast
-                {
-                    PC_Interface.OnHoldLMB();
-                }
-                if (Input.GetMouseButtonUp(0))      //Finish drag + draw
-                {
-                    PC_Interface.OnHoldLMB();
-                }
+                PC_Interface.ToggleCamerasPC();
             }
-            
+            if (Input.GetKeyDown(KeyCode.P))    //Toggle cursor lock
+            {
+                PC_Interface.ToggleLocked();
+            }            
+            PC_Interface.ProjectMarker(projectionMarker);
+            PC_Interface.Paint(Input.GetMouseButton(1));
+            PC_Interface.UpdateFlashlight(Player, aslFlash);
+            PC_Interface.TestScaleProjection();
+
+            if (Input.GetMouseButtonDown(0))    //Raycast to either place marker or select/deselect a marker
+            {
+                PC_Interface.OnClickLMB(Input.GetKey(KeyCode.LeftShift));
+            }
+            if (Input.GetMouseButton(0))        //Drag + draw cast
+            {
+                PC_Interface.OnHoldLMB();
+            }
+            if (Input.GetMouseButtonUp(0))      //Finish drag + draw
+            {
+                PC_Interface.OnReleaseLMB();
+            }
+            #endregion
+
             if (Input.GetKeyDown(KeyCode.Alpha2))   //Switch to new path
             {
                 DisplayManager.ShowPath();
@@ -136,12 +132,17 @@ public class ControlTesting : MonoBehaviour
             {
 
             }
+            if (Input.GetKeyDown(KeyCode.Y))    //Toggle flashlight
+            {
+                PC_Interface.ToggleFlashlight(FlashLight);
+            }
         }
     }
 
     private static void InstantiateFlashlight(GameObject _myGameObject)
     {
         _Instance.FlashLight = _myGameObject;
+        _Instance.aslFlash = _myGameObject.GetComponent<ASLObject>();
         _myGameObject.SetActive(false);
     }
 }

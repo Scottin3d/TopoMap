@@ -23,7 +23,7 @@ public static class BrushGeneratorV2
         if(Physics.Raycast(mouseRay, out hit, 100f))
         {
             if (EventSystem.current.IsPointerOverGameObject(fingerID)) return;
-
+            
             if(hit.collider.transform.parent.tag == "SpawnSmallMap")
             {
                 Vector3 largePos = (hit.point - _smCenter) * MarkerDisplay.GetScaleFactor() + _lmCenter;
@@ -48,6 +48,8 @@ public static class BrushGeneratorV2
     }
 
     #endregion
+
+    #region ERASE
 
     public static void EraseLine()
     {
@@ -99,6 +101,12 @@ public static class BrushGeneratorV2
         }
         IsClearingBrush = false;
     }
+
+    #endregion
+
+    #region FOLLOW
+
+    #endregion
 }
 
 public class BrushStorage : MonoBehaviour {

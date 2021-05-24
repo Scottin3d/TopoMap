@@ -14,16 +14,16 @@ public static class Marker_DragDrawV2
 
     #region RAYCAST_INPUT
 
-    public static void ClickCast(bool LShift, bool ToTable, Ray mouseRay, GameObject _sm, GameObject _lm, string optionValue)
+    public static void ClickCast(bool LShift, Ray mouseRay, GameObject _sm, GameObject _lm)
     {
         RaycastHit hit;
         if (Physics.Raycast(mouseRay, out hit, 1000f))
         {
             if (EventSystem.current.IsPointerOverGameObject(fingerID)) return;
-
+            
             if (LShift)
             {
-                
+                bool ToTable = (hit.collider.transform.parent.tag == "SpawnSmallMap");
                 Vector3 markerPos = Vector3.zero;
                 if (ToTable)
                 {
@@ -33,7 +33,7 @@ public static class Marker_DragDrawV2
                 {
                     markerPos = hit.point;
                 }
-                MarkerGeneratorV2.InstantiateMarker(optionValue, markerPos, ToTable);
+                MarkerGeneratorV2.InstantiateMarker("Marker", markerPos, ToTable);
             }
             else if (hit.collider.gameObject.layer == LayerMask.NameToLayer("Markers"))
             {
@@ -52,6 +52,7 @@ public static class Marker_DragDrawV2
 
     public static void HoldCast(Ray mouseRay, float drawTime)
     {
+        if (!HasDrawOrigin) return;
         bool FromLargeMap = OriginLargeMap();
         int layerMask = (FromLargeMap) ? LayerMask.GetMask("Ground") : LayerMask.GetMask("Holomap");
         RaycastHit hit;
@@ -67,17 +68,17 @@ public static class Marker_DragDrawV2
         }
     }
 
-    public static void ReleaseCast(Ray mouseRay, GameObject _sm, GameObject _lm, string optionValue, float drawTime)
+    public static void ReleaseCast(Ray mouseRay, GameObject _sm, GameObject _lm, float drawTime)
     {
         bool FromLargeMap = OriginLargeMap();
         int layerMask = (FromLargeMap) ? LayerMask.GetMask("Ground") : LayerMask.GetMask("Holomap");
-
+        Debug.Log("Link from large map: " + FromLargeMap);
         Vector3 markerPos = Vector3.zero;
 
         RaycastHit hit;
         if (Physics.Raycast(mouseRay, out hit, 1000f, layerMask))
         {
-            if (EventSystem.current.IsPointerOverGameObject(fingerID)) DrawFinish(Vector3.zero, optionValue, false);
+            if (EventSystem.current.IsPointerOverGameObject(fingerID)) { DrawFinish(Vector3.zero, false);  return; }
             if (!FromLargeMap)
             {
                 markerPos = (hit.point - _sm.transform.position) * MarkerDisplay.GetScaleFactor() + _lm.transform.position;
@@ -87,11 +88,11 @@ public static class Marker_DragDrawV2
                 markerPos = hit.point;
             }
 
-            DrawFinish(markerPos, optionValue, drawTime <= 0f);
+            DrawFinish(markerPos, drawTime <= 0f);
         }
         else
         {
-            DrawFinish(Vector3.zero, optionValue, false);
+            DrawFinish(Vector3.zero, false);
         }
     }
 
@@ -128,7 +129,7 @@ public static class Marker_DragDrawV2
         if (MarkerGeneratorV2.HasSelectedObject)
         {
             float thickness = (IsOnLargeMap) ? 0.25f : 0.01f;
-            drawProjection.transform.position = castPoint;
+            if (drawProjection != null) drawProjection.transform.position = castPoint;
 
             Vector3 line = (drawProjection.transform.position - drawOrigin.transform.position);
             drawLine.transform.localScale = new Vector3(thickness, line.magnitude * 0.5f, thickness);
@@ -136,19 +137,19 @@ public static class Marker_DragDrawV2
             drawLine.transform.up = line;
 
             drawLine.SetActive(SuccessfulCast);
-            drawProjection.SetActive(SuccessfulCast);
+            if (drawProjection != null) drawProjection.SetActive(SuccessfulCast);
         } else
         {
             drawLine.SetActive(false);
-            drawProjection.SetActive(false);
+            if (drawProjection != null) drawProjection.SetActive(false);
         }        
     }
 
-    public static void DrawFinish(Vector3 castPoint, string optionValue, bool SuccessfulCast)
+    public static void DrawFinish(Vector3 castPoint, bool SuccessfulCast)
     {
         if (SuccessfulCast)
         {
-            MarkerGeneratorV2.InstantiateMarker(drawOrigin, optionValue, castPoint);
+            MarkerGeneratorV2.InstantiateMarker(drawOrigin, "Marker", castPoint);
         }
 
         drawLine.SetActive(false);

@@ -34,7 +34,6 @@ public class DisplayManager : MonoBehaviour
     private void Awake()
     {
         _dm = this;
-        MyController.Initialize();
     }
 
     // Start is called before the first frame update

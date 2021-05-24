@@ -10,7 +10,6 @@ public class PC_Interface : MonoBehaviour
     public static PC_Interface _pcInterface;
     private static int fingerID = -1;
 
-    public Dropdown markerDropdown;
     public Dropdown eraseDropdown;
 
     public Camera PlayerCamera;
@@ -25,7 +24,6 @@ public class PC_Interface : MonoBehaviour
     private static bool IsPainting = false;
     private static bool IsPaused = false;
     private static bool IsFlashlightOn = false;
-    private static bool IsVR = false;
 
     public static bool IsProjecting { get { return Projecting; } }
 
@@ -89,7 +87,12 @@ public class PC_Interface : MonoBehaviour
         }
     }
 
-    //TODO: move to separate script
+    /// <summary>
+    /// Projection marker cast onto the small map
+    /// </summary>
+    /// <param name="_marker">The gameobject used as the projection</param>
+    /// <param name="VRmarker">The gameobject used as the VR pointer</param>
+    /// <param name="mouseRay">The ray used for raycasting</param>
     private static void ProjectCast(GameObject _marker, GameObject VRmarker, Ray mouseRay)
     {
         RaycastHit hit;
@@ -113,21 +116,32 @@ public class PC_Interface : MonoBehaviour
         }
     }
 
+    public static void TestScaleProjection()
+    {
+        if(IsViewingTable)
+        {
+            ScaleLine.CheckDisplay(_pcInterface.TableViewCamera, _pcInterface.SmallMap, _pcInterface.LargeMap);
+        } else
+        {
+            ScaleLine.CheckDisplay(_pcInterface.PlayerCamera, _pcInterface.SmallMap, _pcInterface.LargeMap);
+        }
+    }
+
     #endregion
 
     #region PC_DRAG/DRAW CAST
 
     public static void OnClickLMB(bool LShift)
     {
-        string optionValue = _pcInterface.markerDropdown.options[_pcInterface.markerDropdown.value].text;
+        //Debug.Log("Trying to place marker: " + LShift);
         if (IsViewingTable)
         {
             Ray mouseRay = _pcInterface.TableViewCamera.ScreenPointToRay(Input.mousePosition);
-            Marker_DragDrawV2.ClickCast(LShift, IsViewingTable, mouseRay, _pcInterface.SmallMap, _pcInterface.LargeMap, optionValue);
+            Marker_DragDrawV2.ClickCast(LShift, mouseRay, _pcInterface.SmallMap, _pcInterface.LargeMap);
         } else
         {
             Ray mouseRay = _pcInterface.PlayerCamera.ScreenPointToRay(Input.mousePosition);
-            Marker_DragDrawV2.ClickCast(LShift, IsViewingTable, mouseRay, _pcInterface.SmallMap, _pcInterface.LargeMap, optionValue);
+            Marker_DragDrawV2.ClickCast(LShift, mouseRay, _pcInterface.SmallMap, _pcInterface.LargeMap);
         }
     }   
 
@@ -148,16 +162,15 @@ public class PC_Interface : MonoBehaviour
 
     public static void OnReleaseLMB()
     {
-        string optionValue = _pcInterface.markerDropdown.options[_pcInterface.markerDropdown.value].text;
         if (IsViewingTable)
         {
             Ray mouseRay = _pcInterface.TableViewCamera.ScreenPointToRay(Input.mousePosition);
-            Marker_DragDrawV2.ReleaseCast(mouseRay, _pcInterface.SmallMap, _pcInterface.LargeMap, optionValue, drawTime);
+            Marker_DragDrawV2.ReleaseCast(mouseRay, _pcInterface.SmallMap, _pcInterface.LargeMap, drawTime);
         }
         else
         {
             Ray mouseRay = _pcInterface.PlayerCamera.ScreenPointToRay(Input.mousePosition);
-            Marker_DragDrawV2.ReleaseCast(mouseRay, _pcInterface.SmallMap, _pcInterface.LargeMap, optionValue, drawTime);
+            Marker_DragDrawV2.ReleaseCast(mouseRay, _pcInterface.SmallMap, _pcInterface.LargeMap, drawTime);
         }
         drawTime = 1f;
         Projecting = false;
