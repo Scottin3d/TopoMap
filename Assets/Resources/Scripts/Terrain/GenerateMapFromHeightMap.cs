@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using ASL;
 
 /// <summary>
 /// GenerateMapFromHeightMap will read in a heightmap of size greater than 32px x 32px and power of 2 and create meshes based on the input heightmap.
@@ -24,6 +25,7 @@ public partial class GenerateMapFromHeightMap : MonoBehaviour {
     private float chunkSize;                                // the world unit size of each chunk. mapSize / numberOf Chunks 
     public float ChunkSize { get => chunkSize; set => chunkSize = value; }
     public GameObject[,] mapChunksGameObjects;              // map chunk container
+    public GameObject[,] ASLMapChunks;
     public MapChunk[,] mapChunks;                         // map chunk container
 
 
@@ -36,7 +38,8 @@ public partial class GenerateMapFromHeightMap : MonoBehaviour {
     public const int mapChunkSize = 241;
     [Range(0, 6)]
     private int editorPreviewLOD = 0;
-    private bool DoneGeneration = false;
+
+    
 
     private NoiseProperties noiseProperties;
     [Header("Noise Properties")]
@@ -51,6 +54,10 @@ public partial class GenerateMapFromHeightMap : MonoBehaviour {
     [Range(0.01f, 5f)]
     public float lacunarity = 1f;
     public int seed = 69;
+
+
+    private bool DoneGeneration = false;
+    public bool IsGenerated { get { return DoneGeneration; } }
 
     /// <summary>
     /// Assigns class variables.
@@ -94,7 +101,7 @@ public partial class GenerateMapFromHeightMap : MonoBehaviour {
 
         mapChunks = new MapChunk[numberOfChunks, numberOfChunks];   // set map chunk container
         mapChunksGameObjects = new GameObject[numberOfChunks, numberOfChunks];
-
+        ASLMapChunks = new GameObject[numberOfChunks, numberOfChunks];
         int mapWidth = heightmap.width;                             // full heightmap resolution, min 32
         int mapHeight = heightmap.height;                           // full heightmap resolution, min 32
 
@@ -136,13 +143,14 @@ public partial class GenerateMapFromHeightMap : MonoBehaviour {
             chunk.GetComponent<ChunkData>().MapChunk = mapChunk;
 
             mapChunksGameObjects[row, col] = chunk;
+            //ASLHelper.InstantiateASLObject(PrimitiveType.Plane, chunk.transform.position, Quaternion.identity, null, null, GenerateASLChunk);
 
             row++;
         }
 
-
         row = 0;
         col = 0;
+
         // 2. find neighbors
         for (int c = 0; c < numberOfChunks * numberOfChunks; c++) {
             if (row == numberOfChunks) {
@@ -224,8 +232,6 @@ public partial class GenerateMapFromHeightMap : MonoBehaviour {
         material.SetFloat("_WorldMin", worldMinHeight);
         material.SetFloat("_NumChunks", numberOfChunks);
 
-
-
         row = 0;
         col = 0;
         // 5. generate mesh
@@ -237,17 +243,8 @@ public partial class GenerateMapFromHeightMap : MonoBehaviour {
 
             // create chunk mesh
             Mesh mesh = mapChunks[row, col].meshData.CreateMesh();
-
+        
             // create game object of chunk
-            /*
-            GameObject chunk = new GameObject();
-            chunk.transform.parent = transform;
-            chunk.transform.localScale = Vector3.one;
-            chunk.tag = "Chunk";
-            chunk.name = "Chunk" + row + ", " + col;
-            chunk.layer = LayerMask.NameToLayer("Ground");
-            chunk.transform.position = new Vector3(mapChunks[row, col].center.x, transform.position.y, mapChunks[row, col].center.y);
-            */
             mapChunksGameObjects[row, col].AddComponent<MeshFilter>().sharedMesh = mesh;
             mapChunksGameObjects[row, col].AddComponent<MeshCollider>().sharedMesh = mesh;
             mapChunksGameObjects[row, col].AddComponent<MeshRenderer>().sharedMaterial = material;
@@ -258,6 +255,10 @@ public partial class GenerateMapFromHeightMap : MonoBehaviour {
         }
 
         DoneGeneration = true;
+    }
+
+    private void GenerateASLChunk(GameObject _gameObject) { 
+    
     }
 
     /// <summary>
@@ -377,7 +378,7 @@ public partial class GenerateMapFromHeightMap : MonoBehaviour {
         return new MapData(noiseMap, noiseProperties);
     }
 
-    public bool IsGenerated { get { return DoneGeneration; } }
+    
 
 }
 
@@ -391,6 +392,8 @@ public class MapChunk {
     public Vector2 center;
     public MapData mapData;
     public MeshData meshData;
+
+    public float[,] noiseValues;
 
     public MapChunk[] chunkNeighbors = new MapChunk[] { null, null, null, null, null, null, null, null };
     public GameObject[] chunkNeighborObjects = new GameObject[] { null, null, null, null, null, null, null, null };
@@ -407,6 +410,9 @@ public class MapChunk {
         this.heightmap = _heightmap;
         this.center = _center;
         this.mapData = _mapData;
+        noiseValues = Noise.GenerateNoiseMap(_heightmap.width, _heightmap.height, _mapData.noiseProperties.seed,
+                                             _mapData.noiseProperties.noiseScale, _mapData.noiseProperties.octaves,
+                                             _mapData.noiseProperties.persistence, _mapData.noiseProperties.lacunarity, _center);
     }
 }
 

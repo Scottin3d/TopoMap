@@ -1,18 +1,19 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-
-public class MeshManipulation : MonoBehaviour {
+using ASL;
+public partial class MeshManipulation : MonoBehaviour {
     public float UPDATES_PER_SECOND = 2f;
     public GenerateMapFromHeightMap mapGen = null;
 
-    private GameObject currentSelections = null;
+    public GameObject currentSelection = null;
     private bool selectMode = false;
     private bool editMode = false;
 
     private float mouseScrollDelta;
-    public float radius = 5f;
-    private float radiusMin = 1f;
+    public float radius;
+    private float radiusMin;
+    private float deformationStrength;
 
     public Gradient colorGradient;
     public AnimationCurve blendStength;
@@ -20,11 +21,21 @@ public class MeshManipulation : MonoBehaviour {
     private int currentPoolIndex = 0;
     private List<List<VertToDeform>> selectedVerts = new List<List<VertToDeform>>();
 
+    ASLObject meshDefoController;
+
     // mouse
     GameObject mouseObject;
     void Start() {
+        meshDefoController = GetComponent<ASLObject>();
+        radius = mapGen.mapSize / 20f;
+        radiusMin = mapGen.ChunkSize / 10f;
+        ChangeRadius?.Invoke(radius.ToString());
+        deformationStrength = radius / 20f;
+        ChangeStrength?.Invoke(deformationStrength.ToString());
+
+
         mouseObject = GameObject.CreatePrimitive(PrimitiveType.Sphere);
-        float meshRes = mapGen.mapSize / (mapGen.heightmap.width / 32f) / 32f;
+        float meshRes = mapGen.mapSize / mapGen.NumberOfChunks / 32f;
         mouseObject.transform.localScale = Vector3.one * meshRes / 2f;
         mouseObject.GetComponent<Renderer>().material.color = Color.red;
         mouseObject.gameObject.SetActive(selectMode);
@@ -43,28 +54,43 @@ public class MeshManipulation : MonoBehaviour {
         if (Input.GetKeyDown(KeyCode.Alpha1)) {
             selectMode = !selectMode;
             mouseObject.gameObject.SetActive(selectMode);
-        }
 
-        if (selectMode && Input.GetMouseButtonDown(0) || editMode && Input.GetMouseButtonDown(0)) {
-            editMode = !editMode;
-            selectMode = !selectMode;
+            if (!selectMode) {
+                ResetPool();
+            }
         }
 
         // update radius
         if (Input.GetKey(KeyCode.LeftControl)) {
             mouseScrollDelta = Input.mouseScrollDelta.y * 0.5f;
-            radius += mouseScrollDelta;
-            radius = (radius <= radiusMin) ? radiusMin : radius;
+            ChangeDeformationRadius(mouseScrollDelta);
         }
 
-        if (editMode && Input.GetKeyDown(KeyCode.Alpha0)) {
-            ModifyMesh(0.25f);
+        if (selectMode && currentSelection && Input.GetMouseButtonDown(0)) {
+            DeformObject sendDeformInfo = new DeformObject(currentSelection, selectedVerts, deformationStrength);
+            meshDefoController.SendAndSetClaim(() => {
+                meshDefoController.SendMessage("ASLModifyMesh", sendDeformInfo);
+            });
+
+            ModifyMesh(deformationStrength);
         }
 
-        if (editMode && Input.GetKeyDown(KeyCode.Alpha9)) {
-            ModifyMesh(-0.25f);
+        if (selectMode && currentSelection && Input.GetMouseButton(0)) {
+            ModifyMesh(deformationStrength);
+        }
+
+        // min strength -2.5f
+        if (Input.GetKeyDown(KeyCode.LeftBracket)) {
+            ChangeDeformationStrength(-0.1f);
+        }
+
+        // max stregnth 2.5f
+        if (Input.GetKeyDown(KeyCode.RightBracket)) {
+            ChangeDeformationStrength(0.1f);
         }
     }
+
+    
 
     // Update is called once per frame
     IEnumerator MeshManipulate() {
@@ -85,15 +111,18 @@ public class MeshManipulation : MonoBehaviour {
 
                         mouseObject.transform.position = hit.point;
                         MapChunk mapChunk = hit.collider.GetComponent<ChunkData>().MapChunk;
-                        currentSelections = hit.transform.gameObject;
+                        currentSelection = hit.transform.gameObject;
 
                         ClearSelectedVerts();
                         GetRadialVerts(hit, radius);
 
                     } else {
                         ClearSelectedVerts();
-                        currentSelections = null;
+                        currentSelection = null;
                     }
+                } else {
+                    ClearSelectedVerts();
+                    currentSelection = null;
                 }
             }
         }
@@ -117,6 +146,10 @@ public class MeshManipulation : MonoBehaviour {
     }
 
     private GameObject GetVertexFromPool() {
+        if (currentPoolIndex >= vertexPool.Count * 0.8f) {
+            GenerateVertexPool(1000);
+        }
+
         vertexPool[currentPoolIndex].SetActive(true);
         currentPoolIndex++;
         return vertexPool[currentPoolIndex];
@@ -208,24 +241,62 @@ public class MeshManipulation : MonoBehaviour {
         }
     }
 
+    public void ASLModifyMesh(DeformObject deformObject) {
+        MapChunk chunk = deformObject.currentSelection.GetComponent<ChunkData>().MapChunk;
+        for (int i = 0; i < deformObject.deformVertices.Count; i++) {
+            if (i == 0) {
+                Vector3[] vertices = chunk.meshData.vertices;
+
+                foreach (var v in deformObject.deformVertices[i]) {
+                    float strength = 1 - (v.distance / radius);
+
+                    vertices[v.index].y += deformObject.deformDelta * strength;
+                }
+
+                currentSelection.GetComponent<MeshFilter>().mesh.vertices = vertices;
+                currentSelection.GetComponent<MeshFilter>().mesh.RecalculateBounds();
+                currentSelection.GetComponent<MeshFilter>().mesh.RecalculateNormals();
+            } else {
+                // neighbor
+                if (chunk.chunkNeighbors[i - 1] != null) {
+                    Vector3[] vertices = chunk.chunkNeighbors[i - 1].meshData.vertices;
+
+                    foreach (var v in deformObject.deformVertices[i]) {
+                        float strength = 1 - (v.distance / radius);
+                        vertices[v.index].y += deformObject.deformDelta * strength;
+                    }
+                    chunk.chunkNeighborObjects[i - 1].GetComponent<MeshFilter>().mesh.vertices = vertices;
+                    chunk.chunkNeighborObjects[i - 1].GetComponent<MeshFilter>().mesh.RecalculateBounds();
+                    chunk.chunkNeighborObjects[i - 1].GetComponent<MeshFilter>().mesh.RecalculateNormals();
+                }
+            }
+
+        }
+
+        // recalculate normals
+    }
     private void ModifyMesh(float delta) {
-        MapChunk chunk = currentSelections.GetComponent<ChunkData>().MapChunk;
+        
+        MapChunk chunk = currentSelection.GetComponent<ChunkData>().MapChunk;
         for (int i = 0; i < selectedVerts.Count; i++) {
             if (i == 0) {
                 Vector3[] vertices = chunk.meshData.vertices;
                 foreach (var v in selectedVerts[i]) {
-                    vertices[v.index].y += 1 - (delta * v.distance);
+                    float strength = 1 - (v.distance / radius);
+
+                    vertices[v.index].y += delta * strength;
                 }
 
-                currentSelections.GetComponent<MeshFilter>().mesh.vertices = vertices;
-                currentSelections.GetComponent<MeshFilter>().mesh.RecalculateBounds();
-                currentSelections.GetComponent<MeshFilter>().mesh.RecalculateNormals();
+                currentSelection.GetComponent<MeshFilter>().mesh.vertices = vertices;
+                currentSelection.GetComponent<MeshFilter>().mesh.RecalculateBounds();
+                currentSelection.GetComponent<MeshFilter>().mesh.RecalculateNormals();
             } else {
                 // neighbor
                 if (chunk.chunkNeighbors[i - 1] != null) {
                     Vector3[] vertices = chunk.chunkNeighbors[i - 1].meshData.vertices;
                     foreach (var v in selectedVerts[i]) {
-                        vertices[v.index].y += 1 - (delta * v.distance);
+                        float strength = 1 - (v.distance / radius);
+                        vertices[v.index].y += delta * strength;
                     }
                     chunk.chunkNeighborObjects[i - 1].GetComponent<MeshFilter>().mesh.vertices = vertices;
                     chunk.chunkNeighborObjects[i - 1].GetComponent<MeshFilter>().mesh.RecalculateBounds();
@@ -237,6 +308,18 @@ public class MeshManipulation : MonoBehaviour {
 
         // recalculate normals
 
+    }
+}
+
+public struct DeformObject {
+    public GameObject currentSelection;
+    public List<List<VertToDeform>> deformVertices;
+    public float deformDelta;
+
+    public DeformObject(GameObject _currentSelection, List<List<VertToDeform>> _deformVertices, float _deformDelta) {
+        currentSelection = _currentSelection;
+        deformVertices = _deformVertices;
+        deformDelta = _deformDelta;
     }
 }
 
