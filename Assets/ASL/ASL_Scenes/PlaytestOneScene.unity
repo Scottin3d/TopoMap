@@ -5083,6 +5083,20 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   LargeMapGenerator: {fileID: 631668594}
   SmallerMapGenerator: {fileID: 468696374}
+--- !u!114 &1549362518
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1549362511}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9147f82f4a363e640aa2c6b696f722b0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  localBigMap: {fileID: 631668596}
+  localSmallMap: {fileID: 468696375}
 --- !u!4 &1549362519 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 6897538589646759658, guid: 6c21f35d451268d4da0883a9980a2721, type: 3}
