@@ -388,6 +388,7 @@ public static class RouteDisplayV2
     /// <returns>Returns true if removal is successful</returns>
     public static bool RemoveRouteMarker(Transform _t, bool fromFloatCallback)
     {
+        Debug.Log("Deletion from callback: " + fromFloatCallback);
         if (!linkedObj.Contains(_t)) return false;
         int actionNdx = linkedObj.IndexOf(_t);
         if (actionNdx > -1)

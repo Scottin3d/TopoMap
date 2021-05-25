@@ -32,9 +32,12 @@ public class MarkerObject : MonoBehaviour
     /// <param name="_f"></param>
     private void MarkerCallback(string _id, float[] _f)
     {
-        if (RouteDisplayV2.RemoveRouteMarker(gameObject.transform, true)) PlayerMarkerGenerator.RemoveMarker(gameObject);
+        if (Selected) return;
+        if (RouteDisplayV2.RemoveRouteMarker(gameObject.transform, true)) /*Player*/MarkerGeneratorV2./*RemoveMarker*/CallDelete(gameObject);
         else OnFailedCallback();
     }
+
+    public bool IsSelected { get { return Selected; } }
 
 
     /// <summary>
@@ -73,7 +76,26 @@ public class MarkerObject : MonoBehaviour
         if(failedCallbacks >= GameLiftManager.GetInstance().m_Players.Count)
         {
             Debug.Log("Forcing deletion of " + gameObject.name);
-            PlayerMarkerGenerator.ForceDeletion(gameObject);
+            ForceDeletion();
+        }
+    }
+
+    /// <summary>
+    /// Forces the deletion of a marker object because it is not "owned" by an active player
+    /// </summary>
+    private void ForceDeletion()
+    {
+        if (gameObject.GetComponent<ASL.ASLObject>() != null)
+        {
+            ASLObjectTrackingSystem.RemoveObjectToTrack(gameObject.GetComponent<ASL.ASLObject>());
+            gameObject.GetComponent<ASL.ASLObject>().SendAndSetClaim(() =>
+            {
+                gameObject.GetComponent<ASL.ASLObject>().DeleteObject();
+            });
+        }
+        else
+        {
+            Destroy(gameObject.transform);
         }
     }
 }

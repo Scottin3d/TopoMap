@@ -379,6 +379,30 @@ MonoBehaviour:
   currentPoolIndex: 0
   selectedVerts: 
   mouseObject: {fileID: 0}
+  blendStength:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 0
+      inSlope: 1
+      outSlope: 1
+      tangentMode: 34
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    - serializedVersion: 3
+      time: 1
+      value: 1
+      inSlope: 1
+      outSlope: 1
+      tangentMode: 34
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
 --- !u!4 &330221379
 Transform:
   m_ObjectHideFlags: 0
@@ -426,7 +450,7 @@ MonoBehaviour:
   mapSize: 100
   material: {fileID: 2100000, guid: aa51ed62bd15500438dacc5d81a801e8, type: 2}
   useDefaultMeshHeight: 0
-  meshHeight: 1
+  meshHeight: 15
   meshHieghtCurve:
     serializedVersion: 2
     m_Curve:
