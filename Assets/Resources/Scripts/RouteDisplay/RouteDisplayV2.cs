@@ -395,7 +395,7 @@ public static class RouteDisplayV2
             Reinsertion(actionNdx, linkedObj.Count);
             linkedObj.Remove(_t);
             nodeCount--;
-            if (nodeCount < 2) PathDisplayV2.ClearPath();
+            if (nodeCount < 1) DisplayManager.ClearPath();
             UpdateRouteV2(actionNdx - 1, false);
             return true;
         }

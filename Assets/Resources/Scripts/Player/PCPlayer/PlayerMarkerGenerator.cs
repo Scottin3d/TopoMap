@@ -83,7 +83,11 @@ public class PlayerMarkerGenerator : MonoBehaviour
                 if(RouteDisplayV2.RemoveRouteMarker(DrawOrigin.transform, false)) RemoveMarker(DrawOrigin);
                 else
                 {
-
+                    float[] _f = new float[1];
+                    DrawOrigin.GetComponent<ASL.ASLObject>().SendAndSetClaim(() =>
+                    {
+                        DrawOrigin.GetComponent<ASL.ASLObject>().SendFloatArray(_f);
+                    });
                 }
             } 
         }
@@ -129,7 +133,7 @@ public class PlayerMarkerGenerator : MonoBehaviour
                 if (Physics.Raycast(MouseRay, out Hit))
                 {
                     //Test select of path display
-                    PathDisplay.Select(Hit.transform);
+                    //PathDisplay.Select(Hit.transform);
 
                     string DropdownOpionValue = "";
                     //If mouse hit the small map
