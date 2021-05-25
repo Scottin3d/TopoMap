@@ -182,7 +182,14 @@ public class FollowTheDrawingRouteOnLargeMap : MonoBehaviour
     {
         if (StartFollowingRoute == true && Input.GetKeyDown(KeyCode.W))
         {
-            MoveSpeed += 1f;
+            if (Input.GetKeyDown(KeyCode.LeftShift))
+            {
+                MoveSpeed += 10f;
+            }
+            else
+            {
+                MoveSpeed += 1f;
+            }   
         }
 
         if (StartFollowingRoute == true && Input.GetKeyDown(KeyCode.S))
