@@ -33,19 +33,22 @@ public class ScaleLine : MonoBehaviour
 
     IEnumerator UpdateScaleLine()
     {
-        if (closestChunk != null)
+        while (true)
         {
-            Debug.Log("Name: " + closestChunk.gameObject.name + " with parent: " + closestChunk.gameObject.transform.parent);
-            //get height of canvas
-            //get height, width of line panel
-            //get center, top/bottom of line panel
-            //get parent of chunk
-            //get heightmap size
+            if (closestChunk != null)
+            {
+                Debug.Log("Name: " + closestChunk.gameObject.name + " with parent: " + closestChunk.gameObject.transform.parent);
+                //get height of canvas
+                //get height, width of line panel
+                //get center, top/bottom of line panel
+                //get parent of chunk
+                //get heightmap size
 
-            //get scale between canvas height and panel height
-            //draw line from top to bottom edge of line panel, through center
-        }
-        yield return new WaitForSeconds(0.01f);
+                //get scale between canvas height and panel height
+                //draw line from top to bottom edge of line panel, through center
+            }
+            yield return new WaitForSeconds(0.01f);
+        }        
     }
 
     public static void CheckDisplay(Camera _c)
@@ -112,8 +115,7 @@ public class ScaleLine : MonoBehaviour
             if (Physics.Linecast(curDisplay.transform.position, mChunk.gameObject.transform.position, out hitM))
             {
                 if (mChunk.gameObject.Equals(hitM.collider.gameObject)) closestChunk = mChunk;
-            }
-            
+            }            
         }
     }
 
