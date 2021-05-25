@@ -60,9 +60,9 @@ Material:
     - Vector1_a7ca5de029c14cc5ab26055f1d6d14d1: 0.38
     - Vector1_ab16014327ff4ce59fc6777c0cf2f0b4: 0.658
     - Vector1_dadac1c4cbfb41f2acdbcdc09781e251: 1
-    - _NumChunks: 64
-    - _WorldMax: 95.91648
-    - _WorldMin: 13.955687
+    - _NumChunks: 4
+    - _WorldMax: 93.725494
+    - _WorldMin: 13.631765
     m_Colors: []
   m_BuildTextureStacks: []
 --- !u!114 &8271722090965756700

@@ -34,7 +34,6 @@ public class DisplayManager : MonoBehaviour
     private void Awake()
     {
         _dm = this;
-        MyController.Initialize();
     }
 
     // Start is called before the first frame update
@@ -141,7 +140,8 @@ public class DisplayManager : MonoBehaviour
         graph.SetDimensions(size, size, nodeSize);
         graph.collision.fromHeight = scanHeight * _dm.scanFactor;
         graph.collision.heightMask = LayerMask.GetMask("Ground");
-        //set obstacle layer
+        graph.collision.mask = LayerMask.GetMask("RouteObstacle");
+
 
         //Set penalties
         graph.penaltyAngle = true;
@@ -196,6 +196,12 @@ public class DisplayManager : MonoBehaviour
             _dm.oldSpline.Copy(_dm.mySpline);
             drawCoroutine = _dm.StartCoroutine(PathDisplayV2.DrawPath());
         }
+    }
+
+    public static void ClearPath()
+    {
+        if (drawCoroutine != null) _dm.StopCoroutine(drawCoroutine);
+        PathDisplayV2.ClearPath();
     }
 
     public static void DisplayToggle()

@@ -39,8 +39,9 @@ public static class MeshGenerator {
 
                 // calculate the Vector3
                 float xVal = quadCenter.x;
-                //float yVal = heightCurve.Evaluate(chunk.mapData.heightValues[x, z]) * heightMulitplier;
+                //float yVal = heightCurve.Evaluate(chunk.mapData.heightValues[x, z]) * heightMulitplier * chunk.noiseValues[x, z];
                 float yVal = chunk.mapData.heightValues[x, z] * heightMulitplier;
+                //yVal = yVal + (chunk.noiseValues[x, z] * chunk.mapData.noiseProperties.noiseInfluence);
 
                 float zVal = quadCenter.y;
 

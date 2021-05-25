@@ -388,6 +388,7 @@ public static class RouteDisplayV2
     /// <returns>Returns true if removal is successful</returns>
     public static bool RemoveRouteMarker(Transform _t, bool fromFloatCallback)
     {
+        Debug.Log("Deletion from callback: " + fromFloatCallback);
         if (!linkedObj.Contains(_t)) return false;
         int actionNdx = linkedObj.IndexOf(_t);
         if (actionNdx > -1)
@@ -395,7 +396,7 @@ public static class RouteDisplayV2
             Reinsertion(actionNdx, linkedObj.Count);
             linkedObj.Remove(_t);
             nodeCount--;
-            if (nodeCount < 2) PathDisplayV2.ClearPath();
+            if (nodeCount < 1) DisplayManager.ClearPath();
             UpdateRouteV2(actionNdx - 1, false);
             return true;
         }
