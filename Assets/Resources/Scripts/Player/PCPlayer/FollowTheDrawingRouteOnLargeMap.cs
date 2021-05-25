@@ -1,13 +1,15 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class FollowTheDrawingRouteOnLargeMap : MonoBehaviour
 {
     public GameObject Player;
     public GameObject TeleportManger;
+    public Text SpeedDistanceDisplay;
 
-    private float MoveSpeed = 3.5f;
+    private float MoveSpeed = 1f;
     private List<GameObject> MyEntireBrushList = new List<GameObject>();
     private List<GameObject> MyLargerBrushListFromPlayerDrawRoute = new List<GameObject>();
     private List<List<GameObject>> MyExtraBrushListFromPlayerDrawRoute = new List<List<GameObject>>();
@@ -17,6 +19,7 @@ public class FollowTheDrawingRouteOnLargeMap : MonoBehaviour
     private int CurIndex;
     private Vector3 FirstBrush;
     private Vector3 SecondBrush;
+    private float TheTotalLengthOfTheRoute;
 
     // Update is called once per frame
     void Update()
@@ -26,6 +29,10 @@ public class FollowTheDrawingRouteOnLargeMap : MonoBehaviour
             StartFollowTheRoute();
             IncreaseMoveSpeed();
         }
+        else
+        {
+            SpeedDistanceDisplay.enabled = false;
+        }
     }
 
     private void StartFollowTheRoute()
@@ -33,6 +40,7 @@ public class FollowTheDrawingRouteOnLargeMap : MonoBehaviour
         if (Input.GetKeyDown(KeyCode.Alpha3) && StartFollowingRoute == false)
         {
             GetRouteList();
+            SpeedDistanceDisplay.enabled = true;
 
             Debug.Log(BrushListLength);
 
@@ -52,6 +60,7 @@ public class FollowTheDrawingRouteOnLargeMap : MonoBehaviour
             Player.GetComponent<CharacterController>().detectCollisions = false;
             float Step = MoveSpeed * Time.deltaTime;
             Player.transform.position = Vector3.MoveTowards(Player.transform.position, SecondBrush, Step);
+            DisplayCurSpeedDistance();
 
             if (Vector3.Distance(Player.transform.position, SecondBrush) < 0.005f)
             {
@@ -72,6 +81,7 @@ public class FollowTheDrawingRouteOnLargeMap : MonoBehaviour
     private void GetRouteList()
     {
         CurIndex = 0;
+        TheTotalLengthOfTheRoute = 0;
         //MyLargerBrushListFromPlayerDrawRoute = this.GetComponent<PlayerDrawRoute>().GetMyLargerBrushList();
         //MyExtraBrushListFromPlayerDrawRoute = this.GetComponent<PlayerDrawRoute>().GetExtraListBetweenOriginBrush();
         MyEntireBrushList = this.GetComponent<PlayerDrawRoute>().GetMyLineRenenderBetweenBrush();
@@ -90,6 +100,8 @@ public class FollowTheDrawingRouteOnLargeMap : MonoBehaviour
 
             CurIndex++;
         }
+
+        TotalLengthOfTheRoute();
 
         //int i = 0;
         //foreach (GameObject B in MyLargerBrushListFromPlayerDrawRoute)
@@ -121,6 +133,37 @@ public class FollowTheDrawingRouteOnLargeMap : MonoBehaviour
 
         //    CurIndex++;
         //}
+    }
+
+    private void DisplayCurSpeedDistance()
+    {
+        float RemainLength = PartLengthOfTheRoute(CurIndex);
+        float RemainTime = RemainLength / MoveSpeed;
+        string Info = "Speed: " + MoveSpeed + "m/s" + "\r\n" + "Remaining Distance: " + RemainLength + "m" + "\r\n" + "Remaining Time: " + RemainTime + "s";
+
+        SpeedDistanceDisplay.GetComponent<Text>().text = Info;
+    }
+
+    private void TotalLengthOfTheRoute()
+    {
+        //0 1 2 3 4 5
+        float ListL = MyEntireBrushList.Count - 1;
+        for (int i = 0; i < ListL; i++)
+        {
+            TheTotalLengthOfTheRoute += Vector3.Distance(MyEntireBrushList[i].transform.position, MyEntireBrushList[i + 1].transform.position);
+        }
+    }
+
+    private float PartLengthOfTheRoute(int CurIndexPara)
+    {
+        float ListL = MyEntireBrushList.Count - 1;
+        float RemainL = 0;
+        for (; CurIndexPara < ListL; CurIndexPara++)
+        {
+            RemainL += Vector3.Distance(MyEntireBrushList[CurIndexPara].transform.position, MyEntireBrushList[CurIndexPara + 1].transform.position);
+        }
+
+        return RemainL;
     }
 
     private void MoveToNextTwoBrush()
