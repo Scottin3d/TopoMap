@@ -429,26 +429,5 @@ public class PlayerMarkerGenerator : MonoBehaviour
             }
         //}
     }
-
-    /// <summary>
-    /// Force the deletion of a game object. To be called only if a MarkerObject is not "owned" by any player
-    /// </summary>
-    /// <param name="_g"></param>
-    public static void ForceDeletion(GameObject _g)
-    {
-        LargerMapMarkerList.Remove(_g);
-        if(_g.GetComponent<ASL.ASLObject>() != null)
-        {
-            ASLObjectTrackingSystem.RemoveObjectToTrack(_g.GetComponent<ASL.ASLObject>());
-            _g.GetComponent<ASL.ASLObject>().SendAndSetClaim(() =>
-            {
-                _g.GetComponent<ASL.ASLObject>().DeleteObject();
-            });
-        } else
-        {
-            Destroy(_g.transform);
-        }
-        
-    }
 }
 

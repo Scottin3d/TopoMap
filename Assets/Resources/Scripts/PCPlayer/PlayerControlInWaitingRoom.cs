@@ -23,8 +23,12 @@ public class PlayerControlInWaitingRoom : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        ChangeWalkSpeed();
-        ChangePosition();
+        if (!ControlTesting.IsPaused)
+        {
+            ChangeWalkSpeed();
+            ChangePosition();
+        }
+        
     }
 
     //private void FixedUpdate()
