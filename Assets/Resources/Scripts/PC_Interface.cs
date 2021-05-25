@@ -19,6 +19,8 @@ public class PC_Interface : MonoBehaviour
     public GameObject LargeMap;
     public GameObject SmallMap;
 
+    //public RectTransform
+
     private static float drawTime = 1f;
     private static bool Projecting = false;
     private static bool IsPainting = false;
@@ -120,10 +122,10 @@ public class PC_Interface : MonoBehaviour
     {
         if(IsViewingTable)
         {
-            ScaleLine.CheckDisplay(_pcInterface.TableViewCamera, _pcInterface.SmallMap, _pcInterface.LargeMap);
+            ScaleLine.CheckDisplay(_pcInterface.TableViewCamera);
         } else
         {
-            ScaleLine.CheckDisplay(_pcInterface.PlayerCamera, _pcInterface.SmallMap, _pcInterface.LargeMap);
+            ScaleLine.CheckDisplay(_pcInterface.PlayerCamera);
         }
     }
 
@@ -234,6 +236,7 @@ public class PC_Interface : MonoBehaviour
     /// </summary>
     public static void ToggleLocked()
     {
+        Debug.Log("Cursor: " + Cursor.lockState);
         if (IsPaused)
         {
             Cursor.lockState = CursorLockMode.Locked;
@@ -274,6 +277,7 @@ public class PC_Interface : MonoBehaviour
 
     public static void UpdateFlashlight(GameObject playerBody, ASLObject _aslFlashlight)
     {
+        if (_aslFlashlight == null) return;
         if (!_aslFlashlight.gameObject.activeSelf)
         {
             return;

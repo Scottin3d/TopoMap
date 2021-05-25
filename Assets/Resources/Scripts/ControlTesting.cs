@@ -50,6 +50,9 @@ public class ControlTesting : MonoBehaviour
     private ASLObject aslFlash;
     private GameObject projectionMarker;
     private GameObject VRprojectionMarker;
+    private bool Paused = false;
+
+    public static bool IsPaused { get { return Instance.Paused; } }
 
     void Awake()
     {
@@ -75,67 +78,71 @@ public class ControlTesting : MonoBehaviour
             //whatever the vr controls are
         }
         else
-        {   //keyboard + mouse
-            #region NON-VR SPECIFIC
-            if (Input.GetKeyDown(KeyCode.V))    //Toggle between table camera and player camera
+        {   //keyboard + mouse            
+            if (!IsPaused)
             {
-                PC_Interface.ToggleCamerasPC();
-            }
-            if (Input.GetKeyDown(KeyCode.P))    //Toggle cursor lock
-            {
-                PC_Interface.ToggleLocked();
-            }            
-            PC_Interface.ProjectMarker(projectionMarker);
-            PC_Interface.Paint(Input.GetMouseButton(1));
-            PC_Interface.UpdateFlashlight(Player, aslFlash);
-            PC_Interface.TestScaleProjection();
+                #region NON-VR SPECIFIC
+                if (Input.GetKeyDown(KeyCode.V))    //Toggle between table camera and player camera
+                {
+                    PC_Interface.ToggleCamerasPC();
+                }
+                if (Input.GetKeyDown(KeyCode.Escape))    //Toggle cursor lock
+                {
+                    //PC_Interface.ToggleLocked();
+                }
+                PC_Interface.ProjectMarker(projectionMarker);
+                PC_Interface.Paint(Input.GetMouseButton(1));
+                PC_Interface.UpdateFlashlight(Player, aslFlash);
+                PC_Interface.TestScaleProjection();
 
-            if (Input.GetMouseButtonDown(0))    //Raycast to either place marker or select/deselect a marker
-            {
-                PC_Interface.OnClickLMB(Input.GetKey(KeyCode.LeftShift));
-            }
-            if (Input.GetMouseButton(0))        //Drag + draw cast
-            {
-                PC_Interface.OnHoldLMB();
-            }
-            if (Input.GetMouseButtonUp(0))      //Finish drag + draw
-            {
-                PC_Interface.OnReleaseLMB();
-            }
-            #endregion
+                if (Input.GetMouseButtonDown(0))    //Raycast to either place marker or select/deselect a marker
+                {
+                    PC_Interface.OnClickLMB(Input.GetKey(KeyCode.LeftShift));
+                }
+                if (Input.GetMouseButton(0))        //Drag + draw cast
+                {
+                    PC_Interface.OnHoldLMB();
+                }
+                if (Input.GetMouseButtonUp(0))      //Finish drag + draw
+                {
+                    PC_Interface.OnReleaseLMB();
+                }
+                #endregion
 
-            if (Input.GetKeyDown(KeyCode.Alpha2))   //Switch to new path
-            {
-                DisplayManager.ShowPath();
-            }
-            if (Input.GetKeyDown(KeyCode.Alpha3))   //Disable camera
-            {
-                //PathDisplay.DetatchPathCam();
-            }
-            if (Input.GetKeyDown(KeyCode.Alpha4))   //Toggle ability to see path
-            {
-                DisplayManager.DisplayToggle();
-            }
-            if (Input.GetKeyDown(KeyCode.Alpha5))   //Reset route and path
-            {
-                DisplayManager.ResetDisplay();
-            }
-            if (Input.GetKeyDown(KeyCode.Backspace))//Delete last placed marker
-            {
-                MarkerGeneratorV2.DeleteLastPlaced();
-            }
-            if (Input.GetKeyDown(KeyCode.Minus))    //Delete selected marker
-            {
-                MarkerGeneratorV2.DeleteSelected();
-            }
-            if (Input.GetKeyDown(KeyCode.T))        //Teleport between the large map and small map
-            {
+                if (Input.GetKeyDown(KeyCode.Alpha2))   //Switch to new path
+                {
+                    DisplayManager.ShowPath();
+                }
+                if (Input.GetKeyDown(KeyCode.Alpha3))   //Disable camera
+                {
+                    //PathDisplay.DetatchPathCam();
+                }
+                if (Input.GetKeyDown(KeyCode.Alpha4))   //Toggle ability to see path
+                {
+                    DisplayManager.DisplayToggle();
+                }
+                if (Input.GetKeyDown(KeyCode.Alpha5))   //Reset route and path
+                {
+                    DisplayManager.ResetDisplay();
+                }
+                if (Input.GetKeyDown(KeyCode.Backspace))//Delete last placed marker
+                {
+                    MarkerGeneratorV2.DeleteLastPlaced();
+                }
+                if (Input.GetKeyDown(KeyCode.Minus))    //Delete selected marker
+                {
+                    MarkerGeneratorV2.DeleteSelected();
+                }
+                if (Input.GetKeyDown(KeyCode.T))        //Teleport between the large map and small map
+                {
 
+                }
+                if (Input.GetKeyDown(KeyCode.Y))    //Toggle flashlight
+                {
+                    PC_Interface.ToggleFlashlight(FlashLight);
+                }
             }
-            if (Input.GetKeyDown(KeyCode.Y))    //Toggle flashlight
-            {
-                PC_Interface.ToggleFlashlight(FlashLight);
-            }
+            
         }
     }
 
@@ -144,5 +151,10 @@ public class ControlTesting : MonoBehaviour
         _Instance.FlashLight = _myGameObject;
         _Instance.aslFlash = _myGameObject.GetComponent<ASLObject>();
         _myGameObject.SetActive(false);
+    }
+
+    public static void SetPause(bool ShouldPause)
+    {
+        Instance.Paused = ShouldPause;
     }
 }

@@ -140,7 +140,8 @@ public class DisplayManager : MonoBehaviour
         graph.SetDimensions(size, size, nodeSize);
         graph.collision.fromHeight = scanHeight * _dm.scanFactor;
         graph.collision.heightMask = LayerMask.GetMask("Ground");
-        //set obstacle layer
+        graph.collision.mask = LayerMask.GetMask("RouteObstacle");
+
 
         //Set penalties
         graph.penaltyAngle = true;

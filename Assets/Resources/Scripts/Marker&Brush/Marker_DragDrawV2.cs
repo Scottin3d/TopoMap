@@ -152,7 +152,7 @@ public static class Marker_DragDrawV2
             MarkerGeneratorV2.InstantiateMarker(drawOrigin, "Marker", castPoint);
         }
 
-        drawLine.SetActive(false);
+        if (drawLine != null) drawLine.SetActive(false);
         Transform.Destroy(drawProjection);
     }
 
@@ -162,6 +162,7 @@ public static class Marker_DragDrawV2
 
     public static bool OriginLargeMap()
     {
+        if (drawOrigin == null) return false;
         return (ASLObjectTrackingSystem.GetObjects().Contains(drawOrigin.transform));
     }
 }

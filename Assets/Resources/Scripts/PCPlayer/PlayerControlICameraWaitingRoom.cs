@@ -17,7 +17,10 @@ public class PlayerControlICameraWaitingRoom : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        ChangeCameraDirection();
+        if (!ControlTesting.IsPaused)
+        {
+            ChangeCameraDirection();
+        }
     }
 
     //private void FixedUpdate()

@@ -9,8 +9,8 @@ public class ScaleLine : MonoBehaviour
     public Canvas myCanvas;
     public RectTransform RenderPanel;
 
-    private static int lookValue = 0;
-    private static GenerateMapFromHeightMap lookingAt;
+    private static Camera curDisplay;
+    private static ChunkData closestChunk;
 
     void Awake()
     {
@@ -22,76 +22,99 @@ public class ScaleLine : MonoBehaviour
     {
         Debug.Assert(myCanvas != null);
         Debug.Assert(RenderPanel != null);
+        StartCoroutine(UpdateScaleLine());
     }
 
     // Update is called once per frame
     void Update()
     {
-        if(lookValue > 0)
-        {
-            Debug.Log("Looking at: " + lookingAt.gameObject.name);
-        }
+        
     }
 
-    public static void CheckDisplay(Camera _c, GameObject _sm, GameObject _lm)
+    IEnumerator UpdateScaleLine()
     {
-        /*Plane[] cameraPlanes = GeometryUtility.CalculateFrustumPlanes(_c);
-        Bounds camBound = new Bounds(_c.transform.position, Vector3.one);
-        foreach(Plane _p in cameraPlanes)
+        if (closestChunk != null)
         {
-            camBound.Encapsulate(_p.ClosestPointOnPlane(_c.transform.position));
+            Debug.Log("Name: " + closestChunk.gameObject.name + " with parent: " + closestChunk.gameObject.transform.parent);
+            //get height of canvas
+            //get height, width of line panel
+            //get center, top/bottom of line panel
+            //get parent of chunk
+            //get heightmap size
+
+            //get scale between canvas height and panel height
+            //draw line from top to bottom edge of line panel, through center
         }
+        yield return new WaitForSeconds(0.01f);
+    }
 
-        Ray Cray = new Ray(_c.transform.position, _c.transform.forward);
-        Ray Lray = new Ray(_c.transform.position + Vector3.left, _c.transform.forward);
-        Ray Rray = new Ray(_c.transform.position + Vector3.right, _c.transform.forward);
-        RaycastHit Chit;
-        RaycastHit Lhit;
-        RaycastHit Rhit;
+    public static void CheckDisplay(Camera _c)
+    {
+        curDisplay = _c;
+    }
 
-        int castValue = 0;
-        if(Physics.Raycast(Cray, out Chit, 100f))
-        {
-            if((Chit.collider.transform.parent.tag == "SpawnSmallMap") || (Chit.collider.transform.parent.tag == "SpawnLargerMap"))
-            {
-                castValue++;
+    public static void IsChunkVisible(ChunkData mChunk)
+    {
+        if (curDisplay == null) return;
+        if (mChunk == null) return;
+        //mask to ignore markers and obstacles
+        RaycastHit hitM;
+        RaycastHit hitC;
+        int castInfo = 0;
+
+        if (closestChunk != null)
+        {            
+            if (mChunk.gameObject.Equals(closestChunk.gameObject)) {
+                //linecast between camera and closest chunk
+                //if we do not hit the chunk, our closest chunk is now null
+                if(Physics.Linecast(curDisplay.transform.position, closestChunk.gameObject.transform.position, out hitC))
+                {
+                    if (closestChunk.gameObject.Equals(hitC.collider.gameObject)) return;
+                    closestChunk = null;
+                }
             }
-        }
-        if (Physics.Raycast(Lray, out Lhit, 100f))
-        {
-            if ((Lhit.collider.transform.parent.tag == "SpawnSmallMap") || (Lhit.collider.transform.parent.tag == "SpawnLargerMap"))
+            else
             {
-                castValue += 2;
+                //linecast between camera and each chunk
+                //TODO: raycast to closest points
+                if (Physics.Linecast(curDisplay.transform.position, closestChunk.gameObject.transform.position, out hitC))
+                {
+                    if (closestChunk.gameObject.Equals(hitC.collider.gameObject))  castInfo++;
+                }
+                if (Physics.Linecast(curDisplay.transform.position, mChunk.gameObject.transform.position, out hitM))
+                {
+                    if (mChunk.gameObject.Equals(hitM.collider.gameObject)) castInfo += 2;
+                }
+
+                //if we do not hit either chunk, our closest chunk is now null
+                //if we hit 1 chunk, out closest chunk is now that chunk
+                //if we hit 2 chunks, determine the closest chunk
+                switch (castInfo)
+                {
+                    
+                    case 3: closestChunk = (hitC.distance >= hitM.distance) ? closestChunk : mChunk;
+                        break;
+                    case 2: closestChunk = mChunk;
+                        break;
+                    case 1: //Do nothing
+                        break;
+                    default: closestChunk = null;
+                        break;
+                }
+                
             }
-        }
-        if (Physics.Raycast(Rray, out Rhit, 100f))
+
+        } else
         {
-            if ((Rhit.collider.transform.parent.tag == "SpawnSmallMap") || (Rhit.collider.transform.parent.tag == "SpawnLargerMap"))
+            //linecast between camera and chunk
+            //if we do not hit the chunk, do nothing
+            //otherwise, our new closest chunk is the chunk
+            if (Physics.Linecast(curDisplay.transform.position, mChunk.gameObject.transform.position, out hitM))
             {
-                castValue += 4;
+                if (mChunk.gameObject.Equals(hitM.collider.gameObject)) closestChunk = mChunk;
             }
+            
         }
-        lookValue = castValue;
-
-        switch (castValue)
-        {
-            case 7:
-            case 6:
-            case 5:
-            case 4: 
-                lookingAt = Rhit.collider.transform.parent.gameObject.GetComponent<GenerateMapFromHeightMap>();
-                break;
-            case 3:
-            case 2:
-                lookingAt = Lhit.collider.transform.parent.gameObject.GetComponent<GenerateMapFromHeightMap>();
-                break;
-            case 1:
-                lookingAt = Chit.collider.transform.parent.gameObject.GetComponent<GenerateMapFromHeightMap>();
-                break;
-            default:
-                break;
-        }*/
-
     }
 
     public static void CheckIfInView(Renderer _r)
