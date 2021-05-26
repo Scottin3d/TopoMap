@@ -17,7 +17,7 @@ namespace Valve.VR.InteractionSystem
 	public class BodyCollider : MonoBehaviour
 	{
 
-		//public Rigidbody myBody;
+		public Rigidbody myBody;
 
 		public Transform head;
 
@@ -47,6 +47,14 @@ namespace Valve.VR.InteractionSystem
 			//newPosition.x = transform.position.x;
 			//newPosition.z = transform.position.z;
 			playerObject.position = newPosition;
+			if(myBody.velocity.y > 0)
+            {
+				myBody.velocity = Vector3.zero;
+            }
+            else
+            {
+				myBody.velocity = (0.5f * myBody.velocity);
+            }
 		}
 	}
 }

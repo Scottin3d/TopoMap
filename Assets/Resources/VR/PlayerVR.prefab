@@ -1530,6 +1530,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1731d642c0b250b48bb8cdfb153d9792, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  myBody: {fileID: 5475726}
   head: {fileID: 429506}
   playerObject: {fileID: 447954}
 --- !u!54 &5475726

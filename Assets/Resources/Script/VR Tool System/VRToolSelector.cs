@@ -26,7 +26,7 @@ public class VRToolSelector : MonoBehaviour
     //
     //
     //
-    // None <-> Road <-> Marker <-> Ruler
+    // None <-> Road <-> Marker <-> Ruler <-> Teleporter
     //
     //
     //info for the swipe hitboxes:
@@ -85,13 +85,16 @@ public class VRToolSelector : MonoBehaviour
         None,
         Road,
         Marker,
-        Ruler
+        Ruler,
+        Teleport
     }
 
+    //constants for text displays
     private const string NoneText = "None";
     private const string RoadText = "Road";
     private const string MarkerText = "Marker";
     private const string RulerText = "Ruler";
+    private const string TeleportText = "Teleport";
 
     // Start is called before the first frame update
     void Start()
@@ -348,24 +351,35 @@ public class VRToolSelector : MonoBehaviour
                 MarkerTool.deactivate();
                 RoadTool.deactivate();
                 RulerTool.deactivate();
+                TeleportTool.deactivate();
                 break;
             case toolSelectionState.Road:
                 //activate road tool
                 RoadTool.activate();
                 MarkerTool.deactivate();
                 RulerTool.deactivate();
+                TeleportTool.deactivate();
                 break;
             case toolSelectionState.Marker:
                 //activate marker tool
                 MarkerTool.activate();
                 RoadTool.deactivate();
                 RulerTool.deactivate();
+                TeleportTool.deactivate();
                 break;
             case toolSelectionState.Ruler:
                 //activate Ruler
                 RulerTool.activate();
                 MarkerTool.deactivate();
                 RoadTool.deactivate();
+                TeleportTool.deactivate();
+                break;
+            case toolSelectionState.Teleport:
+                //activate Ruler
+                TeleportTool.activate();
+                MarkerTool.deactivate();
+                RoadTool.deactivate();
+                RulerTool.deactivate();
                 break;
             default:
                 break;
@@ -397,6 +411,10 @@ public class VRToolSelector : MonoBehaviour
                     currentState = toolSelectionState.Marker;
                     changeToolBoxText(MarkerText);
                     break;
+                case toolSelectionState.Teleport:
+                    currentState = toolSelectionState.Ruler;
+                    changeToolBoxText(RulerText);
+                    break;
                 default:
                     break;
             }
@@ -418,6 +436,10 @@ public class VRToolSelector : MonoBehaviour
                     changeToolBoxText(RulerText);
                     break;
                 case toolSelectionState.Ruler:
+                    currentState = toolSelectionState.Teleport;
+                    changeToolBoxText(TeleportText);
+                    break;
+                case toolSelectionState.Teleport:
                     break;
                 default:
                     break;
