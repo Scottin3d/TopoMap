@@ -26,7 +26,7 @@ public class VRToolSelector : MonoBehaviour
     //
     //
     //
-    // None <-> Road <-> Marker <-> Flashlight
+    // None <-> Road <-> Marker <-> Ruler
     //
     //
     //info for the swipe hitboxes:
@@ -85,13 +85,13 @@ public class VRToolSelector : MonoBehaviour
         None,
         Road,
         Marker,
-        Flashlight
+        Ruler
     }
 
     private const string NoneText = "None";
     private const string RoadText = "Road";
     private const string MarkerText = "Marker";
-    private const string FlashlightText = "Flashlight";
+    private const string RulerText = "Ruler";
 
     // Start is called before the first frame update
     void Start()
@@ -234,7 +234,7 @@ public class VRToolSelector : MonoBehaviour
         CreateHotSpot(new Vector3(0.0506f, 0.0886f, -0.2423f), new Vector3(33.841f, 0.014f, -45f), Vector3.zero, NoneText, HotSpot_0, 0);
         CreateHotSpot(new Vector3(0.0506f, 0.0598f, -0.1993f), new Vector3(33.841f, 0.014f, -45f), Vector3.zero, RoadText, HotSpot_1, 1);
         CreateHotSpot(new Vector3(0.0506f, 0.0308f, -0.1562f), new Vector3(33.841f, 0.014f, -45f), Vector3.zero, MarkerText, HotSpot_2, 2);
-        CreateHotSpot(new Vector3(0.0506f, 0.0019f, -0.1129f), new Vector3(33.841f, 0.014f, -45f), Vector3.zero, FlashlightText, HotSpot_3, 3);
+        CreateHotSpot(new Vector3(0.0506f, 0.0019f, -0.1129f), new Vector3(33.841f, 0.014f, -45f), Vector3.zero, RulerText, HotSpot_3, 3);
 
         createToolBox();
     }
@@ -302,6 +302,7 @@ public class VRToolSelector : MonoBehaviour
             Debug.Log("HotSpot0 active");
             MarkerTool.deactivate();
             RoadTool.deactivate();
+            RulerTool.deactivate();
         }
         else if(theSpot == HotSpot_1)
         {
@@ -309,6 +310,7 @@ public class VRToolSelector : MonoBehaviour
             Debug.Log("HotSpot1 active");
             RoadTool.activate();
             MarkerTool.deactivate();
+            RulerTool.deactivate();
         }
         else if (theSpot == HotSpot_2)
         {
@@ -316,11 +318,13 @@ public class VRToolSelector : MonoBehaviour
             Debug.Log("HotSpot2 active");
             MarkerTool.activate();
             RoadTool.deactivate();
+            RulerTool.deactivate();
         }
         else if (theSpot == HotSpot_3)
         {
             //activate tool
             Debug.Log("HotSpot3 active");
+            RulerTool.activate();
             MarkerTool.deactivate();
             RoadTool.deactivate();
         }
@@ -343,19 +347,23 @@ public class VRToolSelector : MonoBehaviour
                 //remove current tool
                 MarkerTool.deactivate();
                 RoadTool.deactivate();
+                RulerTool.deactivate();
                 break;
             case toolSelectionState.Road:
                 //activate road tool
                 RoadTool.activate();
                 MarkerTool.deactivate();
+                RulerTool.deactivate();
                 break;
             case toolSelectionState.Marker:
                 //activate marker tool
                 MarkerTool.activate();
                 RoadTool.deactivate();
+                RulerTool.deactivate();
                 break;
-            case toolSelectionState.Flashlight:
-                //activate flashlight
+            case toolSelectionState.Ruler:
+                //activate Ruler
+                RulerTool.activate();
                 MarkerTool.deactivate();
                 RoadTool.deactivate();
                 break;
@@ -385,7 +393,7 @@ public class VRToolSelector : MonoBehaviour
                     currentState = toolSelectionState.Road;
                     changeToolBoxText(RoadText);
                     break;
-                case toolSelectionState.Flashlight:
+                case toolSelectionState.Ruler:
                     currentState = toolSelectionState.Marker;
                     changeToolBoxText(MarkerText);
                     break;
@@ -406,10 +414,10 @@ public class VRToolSelector : MonoBehaviour
                     changeToolBoxText(MarkerText);
                     break;
                 case toolSelectionState.Marker:
-                    currentState = toolSelectionState.Flashlight;
-                    changeToolBoxText(FlashlightText);
+                    currentState = toolSelectionState.Ruler;
+                    changeToolBoxText(RulerText);
                     break;
-                case toolSelectionState.Flashlight:
+                case toolSelectionState.Ruler:
                     break;
                 default:
                     break;

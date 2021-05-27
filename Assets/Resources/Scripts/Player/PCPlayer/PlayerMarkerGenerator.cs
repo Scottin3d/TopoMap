@@ -83,7 +83,11 @@ public class PlayerMarkerGenerator : MonoBehaviour
                 if(RouteDisplayV2.RemoveRouteMarker(DrawOrigin.transform, false)) RemoveMarker(DrawOrigin);
                 else
                 {
-
+                    float[] _f = new float[1];
+                    DrawOrigin.GetComponent<ASL.ASLObject>().SendAndSetClaim(() =>
+                    {
+                        DrawOrigin.GetComponent<ASL.ASLObject>().SendFloatArray(_f);
+                    });
                 }
             } 
         }
@@ -129,7 +133,7 @@ public class PlayerMarkerGenerator : MonoBehaviour
                 if (Physics.Raycast(MouseRay, out Hit))
                 {
                     //Test select of path display
-                    PathDisplay.Select(Hit.transform);
+                    //PathDisplay.Select(Hit.transform);
 
                     string DropdownOpionValue = "";
                     //If mouse hit the small map
@@ -424,27 +428,6 @@ public class PlayerMarkerGenerator : MonoBehaviour
                 });
             }
         //}
-    }
-
-    /// <summary>
-    /// Force the deletion of a game object. To be called only if a MarkerObject is not "owned" by any player
-    /// </summary>
-    /// <param name="_g"></param>
-    public static void ForceDeletion(GameObject _g)
-    {
-        LargerMapMarkerList.Remove(_g);
-        if(_g.GetComponent<ASL.ASLObject>() != null)
-        {
-            ASLObjectTrackingSystem.RemoveObjectToTrack(_g.GetComponent<ASL.ASLObject>());
-            _g.GetComponent<ASL.ASLObject>().SendAndSetClaim(() =>
-            {
-                _g.GetComponent<ASL.ASLObject>().DeleteObject();
-            });
-        } else
-        {
-            Destroy(_g.transform);
-        }
-        
     }
 }
 

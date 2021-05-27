@@ -100,6 +100,9 @@ public static class PathDisplayV2
 
     #endregion
 
+
+    #region PATH_DISPLAY
+
     /// <summary>
     /// Given a Bezier spline, displays the route on the large and small maps
     /// </summary>
@@ -320,6 +323,12 @@ public static class PathDisplayV2
         }
         //Debug.Log("Callbacks: " + outstandingCallbacks);
     }
+
+    #endregion
+
+    #region PATH_FOLLOW
+
+    #endregion
 }
 
 //From https://www.reddit.com/r/Unity3D/comments/3y2scl/how_to_call_a_coroutine_from_a/
