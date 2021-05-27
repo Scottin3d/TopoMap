@@ -141,6 +141,7 @@ public partial class GenerateMapFromHeightMap : MonoBehaviour {
             chunk.transform.position = new Vector3(mapChunk.center.x, transform.position.y, mapChunk.center.y);
             chunk.AddComponent<ChunkData>();
             chunk.GetComponent<ChunkData>().MapChunk = mapChunk;
+            chunk.AddComponent<ASLObject>();
             StartCoroutine(chunk.GetComponent<ChunkData>().AskIfVisible());
 
             mapChunksGameObjects[row, col] = chunk;

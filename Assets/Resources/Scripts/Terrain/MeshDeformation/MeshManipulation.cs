@@ -68,9 +68,9 @@ public partial class MeshManipulation : MonoBehaviour {
 
         if (selectMode && currentSelection && Input.GetMouseButtonDown(0)) {
             DeformObject sendDeformInfo = new DeformObject(currentSelection, selectedVerts, deformationStrength);
-            meshDefoController.SendAndSetClaim(() => {
-                meshDefoController.SendMessage("ASLModifyMesh", sendDeformInfo);
-            });
+            //meshDefoController.SendAndSetClaim(() => {
+                //meshDefoController.SendMessage("ASLModifyMesh", sendDeformInfo);
+            //});
 
             ModifyMesh(deformationStrength);
         }
@@ -243,6 +243,7 @@ public partial class MeshManipulation : MonoBehaviour {
 
     public void ASLModifyMesh(DeformObject deformObject) {
         MapChunk chunk = deformObject.currentSelection.GetComponent<ChunkData>().MapChunk;
+
         for (int i = 0; i < deformObject.deformVertices.Count; i++) {
             if (i == 0) {
                 Vector3[] vertices = chunk.meshData.vertices;
@@ -275,21 +276,63 @@ public partial class MeshManipulation : MonoBehaviour {
 
         // recalculate normals
     }
+
+
+    private float[] ConvertVertexIndices(List<VertToDeform> convertList) {
+        float[] array = new float[convertList.Count];
+
+        for (int i = 0; i < convertList.Count; i++) {
+            array[i] = convertList[i].index;
+        }
+        return array;
+    }
+
+    private float[] ConvertVertexVector3(List<Vector3> convertList) {
+        float[] array = new float[convertList.Count * 3];
+
+        for (int i = 0, a = 0; i < convertList.Count; i++, a += 3) {
+            array[a] = convertList[i].x;
+            array[a + 1] = convertList[i].y;
+            array[a + 2] = convertList[i].z;
+        }
+
+        return array;
+    }
     private void ModifyMesh(float delta) {
         
         MapChunk chunk = currentSelection.GetComponent<ChunkData>().MapChunk;
+
         for (int i = 0; i < selectedVerts.Count; i++) {
+            
             if (i == 0) {
-                Vector3[] vertices = chunk.meshData.vertices;
-                foreach (var v in selectedVerts[i]) {
-                    float strength = 1 - (v.distance / radius);
+                ASLObject asl = currentSelection.GetComponent<ASLObject>();
+                asl.SendAndSetClaim(() => {
 
-                    vertices[v.index].y += delta * strength;
-                }
+                    // convert affected vertex list to float[]
+                    float[] verticesToChange = ConvertVertexIndices(selectedVerts[0]);
 
-                currentSelection.GetComponent<MeshFilter>().mesh.vertices = vertices;
-                currentSelection.GetComponent<MeshFilter>().mesh.RecalculateBounds();
-                currentSelection.GetComponent<MeshFilter>().mesh.RecalculateNormals();
+                    Vector3[] vertices = chunk.meshData.vertices;
+                    List<Vector3> vertexV3s = new List<Vector3>();
+
+                    foreach (var v in selectedVerts[i]) {
+                        float strength = 1 - (v.distance / radius);
+                        vertices[v.index].y += delta * strength;
+                        vertexV3s.Add(vertices[v.index]);
+                    }
+
+                    // convert V3 to float[]
+                    float[] verticesVector3s = ConvertVertexVector3(vertexV3s);
+
+                    asl.SendAndDeformMesh(verticesToChange, verticesVector3s);
+
+
+                    // non asl manipulation
+                    //currentSelection.GetComponent<MeshFilter>().mesh.vertices = vertices;
+                    //currentSelection.GetComponent<MeshFilter>().mesh.RecalculateBounds();
+                    //currentSelection.GetComponent<MeshFilter>().mesh.RecalculateNormals();
+                
+                });
+
             } else {
                 // neighbor
                 if (chunk.chunkNeighbors[i - 1] != null) {

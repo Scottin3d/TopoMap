@@ -274,6 +274,10 @@ namespace ASL
                 }
             }
 
+            
+
+
+
             /// <summary>
             /// Sets the object specified by the id contained in _packet to the color specified in _packet. This function is triggered by a packet received from the relay server.
             /// </summary>
@@ -390,6 +394,48 @@ namespace ASL
                 {
                     myObject.transform.localScale = ConvertByteArrayIntoVector(_packet.Data, startLocation[1], dataLength[1]);
                 }
+            }
+
+            public void DeformMesh(DataReceivedEventArgs _packet) {
+                // 0 - id
+                // 1 - (int) vertex count
+                // 2 = (float[]) vertex indices
+                // 3 - (float[] => vector3[]) vertex Vector3
+
+                (int[] startLocation, int[] dataLength) = DataLengthsAndStartLocations(_packet.Data);
+                string id = ConvertByteArrayIntoString(_packet.Data, startLocation[0], dataLength[0]);
+
+                if (ASLHelper.m_ASLObjects.TryGetValue(id ?? string.Empty, out ASLObject myObject)) {
+                    // get vertex count
+                    int vertexCount = ConvertByteArrayIntoInt(_packet.Data, startLocation[1], dataLength[1]);
+                    // get vertex indicies array
+                    float[] vertexIndicesFloatArray = ConvertByteArrayIntoFloatArray(_packet.Data, startLocation[2], dataLength[2]);
+
+                    // get vertex V3 array
+                    List<Vector3> vertexV3s = new List<Vector3>();
+                    float[] vertexVector3FloatArray = ConvertByteArrayIntoFloatArray(_packet.Data, startLocation[3], dataLength[3]);
+                    for (int i = 0; i < vertexVector3FloatArray.Length; i+= 3) {
+                        Vector3 vertPosition = new Vector3(vertexVector3FloatArray[i], 
+                                                           vertexVector3FloatArray[i + 1], 
+                                                           vertexVector3FloatArray[i + 2]);
+                    }
+
+                    myObject.TryGetComponent<MeshFilter>(out MeshFilter meshFilter);
+                    if (meshFilter != null) {
+                        // vertexV3s.count should equal vertexIndicesFloatArray.length
+                        Vector3[] vertices = meshFilter.mesh.vertices;
+                        for (int i = 0; i < vertexIndicesFloatArray.Length; i++) {
+                            int index = (int)vertexIndicesFloatArray[i];
+                            vertices[index] = vertexV3s[i];
+                        }
+
+                        meshFilter.mesh.vertices = vertices;
+                        meshFilter.mesh.RecalculateNormals();
+                        meshFilter.mesh.RecalculateBounds();
+
+                    }
+                }
+
             }
 
             /// <summary>

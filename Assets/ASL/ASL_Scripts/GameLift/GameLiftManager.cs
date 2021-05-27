@@ -119,6 +119,8 @@ namespace ASL
         /// </summary>
         public enum OpCode
         {
+            /// <summary>Packet code for deforming an objects mesh</summary>
+            DeformMesh,
             /// <summary>Packet identifier that indicates a player has logged in</summary>
             PlayerLoggedIn,
             /// <summary>Packet identifier that indicates a player has joined the match</summary>
@@ -316,11 +318,13 @@ namespace ASL
         private void OnDataReceived(object sender, DataReceivedEventArgs _packet)
         {
             #if (ASL_DEBUG)
+            
             string data = System.Text.Encoding.Default.GetString(_packet.Data);
             //Debug.Log($"[server-sent] OnDataReceived - Sender: {_packet.Sender} OpCode: {_packet.OpCode} data: {data.ToString()}");
             #endif
             switch (_packet.OpCode)
             {
+                
                 case (int)OpCode.PlayerLoggedIn: //Auto packet sent by GameLift
                     break;
                 case (int)OpCode.PlayerJoinedMatch:
@@ -432,6 +436,9 @@ namespace ASL
                     break;
                 case (int)OpCode.LobbyTextMessage:
                     QForMainThread(m_LobbyManager.UpdateChatLog, _packet);
+                    break;
+                case (int)OpCode.DeformMesh:
+                    QForMainThread(m_GameController.DeformMesh, _packet);
                     break;
                 default:
                     Debug.LogError("Unassigned OpCode received: " + _packet.OpCode);

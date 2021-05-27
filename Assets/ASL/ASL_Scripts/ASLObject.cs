@@ -4,6 +4,7 @@ using Google.XR.ARCoreExtensions;
 #endif
 using System.Text;
 using UnityEngine;
+using System.Collections.Generic;
 
 namespace ASL
 {
@@ -15,6 +16,7 @@ namespace ASL
     /// </summary>
     public partial class ASLObject : MonoBehaviour
     {
+        
         /// <summary>Flag indicating whether or not this player currently owns this object or not</summary>
         public bool m_Mine { get; private set; }
 
@@ -288,6 +290,21 @@ namespace ASL
                     RTMessage message = GameLiftManager.GetInstance().CreateRTMessage(GameLiftManager.OpCode.SetLocalPosition, payload);
                     GameLiftManager.GetInstance().m_Client.SendMessage(message);
                 }
+            }
+        }
+
+        public void SendAndDeformMesh(float[] vertices, float[] values) {
+            if (m_Mine) {
+                byte[] id = Encoding.ASCII.GetBytes(m_Id);
+                // convert list to byte array
+                byte[] vertexCount = GameLiftManager.GetInstance().ConvertIntToByteArray(vertices.Length);
+                byte[] verticeList = GameLiftManager.GetInstance().ConvertFloatArrayToByteArray(vertices);
+                byte[] VertexValues = GameLiftManager.GetInstance().ConvertFloatArrayToByteArray(values); ;
+                // payload id, affectedvertices
+                byte[] payload = GameLiftManager.GetInstance().CombineByteArrays(id, vertexCount, verticeList, VertexValues);
+
+                RTMessage message = GameLiftManager.GetInstance().CreateRTMessage(GameLiftManager.OpCode.DeformMesh, payload);
+                GameLiftManager.GetInstance().m_Client.SendMessage(message);
             }
         }
 
