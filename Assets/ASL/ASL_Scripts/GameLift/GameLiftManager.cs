@@ -119,8 +119,7 @@ namespace ASL
         /// </summary>
         public enum OpCode
         {
-            /// <summary>Packet code for deforming an objects mesh</summary>
-            DeformMesh,
+            
             /// <summary>Packet identifier that indicates a player has logged in</summary>
             PlayerLoggedIn,
             /// <summary>Packet identifier that indicates a player has joined the match</summary>
@@ -199,7 +198,9 @@ namespace ASL
             /// <summary>Used to help keep the Android socket connection alive</summary>
             AndroidKeepConnectionAlive,
             /// <summary>Packet code for sending object tags</summary>
-            TagUpdate
+            TagUpdate,
+            /// <summary>Packet code for deforming an objects mesh</summary>
+            DeformMesh
 
         }
 

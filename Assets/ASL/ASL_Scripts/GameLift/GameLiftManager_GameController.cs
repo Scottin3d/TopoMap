@@ -412,12 +412,13 @@ namespace ASL
                     float[] vertexIndicesFloatArray = ConvertByteArrayIntoFloatArray(_packet.Data, startLocation[2], dataLength[2]);
 
                     // get vertex V3 array
-                    List<Vector3> vertexV3s = new List<Vector3>();
+                    List<Vector3> vertexV3s = new List<Vector3>(vertexCount);
                     float[] vertexVector3FloatArray = ConvertByteArrayIntoFloatArray(_packet.Data, startLocation[3], dataLength[3]);
                     for (int i = 0; i < vertexVector3FloatArray.Length; i+= 3) {
                         Vector3 vertPosition = new Vector3(vertexVector3FloatArray[i], 
                                                            vertexVector3FloatArray[i + 1], 
                                                            vertexVector3FloatArray[i + 2]);
+                        vertexV3s.Add(vertPosition);
                     }
 
                     myObject.TryGetComponent<MeshFilter>(out MeshFilter meshFilter);

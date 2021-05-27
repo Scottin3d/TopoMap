@@ -9,6 +9,8 @@ using ASL;
 /// Each mesh has a chunk resolution of 64x64 triangles.
 /// </summary>
 public partial class GenerateMapFromHeightMap : MonoBehaviour {
+    TerrainASLObjectsGeneration taslog;
+
     private float worldMaxHeight = float.MinValue;
     private float worldMinHeight = float.MaxValue;
 
@@ -26,6 +28,7 @@ public partial class GenerateMapFromHeightMap : MonoBehaviour {
     public float ChunkSize { get => chunkSize; set => chunkSize = value; }
     public GameObject[,] mapChunksGameObjects;              // map chunk container
     public GameObject[,] ASLMapChunks;
+    List<GameObject> ASLTerrainObjects;
     public MapChunk[,] mapChunks;                         // map chunk container
 
 
@@ -75,6 +78,8 @@ public partial class GenerateMapFromHeightMap : MonoBehaviour {
         }
 
         noiseProperties = new NoiseProperties(noiseInfluence, noiseScale, octaves, persistence, lacunarity, seed);
+
+        taslog = new TerrainASLObjectsGeneration();
     }
 
     /// <summary>
@@ -84,7 +89,9 @@ public partial class GenerateMapFromHeightMap : MonoBehaviour {
         if (demoMode) {
             GenDemo();
         } else {
-            GenerateMap();
+            if (GameLiftManager.GetInstance().m_PeerId == 1) { 
+                StartCoroutine(GenerateMap());
+            }
         }
     }
 
@@ -95,13 +102,23 @@ public partial class GenerateMapFromHeightMap : MonoBehaviour {
     /// 3. smooth the edges of the terrain chunks
     /// 4. generate the chunk meshes
     /// </summary>
-    public void GenerateMap() {
+    IEnumerator GenerateMap() {
+        // spawn asl objects
+        taslog.GenerateTerrainAslObjects(numberOfChunks * numberOfChunks);
+        
+        while (!taslog.IsComplete) {
+            yield return new WaitForSeconds(0.1f);
+        }
+
+        ASLTerrainObjects = taslog.GetASLObjects();
+
         worldMaxHeight = float.MinValue;
         worldMinHeight = float.MaxValue;
 
         mapChunks = new MapChunk[numberOfChunks, numberOfChunks];   // set map chunk container
         mapChunksGameObjects = new GameObject[numberOfChunks, numberOfChunks];
         ASLMapChunks = new GameObject[numberOfChunks, numberOfChunks];
+
         int mapWidth = heightmap.width;                             // full heightmap resolution, min 32
         int mapHeight = heightmap.height;                           // full heightmap resolution, min 32
 
@@ -119,7 +136,7 @@ public partial class GenerateMapFromHeightMap : MonoBehaviour {
             // find the center of the chunk
             float halfChunk = chunkSize / 2f;
             Vector2 _chunkCenter = new Vector2(transform.position.x + mapLowerLeftX + (row * chunkSize) + halfChunk,
-                                             transform.position.z + mapLowerLeftZ + (col * chunkSize) + halfChunk);
+                                                transform.position.z + mapLowerLeftZ + (col * chunkSize) + halfChunk);
 
             // generate heightmap chunk
             Texture2D _heightmap = TextureGenerator.GetPixelMap(heightmap, (mapWidth / numberOfChunks) * row,
@@ -132,22 +149,29 @@ public partial class GenerateMapFromHeightMap : MonoBehaviour {
             MapChunk mapChunk = new MapChunk(_heightmap, _chunkCenter, _mapData);
             mapChunks[row, col] = mapChunk;
 
-            GameObject chunk = new GameObject();
-            chunk.transform.parent = transform;
-            chunk.transform.localScale = Vector3.one;
-            chunk.tag = "Chunk";
-            chunk.name = "Chunk" + row + ", " + col;
-            chunk.layer = LayerMask.NameToLayer("Ground");
-            chunk.transform.position = new Vector3(mapChunk.center.x, transform.position.y, mapChunk.center.y);
-            chunk.AddComponent<ChunkData>();
-            chunk.GetComponent<ChunkData>().MapChunk = mapChunk;
-            chunk.AddComponent<ASLObject>();
-            StartCoroutine(chunk.GetComponent<ChunkData>().AskIfVisible());
+            //GameObject chunk = taslog.GetASLObject(c);
+            GameObject chunk = ASLTerrainObjects[c];
+            chunk.GetComponent<ASLObject>().SendAndSetClaim(() => {
+                chunk.transform.parent = transform;
 
-            mapChunksGameObjects[row, col] = chunk;
-            //ASLHelper.InstantiateASLObject(PrimitiveType.Plane, chunk.transform.position, Quaternion.identity, null, null, GenerateASLChunk);
+                chunk.transform.localScale = Vector3.one;
+                chunk.GetComponent<ASLObject>().SendAndSetLocalScale(chunk.transform.localScale);
 
-            row++;
+                chunk.tag = "Chunk";
+                chunk.name = "Chunk" + row + ", " + col;
+                chunk.layer = LayerMask.NameToLayer("Ground");
+                chunk.transform.position = new Vector3(mapChunk.center.x, transform.position.y, mapChunk.center.y);
+                chunk.GetComponent<ASLObject>().SendAndSetWorldPosition(chunk.transform.position);
+
+                chunk.GetComponent<ChunkData>().MapChunk = mapChunk;
+
+                //ASLHelper.InstantiateASLObject(PrimitiveType.Plane, chunk.transform.position, Quaternion.identity, null, null, GenerateASLChunk);
+
+             });
+
+             StartCoroutine(chunk.GetComponent<ChunkData>().AskIfVisible());
+             mapChunksGameObjects[row, col] = chunk;
+             row++;
         }
 
         row = 0;
@@ -247,9 +271,9 @@ public partial class GenerateMapFromHeightMap : MonoBehaviour {
             Mesh mesh = mapChunks[row, col].meshData.CreateMesh();
         
             // create game object of chunk
-            mapChunksGameObjects[row, col].AddComponent<MeshFilter>().sharedMesh = mesh;
-            mapChunksGameObjects[row, col].AddComponent<MeshCollider>().sharedMesh = mesh;
-            mapChunksGameObjects[row, col].AddComponent<MeshRenderer>().sharedMaterial = material;
+            mapChunksGameObjects[row, col].GetComponent<MeshFilter>().sharedMesh = mesh;
+            mapChunksGameObjects[row, col].GetComponent<MeshCollider>().sharedMesh = mesh;
+            mapChunksGameObjects[row, col].GetComponent<MeshRenderer>().sharedMaterial = material;
             mapChunksGameObjects[row, col].GetComponent<MeshRenderer>().sharedMaterial.mainTexture = mapChunks[row, col].heightmap;
             
 

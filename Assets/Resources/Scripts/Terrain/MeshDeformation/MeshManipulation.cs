@@ -158,6 +158,7 @@ public partial class MeshManipulation : MonoBehaviour {
     private void GenerateVertexPool(int count) {
         for (int i = 0; i < count; i++) {
             GameObject v = CreateVertex(Vector3.zero);
+            v.transform.parent = transform;
             v.transform.localScale *= 0.5f;
             vertexPool.Add(v);
             v.SetActive(false);
