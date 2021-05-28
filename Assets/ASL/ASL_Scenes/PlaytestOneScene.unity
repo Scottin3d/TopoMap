@@ -6763,8 +6763,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   m_RoomName: PlayDemo
   m_StartingScene: PlaytestOneScene
-<<<<<<< HEAD
-=======
 --- !u!1 &2116268402
 GameObject:
   m_ObjectHideFlags: 0
@@ -6953,7 +6951,6 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2132809073}
   m_CullTransparentMesh: 1
->>>>>>> ce2b3316cd57cb3c790f4bf0e4cb6d351a83d13d
 --- !u!1 &2138677391
 GameObject:
   m_ObjectHideFlags: 0
