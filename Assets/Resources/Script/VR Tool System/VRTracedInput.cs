@@ -104,6 +104,7 @@ public class VRTracedInput : MonoBehaviour
             {
                 LocalProjectMarker.transform.position = Hit.point;
                 //LocalProjectMarker.SetActive(false);
+                initialGrip = false;
             }
         }
     }
@@ -111,6 +112,7 @@ public class VRTracedInput : MonoBehaviour
     //function that projects the marker when the grip is released
     private void ProjectMarkerLast()
     {
+        Debug.Log("in project marker last");
         Vector3 startPosition = frontObject.transform.position;
         Vector3 rayDirection = (frontObject.transform.position - backObject.transform.position).normalized;
         Ray MouseRay = new Ray(startPosition, rayDirection);

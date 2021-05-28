@@ -306,6 +306,7 @@ public class VRToolSelector : MonoBehaviour
             MarkerTool.deactivate();
             RoadTool.deactivate();
             RulerTool.deactivate();
+            TeleportTool.deactivate();
         }
         else if(theSpot == HotSpot_1)
         {
@@ -314,6 +315,7 @@ public class VRToolSelector : MonoBehaviour
             RoadTool.activate();
             MarkerTool.deactivate();
             RulerTool.deactivate();
+            TeleportTool.deactivate();
         }
         else if (theSpot == HotSpot_2)
         {
@@ -322,6 +324,7 @@ public class VRToolSelector : MonoBehaviour
             MarkerTool.activate();
             RoadTool.deactivate();
             RulerTool.deactivate();
+            TeleportTool.deactivate();
         }
         else if (theSpot == HotSpot_3)
         {
@@ -330,6 +333,7 @@ public class VRToolSelector : MonoBehaviour
             RulerTool.activate();
             MarkerTool.deactivate();
             RoadTool.deactivate();
+            TeleportTool.deactivate();
         }
         else
         {

@@ -32,6 +32,7 @@ public class TeleportTool : MonoBehaviour
     //this function will teleport the player to the position they are pointing at, and is called on grip release in the VRTracedInput class
     public static void teleportPlayer(Vector3 position)
     {
+        Debug.Log("in teleport player");
         if (!isActive)
         {
             return;
