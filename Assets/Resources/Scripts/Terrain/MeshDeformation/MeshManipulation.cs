@@ -1,10 +1,10 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using ASL;
 public partial class MeshManipulation : MonoBehaviour {
     public float UPDATES_PER_SECOND = 2f;
-    public GenerateMapFromHeightMap mapGen = null;
 
     public GameObject currentSelection = null;
     private bool selectMode = false;
@@ -21,12 +21,16 @@ public partial class MeshManipulation : MonoBehaviour {
     private int currentPoolIndex = 0;
     private List<List<VertToDeform>> selectedVerts = new List<List<VertToDeform>>();
 
-    ASLObject meshDefoController;
-
+    ASLObject terrainBrain;
+    public GenerateMapFromHeightMap mapGen = null;
+    static bool isUpdating = false;
+    static int chunkID;
+    static float[] detlas;
+    static int[] vertices;
     // mouse
     GameObject mouseObject;
     void Start() {
-        meshDefoController = GetComponent<ASLObject>();
+        terrainBrain = GetComponent<ASLObject>();
         radius = mapGen.mapSize / 20f;
         radiusMin = mapGen.ChunkSize / 10f;
         ChangeRadius?.Invoke(radius.ToString());
@@ -45,6 +49,8 @@ public partial class MeshManipulation : MonoBehaviour {
         for (int i = 0; i < enumSize; i++) { 
             selectedVerts.Add(new List<VertToDeform>());
         }
+
+        terrainBrain._LocallySetFloatCallback(DefomationCallBack);
 
         GenerateVertexPool(20000);
         StartCoroutine(MeshManipulate());
@@ -88,9 +94,53 @@ public partial class MeshManipulation : MonoBehaviour {
         if (Input.GetKeyDown(KeyCode.RightBracket)) {
             ChangeDeformationStrength(0.1f);
         }
+
+        //
+        if (isUpdating) {
+            GameObject chunk = mapGen.GetChunkGameObject(chunkID);
+            Vector3[] chunkVertices = chunk.GetComponent<MeshFilter>().mesh.vertices;
+            int i = 0;
+            foreach (var v in vertices) {
+                Vector3 vert = chunkVertices[v];
+                vert.y = detlas[i];
+                i++;
+                chunkVertices[v] = vert;
+            }
+
+            chunk.GetComponent<MeshFilter>().mesh.RecalculateBounds();
+            chunk.GetComponent<MeshFilter>().mesh.RecalculateNormals();
+            isUpdating = !isUpdating;
+        }
     }
 
-    
+    public static void DefomationCallBack(string _id, float[] _myFloats) {
+        if (ASL.ASLHelper.m_ASLObjects.TryGetValue(_id, out ASL.ASLObject myObject)) {
+            Debug.Log("The name of the object that sent these floats is: " + myObject.name);
+        }
+        // [0] id
+        int chunkId = Convert.ToInt32(_myFloats[0]);
+        // [1] number of affected vertices
+        int numberOfAffectedVertices = Convert.ToInt32(_myFloats[1]);
+        int[] affectedVertices = new int[numberOfAffectedVertices];
+
+        // [2] affected vertex indices
+        int v = 2;
+        for (int i = 0; i < numberOfAffectedVertices; i++, v++) {
+            affectedVertices[i] = Convert.ToInt32(_myFloats[v]);
+        }
+
+        // [3] affected vertex deltas
+        float[] affectedVertexDelta = new float[numberOfAffectedVertices];
+        for (int i = 0; i < numberOfAffectedVertices; i++, v++) {
+            affectedVertexDelta[i] = _myFloats[v];
+        }
+
+        // need a static copy of the meshes?
+        chunkID = chunkId;
+        detlas = affectedVertexDelta;
+        vertices = affectedVertices;
+        isUpdating = true;
+    }
 
     // Update is called once per frame
     IEnumerator MeshManipulate() {
@@ -305,26 +355,39 @@ public partial class MeshManipulation : MonoBehaviour {
 
         for (int i = 0; i < selectedVerts.Count; i++) {
             
+            // selection
             if (i == 0) {
                 ASLObject asl = currentSelection.GetComponent<ASLObject>();
-                asl.SendAndSetClaim(() => {
+                terrainBrain.SendAndSetClaim(() => {
+                    // chunk id
+                    float[] id = new float[] { currentSelection.GetComponent<ChunkData>().MapChunk.chunkID };
 
                     // convert affected vertex list to float[]
                     float[] verticesToChange = ConvertVertexIndices(selectedVerts[0]);
 
+                    // number of verts to change
+                    float[] numberOfAffectedVertices = new float[] { verticesToChange.Length };
+
                     Vector3[] vertices = chunk.meshData.vertices;
                     List<Vector3> vertexV3s = new List<Vector3>();
+                    float[] affectedVertexDelta = new float[verticesToChange.Length];
 
+                    int i = 0;
                     foreach (var v in selectedVerts[i]) {
                         float strength = 1 - (v.distance / radius);
                         vertices[v.index].y += delta * strength;
                         vertexV3s.Add(vertices[v.index]);
+                        affectedVertexDelta[i] = vertices[v.index].y;
+                        i++;
                     }
 
                     // convert V3 to float[]
                     float[] verticesVector3s = ConvertVertexVector3(vertexV3s);
 
-                    asl.SendAndDeformMesh(verticesToChange, verticesVector3s);
+
+                    float[] payload = CombineFloatArrays(id, numberOfAffectedVertices, verticesToChange, affectedVertexDelta);
+                    terrainBrain.SendFloatArray(payload);
+                    //asl.SendAndDeformMesh(verticesToChange, verticesVector3s);
 
 
                     // non asl manipulation
@@ -353,7 +416,36 @@ public partial class MeshManipulation : MonoBehaviour {
         // recalculate normals
 
     }
+    public float[] CombineFloatArrays(float[] array1, float[] array2, float[] array3, float[] array4) {
+        int a1 = array1.Length;
+        int a2 = array2.Length;
+        int a3 = array3.Length;
+        int a4 = array4.Length;
+
+        float[] array = new float[a1 + a2 + a3 + a4];
+
+        int a = 0;
+        for (int i = 0; i < a1; i++, a++) {
+            array[a] = array1[i];
+        }
+
+        for (int i = 0; i < a2; i++, a++) {
+            array[a] = array2[i];
+        }
+
+        for (int i = 0; i < a3; i++, a++) {
+            array[a] = array3[i];
+        }
+
+        for (int i = 0; i < a4; i++, a++) {
+            array[a] = array4[i];
+        }
+
+        return array;
+    }
 }
+
+
 
 public struct DeformObject {
     public GameObject currentSelection;

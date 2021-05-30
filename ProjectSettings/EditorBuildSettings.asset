@@ -11,7 +11,7 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/ASL/ASL_Scenes/ASL_SceneLoader.unity
     guid: 6026d53651e499849a1420efc6833ec7
-  - enabled: 0
+  - enabled: 1
     path: Assets/ASL/ASL_Scenes/DeformationBrain.unity
     guid: 18a82ffe17bd2924a9002584d44182c5
   - enabled: 1

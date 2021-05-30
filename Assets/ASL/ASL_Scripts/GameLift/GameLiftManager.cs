@@ -200,7 +200,19 @@ namespace ASL
             /// <summary>Packet code for sending object tags</summary>
             TagUpdate,
             /// <summary>Packet code for deforming an objects mesh</summary>
-            DeformMesh
+            DeformMesh,
+            /// <summary>Packet code for clearing a mesh</summary>
+            ClearMesh,
+            /// <summary>Packet code for setting a mesh</summary>
+            SetMesh,
+            /// <summary>Packet code for sending mesh verticies</summary>
+            SendVertices,
+            /// <summary>Packet code for sending mesh normals</summary>
+            SendNormals,
+            /// <summary>Packet code for sending mesh triangles</summary>
+            SendTriangles,
+            /// <summary>Packet code for sending mesh uvs</summary>
+            SendUVs
 
         }
 
@@ -422,7 +434,7 @@ namespace ASL
                     break;
                 case (int)OpCode.SendTexture2D:
                     QForMainThread(m_GameController.RecieveTexture2D, _packet);
-                        break;
+                    break;
                 case (int)OpCode.ResolveAnchorId:
                     QForMainThread(m_GameController.ResolveAnchorId, _packet);
                     break;
@@ -440,6 +452,24 @@ namespace ASL
                     break;
                 case (int)OpCode.DeformMesh:
                     QForMainThread(m_GameController.DeformMesh, _packet);
+                    break;
+                case (int)OpCode.ClearMesh:
+                    QForMainThread(m_GameController.ClearMesh, _packet);
+                    break;
+                case (int)OpCode.SetMesh:
+                    QForMainThread(m_GameController.SetMesh, _packet);
+                    break;
+                case (int)OpCode.SendVertices:
+                    QForMainThread(m_GameController.SendVertices, _packet);
+                    break;
+                case (int)OpCode.SendNormals:
+                    QForMainThread(m_GameController.SendNormals, _packet);
+                    break;
+                case (int)OpCode.SendTriangles:
+                    QForMainThread(m_GameController.SendTriangles, _packet);
+                    break;
+                case (int)OpCode.SendUVs:
+                    QForMainThread(m_GameController.SendUVs, _packet);
                     break;
                 default:
                     Debug.LogError("Unassigned OpCode received: " + _packet.OpCode);

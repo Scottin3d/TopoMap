@@ -11,12 +11,10 @@ public class ASLRecieveCommand : MonoBehaviour
         t = transform;
     }
 
-    public static void MoveCubeExecute(ASLObject asl, float f) {
-        asl.SendAndSetClaim(() => {
+    public static void MoveCubeExecute(float f) {
             Vector3 pos = t.position;
             pos.y += f;
             t.position = pos;
-        });
         
     }
 
@@ -25,14 +23,6 @@ public class ASLRecieveCommand : MonoBehaviour
             Debug.Log("The name of the object that sent these floats is: " + myObject.name);
         }
 
-        a = t.GetComponent<ASLObject>();
-
-        switch (_myFloats[0]) {
-            case 0:
-                MoveCubeExecute(a, _myFloats[1]);
-                break;
-            case 1:
-                break;
-        }
+        MoveCubeExecute(_myFloats[0]);
     }
 }
