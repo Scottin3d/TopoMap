@@ -128,5 +128,7 @@ public class ToolBox : MonoBehaviour
 
         primaryText.transform.localPosition = Vector3.zero;
         transitionText.transform.localPosition = Vector3.zero;
+
+        inAnimation = false;
     }
 }
