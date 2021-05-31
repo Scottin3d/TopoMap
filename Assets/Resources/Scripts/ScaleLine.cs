@@ -6,8 +6,8 @@ using UnityEngine.UI;
 public class ScaleLine : MonoBehaviour
 {
     public static ScaleLine _sl;
-    public RectTransform myCanvas, RenderPanel;
-    public LineRenderer centerLine, baseLine, branchM, branchF;
+    public Canvas myCanvas;
+    public RectTransform RenderPanel, RenderBase, RenderM, RenderF;
 
     private static Camera curDisplay;
     private static ChunkData closestChunk;
@@ -22,47 +22,30 @@ public class ScaleLine : MonoBehaviour
     {
         Debug.Assert(myCanvas != null);
         Debug.Assert(RenderPanel != null);
-        Debug.Assert(centerLine != null);
-        Debug.Assert(baseLine != null);
-        Debug.Assert(branchM != null);
-        Debug.Assert(branchF != null);
+        Debug.Assert(RenderBase != null);
+        Debug.Assert(RenderM != null);
+        Debug.Assert(RenderF != null);
         StartCoroutine(UpdateScaleLine());
-    }
-
-    // Update is called once per frame
-    void Update()
-    {
-        
     }
 
     IEnumerator UpdateScaleLine()
     {
-        Debug.Log(myCanvas.rect.height / 3f);
-        Debug.Log(myCanvas.rect.height *.3f);
         while (true)
         {
             //get height of canvas
-            float canvasHeight = myCanvas.rect.height;
+            float canvasHeight = myCanvas.pixelRect.height;
             //get height, width of line panel
-            float panelHeight = canvasHeight / 3f;
-            float panelWidth = 50f;
-            float panelX = 30f;
-            float panelY = canvasHeight * 0.3f;
-            //get center, top/bottom of line panel
-            RenderPanel.rect.Set(panelX, panelY, panelWidth, panelHeight);
+            float panelHeight = canvasHeight * 0.3f; float panelWidth = 10f;
+            float scaleWidth = 20f; float scaleHeight = 10f;
+            float baseWidth = scaleWidth * 2f + panelWidth;
 
-            //get positions, convert
-            //Vector2 topPos = new Vector2(panelX + 0.5f * panelWidth, panelY);
-            //Vector2 botPos = new Vector2(panelX + 0.5f * panelWidth, panelY + panelHeight);
-            if(curDisplay != null)
-            {
-                Vector3 topPos = curDisplay.ScreenToWorldPoint(new Vector2(panelX + 0.5f * panelWidth, panelY));
-                Vector3 botPos = curDisplay.ScreenToWorldPoint(new Vector2(panelX + 0.5f * panelWidth, panelY + panelHeight));
-                Vector3[] cPosArr = { topPos, botPos };
-                Debug.Log("" + cPosArr[0] + "," + cPosArr[1]);
-                centerLine.SetPositions(cPosArr);
-            }
-            
+            float panelX = 50f; float panelY = canvasHeight * 0.3f;
+            //get center, top/bottom of line panel
+            RenderPanel.anchoredPosition = new Vector2(panelX, panelY);
+            RenderPanel.sizeDelta = new Vector2(panelWidth, panelHeight);
+
+            RenderBase.anchoredPosition = new Vector2(panelX, panelY - 0.5f * panelHeight);
+            RenderBase.sizeDelta = new Vector2(baseWidth, scaleHeight);
 
 
             if (closestChunk != null)
@@ -78,7 +61,13 @@ public class ScaleLine : MonoBehaviour
                 }
 
                 //get scale between canvas height and panel height
-                //draw line from top to bottom edge of line panel, through center
+            } else
+            {
+                RenderM.anchoredPosition = new Vector2(panelX - 0.5f * (scaleWidth + panelWidth), panelY - 0.5f * panelHeight);
+                RenderM.sizeDelta = new Vector2(scaleWidth, scaleHeight);
+
+                RenderF.anchoredPosition = new Vector2(panelX + 0.5f * (scaleWidth + panelWidth), panelY - 0.5f * panelHeight);
+                RenderF.sizeDelta = new Vector2(scaleWidth, scaleHeight);
             }
             yield return new WaitForSeconds(0.01f);
         }        
