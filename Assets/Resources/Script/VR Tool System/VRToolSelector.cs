@@ -404,20 +404,28 @@ public class VRToolSelector : MonoBehaviour
                 case toolSelectionState.None:
                     break;
                 case toolSelectionState.Road:
-                    currentState = toolSelectionState.None;
-                    changeToolBoxText(NoneText);
+                    if (ToolBox.GetComponent<ToolBox>().transitionLeft(NoneText))
+                    {
+                        currentState = toolSelectionState.None;
+                    }
                     break;
                 case toolSelectionState.Marker:
-                    currentState = toolSelectionState.Road;
-                    changeToolBoxText(RoadText);
+                    if (ToolBox.GetComponent<ToolBox>().transitionLeft(RoadText))
+                    {
+                        currentState = toolSelectionState.Road;
+                    }
                     break;
                 case toolSelectionState.Ruler:
-                    currentState = toolSelectionState.Marker;
-                    changeToolBoxText(MarkerText);
+                    if (ToolBox.GetComponent<ToolBox>().transitionLeft(MarkerText))
+                    {
+                        currentState = toolSelectionState.Marker;
+                    }
                     break;
                 case toolSelectionState.Teleport:
-                    currentState = toolSelectionState.Ruler;
-                    changeToolBoxText(RulerText);
+                    if (ToolBox.GetComponent<ToolBox>().transitionLeft(RulerText))
+                    {
+                        currentState = toolSelectionState.Ruler;
+                    }
                     break;
                 default:
                     break;
@@ -425,23 +433,31 @@ public class VRToolSelector : MonoBehaviour
         }
         else if(swipeObject == RightPad) //swipe right
         {
-            switch (currentState)
+            switch (currentState) //currently using transition left as it is not yet based on direction
             {
                 case toolSelectionState.None:
-                    currentState = toolSelectionState.Road;
-                    changeToolBoxText(RoadText);
+                    if (ToolBox.GetComponent<ToolBox>().transitionLeft(RoadText))
+                    {
+                        currentState = toolSelectionState.Road;
+                    }
                     break;
                 case toolSelectionState.Road:
-                    currentState = toolSelectionState.Marker;
-                    changeToolBoxText(MarkerText);
+                    if (ToolBox.GetComponent<ToolBox>().transitionLeft(MarkerText))
+                    {
+                        currentState = toolSelectionState.Marker;
+                    }
                     break;
                 case toolSelectionState.Marker:
-                    currentState = toolSelectionState.Ruler;
-                    changeToolBoxText(RulerText);
+                    if (ToolBox.GetComponent<ToolBox>().transitionLeft(RulerText))
+                    {
+                        currentState = toolSelectionState.Ruler;
+                    }
                     break;
                 case toolSelectionState.Ruler:
-                    currentState = toolSelectionState.Teleport;
-                    changeToolBoxText(TeleportText);
+                    if (ToolBox.GetComponent<ToolBox>().transitionLeft(TeleportText))
+                    {
+                        currentState = toolSelectionState.Teleport;
+                    }
                     break;
                 case toolSelectionState.Teleport:
                     break;
