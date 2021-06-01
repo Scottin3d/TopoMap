@@ -4,6 +4,12 @@ using System.Collections.Generic;
 using UnityEngine;
 using ASL;
 
+/// <summary>
+/// ASLDeformationBrain is the core logic for handling the manipulation of chunk meshes using the ASL library.  
+/// Deformation is broken down into payloads sent over ASL and then reconstructed.  Beause ASL function callbacks
+/// are handled asynchronously, when a payload is recieved, it is reconstructed into an instruction object and added
+/// to a queue that will then continuously try to execute in the Update() function.
+/// </summary>
 public class ASLDeformationBrain : MonoBehaviour {
     public static ASLDeformationBrain current;
     public GenerateMapFromHeightMap mapGen = null;
@@ -12,9 +18,7 @@ public class ASLDeformationBrain : MonoBehaviour {
     public List<GameObject> localMapChunks = new List<GameObject>();
     public static Queue<Instruction> instructions = new Queue<Instruction>();
 
-
     bool IsInit = false;
-    // bool IsChange = false;
 
     /// <summary>
     /// Set a static reference to the script for access outside of scope.
@@ -147,13 +151,15 @@ public class ASLDeformationBrain : MonoBehaviour {
         mesh.vertices = vertices;
         mesh.RecalculateBounds();
         mesh.RecalculateNormals();
+
+        chunk.GetComponent<MeshCollider>().sharedMesh = mesh;
     }
 
     /// <summary>
-    /// 
+    /// Splits a float[] payload into a list of instruction steps.
     /// </summary>
-    /// <param name="_payload"></param>
-    /// <returns></returns>
+    /// <param name="_payload">The float[] to be split</param>
+    /// <returns>The instruction steps in list form</returns>
     public static List<float[]> SplitPayload(float[] _payload) {
         List<float[]> splitPayload = new List<float[]>();
         splitPayload.Add(new float[1] { _payload[0] });
@@ -219,22 +225,6 @@ public class ASLDeformationBrain : MonoBehaviour {
         }
         return array;
     }
-
-    /*
-    // eventually take in
-    private void DeformMesh(RaycastHit hit, float f) {
-        hit.collider.TryGetComponent<ChunkData>(out ChunkData chunk);
-        if (chunk != null) {
-            int chunkID = chunk.MapChunk.chunkID;
-
-            float[] payload = new float[] { Convert.ToSingle(chunkID), f };
-
-            brain.SendAndSetClaim(() => {
-                brain.SendFloatArray(payload);
-            });
-        }
-    }
-    */
 
     /// <summary>
     /// The SendFloatArray Callback function associated with ASL and the deformation brain.
