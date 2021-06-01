@@ -8,6 +8,7 @@ public class ScaleLine : MonoBehaviour
     public static ScaleLine _sl;
     public Canvas myCanvas;
     public RectTransform RenderPanel, RenderBase, RenderM, RenderF;
+    public Text LabelM, LabelF;
 
     private static Camera curDisplay;
     private static ChunkData closestChunk;
@@ -35,8 +36,8 @@ public class ScaleLine : MonoBehaviour
             //get height of canvas
             float canvasHeight = myCanvas.pixelRect.height;
             //get height, width of line panel
-            float panelHeight = canvasHeight * 0.3f; float panelWidth = 10f;
-            float scaleWidth = 20f; float scaleHeight = 10f;
+            float panelHeight = canvasHeight * 0.3f; float panelWidth = 2f;
+            float scaleWidth = 24f; float scaleHeight = 2f;
             float baseWidth = scaleWidth * 2f + panelWidth;
 
             float panelX = 50f; float panelY = canvasHeight * 0.3f;
@@ -47,7 +48,7 @@ public class ScaleLine : MonoBehaviour
             RenderBase.anchoredPosition = new Vector2(panelX, panelY - 0.5f * panelHeight);
             RenderBase.sizeDelta = new Vector2(baseWidth, scaleHeight);
 
-
+            //Debug.Log(closestChunk);
             if (closestChunk != null)
             {
                 //Debug.Log("Name: " + closestChunk.gameObject.name + " with parent: " + closestChunk.gameObject.transform.parent);
@@ -60,7 +61,12 @@ public class ScaleLine : MonoBehaviour
                     mapSize = chunkParent.gameObject.GetComponent<GenerateMapFromHeightMap>().mapSize;
                 }
 
-                //get scale between canvas height and panel height
+                float mf_ScaleOffset = 0.25f * 3.28084f - 0.5f;
+                RenderF.anchoredPosition = new Vector2(panelX - 0.5f * (scaleWidth + panelWidth), panelY + mf_ScaleOffset * panelHeight);
+                RenderF.sizeDelta = new Vector2(scaleWidth, scaleHeight);
+
+                RenderM.anchoredPosition = new Vector2(panelX + 0.5f * (scaleWidth + panelWidth), panelY - 0.25f * panelHeight);
+                RenderM.sizeDelta = new Vector2(scaleWidth, scaleHeight);
             } else
             {
                 RenderM.anchoredPosition = new Vector2(panelX - 0.5f * (scaleWidth + panelWidth), panelY - 0.5f * panelHeight);
@@ -82,7 +88,12 @@ public class ScaleLine : MonoBehaviour
     {
         if (curDisplay == null) return;
         if (mChunk == null) return;
-        //mask to ignore markers and obstacles
+        //mask to ignore markers and obstacles https://answers.unity.com/questions/8715/how-do-i-use-layermasks.html
+        int groundMask = LayerMask.NameToLayer("Ground");
+        int holoMask = LayerMask.NameToLayer("Holomap");
+        int mask1 = 1 << groundMask; int mask2 = 1 << holoMask;
+        int combMask = mask1 | mask2;
+        
         RaycastHit hitM;
         RaycastHit hitC;
         int castInfo = 0;
@@ -92,7 +103,7 @@ public class ScaleLine : MonoBehaviour
             if (mChunk.gameObject.Equals(closestChunk.gameObject)) {
                 //linecast between camera and closest chunk
                 //if we do not hit the chunk, our closest chunk is now null
-                if(Physics.Linecast(curDisplay.transform.position, closestChunk.gameObject.transform.position, out hitC))
+                if(Physics.Linecast(curDisplay.transform.position, closestChunk.gameObject.transform.position, out hitC, combMask))
                 {
                     if (closestChunk.gameObject.Equals(hitC.collider.gameObject)) return;
                     closestChunk = null;
@@ -102,11 +113,11 @@ public class ScaleLine : MonoBehaviour
             {
                 //linecast between camera and each chunk
                 //TODO: raycast to closest points
-                if (Physics.Linecast(curDisplay.transform.position, closestChunk.gameObject.transform.position, out hitC))
+                if (Physics.Linecast(curDisplay.transform.position, closestChunk.gameObject.transform.position, out hitC, combMask))
                 {
                     if (closestChunk.gameObject.Equals(hitC.collider.gameObject))  castInfo++;
                 }
-                if (Physics.Linecast(curDisplay.transform.position, mChunk.gameObject.transform.position, out hitM))
+                if (Physics.Linecast(curDisplay.transform.position, mChunk.gameObject.transform.position, out hitM, combMask))
                 {
                     if (mChunk.gameObject.Equals(hitM.collider.gameObject)) castInfo += 2;
                 }
@@ -133,9 +144,12 @@ public class ScaleLine : MonoBehaviour
             //linecast between camera and chunk
             //if we do not hit the chunk, do nothing
             //otherwise, our new closest chunk is the chunk
-            if (Physics.Linecast(curDisplay.transform.position, mChunk.gameObject.transform.position, out hitM))
+            if (Physics.Linecast(curDisplay.transform.position, mChunk.gameObject.transform.position, out hitM, combMask))
             {
-                if (mChunk.gameObject.Equals(hitM.collider.gameObject)) closestChunk = mChunk;
+                if (mChunk.gameObject.Equals(hitM.collider.gameObject)) {
+                    closestChunk = mChunk;
+                    Debug.Log(hitM.collider.gameObject);
+                } 
             }            
         }
     }

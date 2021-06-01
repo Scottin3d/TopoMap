@@ -239,15 +239,38 @@ public class PC_Interface : MonoBehaviour
         Debug.Log("Cursor: " + Cursor.lockState);
         if (IsPaused)
         {
-            Cursor.lockState = CursorLockMode.Locked;
+            
+            if (IsViewingTable)
+            {
+                Cursor.lockState = CursorLockMode.None;
+            }
+            else
+            {
+                Cursor.lockState = CursorLockMode.Locked;
+                
+            }
             Cursor.visible = false;
         } else
         {
+            
             Cursor.lockState = CursorLockMode.None;
             Cursor.visible = true;
         }
         IsPaused = !IsPaused;
         //lock camera based on new state of paused
+    }
+
+    public static void SetCursorState()
+    {
+        if(IsViewingTable)
+        {
+            Cursor.lockState = CursorLockMode.None;
+            Cursor.visible = IsPaused;
+        } else
+        {
+            Cursor.lockState = CursorLockMode.Locked;
+            Cursor.visible = false;
+        }
     }
 
     public static void ToggleCamerasPC()
