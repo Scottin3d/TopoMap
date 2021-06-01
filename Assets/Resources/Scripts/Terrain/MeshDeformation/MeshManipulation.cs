@@ -27,8 +27,6 @@ public partial class MeshManipulation : MonoBehaviour {
     static int chunkID;
     static float[] detlas;
     static int[] vertices;
-
-    static Queue<Instruction> instructions = new Queue<Instruction>();
     // mouse
     GameObject mouseObject;
     void Start() {
@@ -75,6 +73,11 @@ public partial class MeshManipulation : MonoBehaviour {
         }
 
         if (selectMode && currentSelection && Input.GetMouseButtonDown(0)) {
+            DeformObject sendDeformInfo = new DeformObject(currentSelection, selectedVerts, deformationStrength);
+            //meshDefoController.SendAndSetClaim(() => {
+                //meshDefoController.SendMessage("ASLModifyMesh", sendDeformInfo);
+            //});
+
             ModifyMesh(deformationStrength);
         }
 
@@ -228,6 +231,8 @@ public partial class MeshManipulation : MonoBehaviour {
     /// <param name="hit"></param>
     /// <param name="radius"></param>
     private void  GetRadialVerts(RaycastHit hit, float radius) {
+
+
         Vector3 center = hit.point;
 
         // check current chunk
@@ -240,10 +245,9 @@ public partial class MeshManipulation : MonoBehaviour {
             Vector3 realworldV3Position = localToWorld.MultiplyPoint3x4(vertices[i]);
             float distance = Mathf.Abs(Vector3.Distance(realworldV3Position, center));
             if (distance <= radius) {
-                float strength = 1 - (distance / radius);
 
                 // store vert for deformation
-                VertToDeform vert = new VertToDeform(i, distance, strength * deformationStrength);
+                VertToDeform vert = new VertToDeform(i, distance);
                 selectedVerts[0].Add(vert);
 
                 // place display vert
@@ -273,9 +277,7 @@ public partial class MeshManipulation : MonoBehaviour {
                     float distance = Mathf.Abs(Vector3.Distance(realworldV3Position, center));
                     if (distance <= radius) {
 
-                        float strength = 1 - (distance / radius);
-
-                        VertToDeform vert = new VertToDeform(i, distance, strength * deformationStrength);
+                        VertToDeform vert = new VertToDeform(i, distance);
                         selectedVerts[neighborIndex].Add(vert);
 
                         GameObject v = GetVertexFromPool();
@@ -290,7 +292,43 @@ public partial class MeshManipulation : MonoBehaviour {
         }
     }
 
-    /*
+    public void ASLModifyMesh(DeformObject deformObject) {
+        MapChunk chunk = deformObject.currentSelection.GetComponent<ChunkData>().MapChunk;
+
+        for (int i = 0; i < deformObject.deformVertices.Count; i++) {
+            if (i == 0) {
+                Vector3[] vertices = chunk.meshData.vertices;
+
+                foreach (var v in deformObject.deformVertices[i]) {
+                    float strength = 1 - (v.distance / radius);
+
+                    vertices[v.index].y += deformObject.deformDelta * strength;
+                }
+
+                currentSelection.GetComponent<MeshFilter>().mesh.vertices = vertices;
+                currentSelection.GetComponent<MeshFilter>().mesh.RecalculateBounds();
+                currentSelection.GetComponent<MeshFilter>().mesh.RecalculateNormals();
+            } else {
+                // neighbor
+                if (chunk.chunkNeighbors[i - 1] != null) {
+                    Vector3[] vertices = chunk.chunkNeighbors[i - 1].meshData.vertices;
+
+                    foreach (var v in deformObject.deformVertices[i]) {
+                        float strength = 1 - (v.distance / radius);
+                        vertices[v.index].y += deformObject.deformDelta * strength;
+                    }
+                    chunk.chunkNeighborObjects[i - 1].GetComponent<MeshFilter>().mesh.vertices = vertices;
+                    chunk.chunkNeighborObjects[i - 1].GetComponent<MeshFilter>().mesh.RecalculateBounds();
+                    chunk.chunkNeighborObjects[i - 1].GetComponent<MeshFilter>().mesh.RecalculateNormals();
+                }
+            }
+
+        }
+
+        // recalculate normals
+    }
+
+
     private float[] ConvertVertexIndices(List<VertToDeform> convertList) {
         float[] array = new float[convertList.Count];
 
@@ -317,10 +355,6 @@ public partial class MeshManipulation : MonoBehaviour {
         
         MapChunk chunk = currentSelection.GetComponent<ChunkData>().MapChunk;
 
-        DeformInstruction i = new DeformInstruction(chunk.chunkID, selectedVerts, delta);
-        ASLDeformationBrain.current.QueueInstruction(i);
-
-        /*
         for (int i = 0; i < selectedVerts.Count; i++) {
             
             // selection
@@ -382,10 +416,8 @@ public partial class MeshManipulation : MonoBehaviour {
         }
 
         // recalculate normals
-        */
-    }
 
-    /*
+    }
     public float[] CombineFloatArrays(float[] array1, float[] array2, float[] array3, float[] array4) {
         int a1 = array1.Length;
         int a2 = array2.Length;
@@ -416,13 +448,15 @@ public partial class MeshManipulation : MonoBehaviour {
     */
 }
 
-public struct DeformInstruction {
-    public int id;
+
+
+public struct DeformObject {
+    public GameObject currentSelection;
     public List<List<VertToDeform>> deformVertices;
     public float deformDelta;
 
-    public DeformInstruction(int _id, List<List<VertToDeform>> _deformVertices, float _deformDelta) {
-        this.id = _id;
+    public DeformObject(GameObject _currentSelection, List<List<VertToDeform>> _deformVertices, float _deformDelta) {
+        currentSelection = _currentSelection;
         deformVertices = _deformVertices;
         deformDelta = _deformDelta;
     }
@@ -431,12 +465,10 @@ public struct DeformInstruction {
 public struct VertToDeform {
     public int index;
     public float distance;
-    public float defromStrength;
 
 
-    public VertToDeform(int _index, float _distance, float _strength) {
+    public VertToDeform(int _index, float _distance) {
         index = _index;
         distance = _distance;
-        defromStrength = _strength;
     }
 }
