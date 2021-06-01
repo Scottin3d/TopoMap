@@ -3,7 +3,9 @@
 using Google.XR.ARCoreExtensions;
 #endif
 using System.Text;
+using System;
 using UnityEngine;
+using System.Collections.Generic;
 
 namespace ASL
 {
@@ -15,6 +17,7 @@ namespace ASL
     /// </summary>
     public partial class ASLObject : MonoBehaviour
     {
+        
         /// <summary>Flag indicating whether or not this player currently owns this object or not</summary>
         public bool m_Mine { get; private set; }
 
@@ -289,6 +292,171 @@ namespace ASL
                     GameLiftManager.GetInstance().m_Client.SendMessage(message);
                 }
             }
+        }
+
+        public void SendAndDeformMesh(float[] verticies, float[] values) {
+            if (m_Mine) {
+                byte[] id = Encoding.ASCII.GetBytes(m_Id);
+                // convert list to byte array
+                byte[] vertexCount = GameLiftManager.GetInstance().ConvertIntToByteArray(verticies.Length);
+                byte[] verticeList = GameLiftManager.GetInstance().ConvertFloatArrayToByteArray(verticies);
+                byte[] VertexValues = GameLiftManager.GetInstance().ConvertFloatArrayToByteArray(values); ;
+                // payload id, affectedvertices
+                byte[] payload = GameLiftManager.GetInstance().CombineByteArrays(id, vertexCount, verticeList, VertexValues);
+
+                RTMessage message = GameLiftManager.GetInstance().CreateRTMessage(GameLiftManager.OpCode.DeformMesh, payload);
+                GameLiftManager.GetInstance().m_Client.SendMessage(message);
+            }
+        }
+
+        public void SendAndClearMesh() {
+            if (m_Mine) {
+                byte[] id = Encoding.ASCII.GetBytes(m_Id);
+
+                //byte[] payload = GameLiftManager.GetInstance().CombineByteArrays(id);
+
+                RTMessage message = GameLiftManager.GetInstance().CreateRTMessage(GameLiftManager.OpCode.ClearMesh, id);
+                GameLiftManager.GetInstance().m_Client.SendMessage(message);
+            }
+        }
+
+        public void SendAndSetVertices(Vector3[] _vertices) {
+            if (m_Mine) {
+                byte[] id = Encoding.ASCII.GetBytes(m_Id);
+
+                float[] vertices = ConvertVector3ArrytoFloatArray(_vertices);
+                byte[] bVertices = GameLiftManager.GetInstance().ConvertFloatArrayToByteArray(vertices);
+
+                // payload id, verticies, normals, triangles, uvs
+                byte[] payload = GameLiftManager.GetInstance().CombineByteArrays(id, bVertices);
+
+                RTMessage message = GameLiftManager.GetInstance().CreateRTMessage(GameLiftManager.OpCode.SendVertices, payload);
+                GameLiftManager.GetInstance().m_Client.SendMessage(message);
+            }
+        }
+
+        public void SendAndSetNormals(Vector3[] _normals) {
+            if (m_Mine) {
+                byte[] id = Encoding.ASCII.GetBytes(m_Id);
+
+                float[] normals = ConvertVector3ArrytoFloatArray(_normals);
+                byte[] bNormals = GameLiftManager.GetInstance().ConvertFloatArrayToByteArray(normals);
+
+                // payload id, verticies, normals, triangles, uvs
+                byte[] payload = GameLiftManager.GetInstance().CombineByteArrays(id, bNormals);
+
+                RTMessage message = GameLiftManager.GetInstance().CreateRTMessage(GameLiftManager.OpCode.SendNormals, payload);
+                GameLiftManager.GetInstance().m_Client.SendMessage(message);
+            }
+        }
+
+        public void SendAndSetTriangles(int[] _triangles) {
+            if (m_Mine) {
+                byte[] id = Encoding.ASCII.GetBytes(m_Id);
+
+                //float[] triangles = ConvertIntArrayToFloatArray(_triangles);
+                byte[] bTriangles = ConvertTriangleArrayToShortByteArray(_triangles);
+
+                // payload id, verticies, normals, triangles, uvs
+                byte[] payload = GameLiftManager.GetInstance().CombineByteArrays(id, bTriangles);
+
+                RTMessage message = GameLiftManager.GetInstance().CreateRTMessage(GameLiftManager.OpCode.SendTriangles, payload);
+                GameLiftManager.GetInstance().m_Client.SendMessage(message);
+            }
+        }
+
+        public byte[] ConvertTriangleArrayToShortByteArray(int[] _triangles) {
+            int arraySize = sizeof(short) * _triangles.Length;
+            byte[] bArray = new byte[arraySize];
+
+            for (int i = 0, b = 0; i < _triangles.Length; i++, b += 2) {
+                short n = Convert.ToInt16(_triangles[i]);
+                FromShort(n, out byte byte1, out byte byte2);
+                bArray[b] = byte1;
+                bArray[b + 1] = byte2;
+            }
+
+            return bArray;
+        }
+
+        void FromShort(short number, out byte byte1, out byte byte2) {
+            byte2 = (byte)(number >> 8);
+            byte1 = (byte)(number & 255);
+        }
+
+        public void SendAndSetUVs(Vector2[] _uvs) {
+            if (m_Mine) {
+                byte[] id = Encoding.ASCII.GetBytes(m_Id);
+
+                float[] uvs = ConvertVector2ArrytoFloatArray(_uvs);
+                byte[] bUVs = GameLiftManager.GetInstance().ConvertFloatArrayToByteArray(uvs);
+
+                // payload id, verticies, normals, triangles, uvs
+                byte[] payload = GameLiftManager.GetInstance().CombineByteArrays(id, bUVs);
+
+                RTMessage message = GameLiftManager.GetInstance().CreateRTMessage(GameLiftManager.OpCode.SendUVs, payload);
+                GameLiftManager.GetInstance().m_Client.SendMessage(message);
+            }
+        }
+
+        public void SendAndSetMesh() {
+            if (m_Mine) {
+
+                byte[] id = Encoding.ASCII.GetBytes(m_Id);
+
+                // payload id, verticies, normals, triangles, uvs
+                //byte[] payload = GameLiftManager.GetInstance().CombineByteArrays(id, bVerticies, bNormals, bTriangles, buvs);
+
+                RTMessage message = GameLiftManager.GetInstance().CreateRTMessage(GameLiftManager.OpCode.SetMesh, id);
+                GameLiftManager.GetInstance().m_Client.SendMessage(message);
+            }
+        }
+
+        /// <summary>
+        /// Converts a Vector3[] to float[]
+        /// </summary>
+        /// <param name="convertList">The Vector3[] to be converted</param>
+        /// <returns>A shallow copy of the values</returns>
+        private float[] ConvertVector3ArrytoFloatArray(Vector3[] convertList) {
+            float[] array = new float[convertList.Length * 3];
+
+            for (int i = 0, a = 0; i < convertList.Length; i++, a += 3) {
+                array[a] = convertList[i].x;
+                array[a + 1] = convertList[i].y;
+                array[a + 2] = convertList[i].z;
+            }
+
+            return array;
+        }
+
+        /// <summary>
+        /// Converts a Vector2[] to float[]
+        /// </summary>
+        /// <param name="convertList">The Vector2[] to be converted</param>
+        /// <returns>A shallow copy of the values</returns>
+        private float[] ConvertVector2ArrytoFloatArray(Vector2[] convertList) {
+            float[] array = new float[convertList.Length * 2];
+
+            for (int i = 0, a = 0; i < convertList.Length; i++, a += 2) {
+                array[a] = convertList[i].x;
+                array[a + 1] = convertList[i].y;
+            }
+
+            return array;
+        }
+
+        /// <summary>
+        /// Converts an int[] to float[]
+        /// </summary>
+        /// <param name="convertList">The float[] to be converted</param>
+        /// <returns>A shallow copy of the float values</returns>
+        private float[] ConvertIntArrayToFloatArray(int[] convertList) {
+            float[] array = new float[convertList.Length];
+
+            for (int i = 0; i < convertList.Length; i++) {
+                array[i] = convertList[i];
+            }
+            return array;
         }
 
         /// <summary>
