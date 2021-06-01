@@ -75,12 +75,6 @@ public partial class MeshManipulation : MonoBehaviour {
         }
 
         if (selectMode && currentSelection && Input.GetMouseButtonDown(0)) {
-            int id = currentSelection.GetComponent<ChunkData>().MapChunk.chunkID;
-            DeformInstruction sendDeformInfo = new DeformInstruction(id, selectedVerts, deformationStrength);
-            //meshDefoController.SendAndSetClaim(() => {
-                //meshDefoController.SendMessage("ASLModifyMesh", sendDeformInfo);
-            //});
-
             ModifyMesh(deformationStrength);
         }
 
@@ -99,6 +93,7 @@ public partial class MeshManipulation : MonoBehaviour {
         }
 
         //
+        /*
         if (isUpdating) {
             GameObject chunk = mapGen.GetChunkGameObject(chunkID);
             Vector3[] chunkVertices = chunk.GetComponent<MeshFilter>().mesh.vertices;
@@ -114,6 +109,7 @@ public partial class MeshManipulation : MonoBehaviour {
             chunk.GetComponent<MeshFilter>().mesh.RecalculateNormals();
             isUpdating = !isUpdating;
         }
+        */
     }
 
     public static void DefomationCallBack(string _id, float[] _myFloats) {
@@ -183,7 +179,6 @@ public partial class MeshManipulation : MonoBehaviour {
 
     private void ClearSelectedVerts() {
         foreach (var l in selectedVerts) {
-            
             l.Clear();
         }
     }
@@ -202,7 +197,6 @@ public partial class MeshManipulation : MonoBehaviour {
         if (currentPoolIndex >= vertexPool.Count * 0.8f) {
             GenerateVertexPool(1000);
         }
-
         vertexPool[currentPoolIndex].SetActive(true);
         currentPoolIndex++;
         return vertexPool[currentPoolIndex];
@@ -296,6 +290,7 @@ public partial class MeshManipulation : MonoBehaviour {
         }
     }
 
+    /*
     private float[] ConvertVertexIndices(List<VertToDeform> convertList) {
         float[] array = new float[convertList.Count];
 
@@ -316,6 +311,8 @@ public partial class MeshManipulation : MonoBehaviour {
 
         return array;
     }
+    */
+
     private void ModifyMesh(float delta) {
         
         MapChunk chunk = currentSelection.GetComponent<ChunkData>().MapChunk;
@@ -388,6 +385,7 @@ public partial class MeshManipulation : MonoBehaviour {
         */
     }
 
+    /*
     public float[] CombineFloatArrays(float[] array1, float[] array2, float[] array3, float[] array4) {
         int a1 = array1.Length;
         int a2 = array2.Length;
@@ -415,8 +413,8 @@ public partial class MeshManipulation : MonoBehaviour {
 
         return array;
     }
+    */
 }
-
 
 public struct DeformInstruction {
     public int id;
