@@ -2,17 +2,19 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using ASL;
 
 public class FollowTheDrawingRouteOnLargeMap : MonoBehaviour
 {
     public GameObject Player;
     public GameObject TeleportManger;
     public Text SpeedDistanceDisplay;
+    public Dropdown MyPlayersRoute;
 
     private float MoveSpeed = 1f;
+
     private List<GameObject> MyEntireBrushList = new List<GameObject>();
-    private List<GameObject> MyLargerBrushListFromPlayerDrawRoute = new List<GameObject>();
-    private List<List<GameObject>> MyExtraBrushListFromPlayerDrawRoute = new List<List<GameObject>>();
+    private List<Vector3> OtherPlayerBrushList = new List<Vector3>();
 
     private bool StartFollowingRoute = false;
     private int BrushListLength;
@@ -20,6 +22,23 @@ public class FollowTheDrawingRouteOnLargeMap : MonoBehaviour
     private Vector3 FirstBrush;
     private Vector3 SecondBrush;
     private float TheTotalLengthOfTheRoute;
+
+    void Start()
+    {
+        MyPlayersRoute.options.Clear();
+
+        foreach (var Thing in GameLiftManager.GetInstance().m_Players)
+        {
+            if (Thing.Value == GameLiftManager.GetInstance().m_Username)
+            {
+                MyPlayersRoute.options.Add(new Dropdown.OptionData("My Own Route"));
+            }
+            else
+            {
+                MyPlayersRoute.options.Add(new Dropdown.OptionData(Thing.Value));
+            }
+        }
+    }
 
     // Update is called once per frame
     void Update()
@@ -80,59 +99,54 @@ public class FollowTheDrawingRouteOnLargeMap : MonoBehaviour
 
     private void GetRouteList()
     {
-        CurIndex = 0;
-        TheTotalLengthOfTheRoute = 0;
-        //MyLargerBrushListFromPlayerDrawRoute = this.GetComponent<PlayerDrawRoute>().GetMyLargerBrushList();
-        //MyExtraBrushListFromPlayerDrawRoute = this.GetComponent<PlayerDrawRoute>().GetExtraListBetweenOriginBrush();
-        MyEntireBrushList = this.GetComponent<PlayerDrawRoute>().GetMyLineRenenderBetweenBrush();
-
-        BrushListLength = MyEntireBrushList.Count;
-        CurIndex = 0;
-
-        if (BrushListLength >= 2)
+        if (MyPlayersRoute.options[MyPlayersRoute.value].text == "My Own Route")
         {
-            //Get First and Second brush here
-            FirstBrush = MyEntireBrushList[CurIndex].transform.position;
-            SecondBrush = MyEntireBrushList[CurIndex + 1].transform.position;
+            CurIndex = 0;
+            TheTotalLengthOfTheRoute = 0;
 
-            FirstBrush.y += 3.5f;
-            SecondBrush.y += 3.5f;
+            //Get my route
+            MyEntireBrushList = this.GetComponent<PlayerDrawRoute>().GetMyLineRenenderBetweenBrush();
+            BrushListLength = MyEntireBrushList.Count;
 
-            CurIndex++;
+            if (BrushListLength >= 2)
+            {
+                //Get First and Second brush here
+                FirstBrush = MyEntireBrushList[CurIndex].transform.position;
+                SecondBrush = MyEntireBrushList[CurIndex + 1].transform.position;
+
+                FirstBrush.y += 3.5f;
+                SecondBrush.y += 3.5f;
+
+                CurIndex++;
+            }
+
+            TotalLengthOfTheRoute();
         }
+        else
+        {
+            CurIndex = 0;
+            TheTotalLengthOfTheRoute = 0;
 
-        TotalLengthOfTheRoute();
+            //Get Other's Route based on the drop down value
+            //MyPlayersRoute.options[MyPlayersRoute.value].text is the drop down value
+            OtherPlayerBrushList = this.GetComponent<PlayerDrawRoute>().GetOtherPlayerRoute()[MyPlayersRoute.options[MyPlayersRoute.value].text];
 
-        //int i = 0;
-        //foreach (GameObject B in MyLargerBrushListFromPlayerDrawRoute)
-        //{
-        //    MyEntireBrushList.Add(B);
+            BrushListLength = OtherPlayerBrushList.Count;
 
-        //    if (i < MyExtraBrushListFromPlayerDrawRoute.Count)
-        //    {
-        //        //MyEntireBrushList.AddRange(MyExtraBrushListFromPlayerDrawRoute[i]);
-        //        foreach (GameObject E in MyExtraBrushListFromPlayerDrawRoute[i])
-        //        {
-        //            MyEntireBrushList.Add(E);
-        //        }
+            if (BrushListLength >= 2)
+            {
+                //Get First and Second brush here
+                FirstBrush = OtherPlayerBrushList[CurIndex];
+                SecondBrush = OtherPlayerBrushList[CurIndex + 1];
 
-        //        i++;
-        //    }
-        //}
+                FirstBrush.y += 3.5f;
+                SecondBrush.y += 3.5f;
 
-        //BrushListLength = MyEntireBrushList.Count;
+                CurIndex++;
+            }
 
-        //if (BrushListLength >= 2)
-        //{
-        //    //Get First and Second brush here
-        //    FirstBrush = MyEntireBrushList[CurIndex].transform.position;
-        //    SecondBrush = MyEntireBrushList[CurIndex + 1].transform.position;
-
-        //    FirstBrush.y += 3f;
-        //    SecondBrush.y += 3f;
-
-        //    CurIndex++;
-        //}
+            TotalLengthOfTheRouteOtherPlayer();
+        }
     }
 
     private void DisplayCurSpeedDistance()
@@ -154,28 +168,66 @@ public class FollowTheDrawingRouteOnLargeMap : MonoBehaviour
         }
     }
 
+    private void TotalLengthOfTheRouteOtherPlayer()
+    {
+        //0 1 2 3 4 5
+        float ListL = OtherPlayerBrushList.Count - 1;
+        for (int i = 0; i < ListL; i++)
+        {
+            TheTotalLengthOfTheRoute += Vector3.Distance(OtherPlayerBrushList[i], OtherPlayerBrushList[i + 1]);
+        }
+    }
+
     private float PartLengthOfTheRoute(int CurIndexPara)
     {
-        float ListL = MyEntireBrushList.Count - 1;
-        float RemainL = 0;
-        for (; CurIndexPara < ListL; CurIndexPara++)
+        if (MyPlayersRoute.options[MyPlayersRoute.value].text == "My Own Route")
         {
-            RemainL += Vector3.Distance(MyEntireBrushList[CurIndexPara].transform.position, MyEntireBrushList[CurIndexPara + 1].transform.position);
-        }
+            float ListL = MyEntireBrushList.Count - 1;
+            float RemainL = 0;
+            for (; CurIndexPara < ListL; CurIndexPara++)
+            {
+                RemainL += Vector3.Distance(MyEntireBrushList[CurIndexPara].transform.position, MyEntireBrushList[CurIndexPara + 1].transform.position);
+            }
 
-        return RemainL;
+            return RemainL;
+        }
+        else
+        {
+            float ListL = OtherPlayerBrushList.Count - 1;
+            float RemainL = 0;
+            for (; CurIndexPara < ListL; CurIndexPara++)
+            {
+                RemainL += Vector3.Distance(OtherPlayerBrushList[CurIndexPara], OtherPlayerBrushList[CurIndexPara + 1]);
+            }
+
+            return RemainL;
+        }
     }
 
     private void MoveToNextTwoBrush()
     {
-        FirstBrush = MyEntireBrushList[CurIndex].transform.position;
-        SecondBrush = MyEntireBrushList[CurIndex + 1].transform.position;
+        if (MyPlayersRoute.options[MyPlayersRoute.value].text == "My Own Route")
+        {
+            FirstBrush = MyEntireBrushList[CurIndex].transform.position;
+            SecondBrush = MyEntireBrushList[CurIndex + 1].transform.position;
 
-        FirstBrush.y += 3.5f;
-        SecondBrush.y += 3.5f;
+            FirstBrush.y += 3.5f;
+            SecondBrush.y += 3.5f;
 
-        Player.transform.position = FirstBrush;
-        CurIndex++;
+            Player.transform.position = FirstBrush;
+            CurIndex++;
+        }
+        else
+        {
+            FirstBrush = OtherPlayerBrushList[CurIndex];
+            SecondBrush = OtherPlayerBrushList[CurIndex + 1];
+
+            FirstBrush.y += 3.5f;
+            SecondBrush.y += 3.5f;
+
+            Player.transform.position = FirstBrush;
+            CurIndex++;
+        }
     }
 
     private void IncreaseMoveSpeed()
