@@ -436,6 +436,10 @@ PrefabInstance:
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_MethodName
       value: EraseLineOnMap
       objectReference: {fileID: 0}
+    - target: {fileID: 7452354057933704338, guid: 9a2a8920f4639b742af327f29dec352e, type: 3}
+      propertyPath: m_RootOrder
+      value: 11
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 9a2a8920f4639b742af327f29dec352e, type: 3}
 --- !u!224 &57718096 stripped
@@ -5959,6 +5963,30 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 1549362516, guid: 6c21f35d451268d4da0883a9980a2721, type: 3}
+      propertyPath: SmallMapGenerator
+      value: 
+      objectReference: {fileID: 468696374}
+    - target: {fileID: 1549362516, guid: 6c21f35d451268d4da0883a9980a2721, type: 3}
+      propertyPath: LargerMapGenerator
+      value: 
+      objectReference: {fileID: 631668594}
+    - target: {fileID: 1549362517, guid: 6c21f35d451268d4da0883a9980a2721, type: 3}
+      propertyPath: LargeMapGenerator
+      value: 
+      objectReference: {fileID: 631668594}
+    - target: {fileID: 1549362517, guid: 6c21f35d451268d4da0883a9980a2721, type: 3}
+      propertyPath: SmallerMapGenerator
+      value: 
+      objectReference: {fileID: 468696374}
+    - target: {fileID: 1549362518, guid: 6c21f35d451268d4da0883a9980a2721, type: 3}
+      propertyPath: localBigMap
+      value: 
+      objectReference: {fileID: 631668596}
+    - target: {fileID: 1549362518, guid: 6c21f35d451268d4da0883a9980a2721, type: 3}
+      propertyPath: localSmallMap
+      value: 
+      objectReference: {fileID: 468696375}
     - target: {fileID: 6897538589646759656, guid: 6c21f35d451268d4da0883a9980a2721, type: 3}
       propertyPath: m_Name
       value: VRController

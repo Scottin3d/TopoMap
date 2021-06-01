@@ -13,24 +13,22 @@ public class PlayerDrawRoute : MonoBehaviour
     private static List<GameObject> MySmallBrushList = new List<GameObject>();
     private static List<GameObject> MyLargerBrushList = new List<GameObject>();
 
-    private static int MyFirstBrushPositionIndex = 0;
-    private static int MySecondBrushPositionIndex = 0;
-    private static int CurLoopIndex = 0;
-
     private static List<GameObject> MyLineRenenderBetweenBrush = new List<GameObject>();
     private static List<GameObject> TempList = new List<GameObject>();
-    private static List<List<GameObject>> ExtraListBetweenOriginBrush = new List<List<GameObject>>();
     private static Vector3 FirstBrushPosition = new Vector3();
     private static Vector3 SecondBrushPosition = new Vector3();
-    private int MyLargeBruchListIndex = 0;
+    private static int MyLargeBruchListIndex = 0;
 
     private static List<GameObject> MyLineRenenderBetweenBrushSmallMap = new List<GameObject>();
     private static Vector3 FirstBrushPositionSmallMap = new Vector3();
     private static Vector3 SecondBrushPositionSmallMap = new Vector3();
-    private int MySmallBrushListIndex = 0;
+    private static int MySmallBrushListIndex = 0;
 
     public Dropdown MyEraseDropDown;
     private static GameObject ThisGameObject;
+
+    public GameObject ThreeD_TextToDisplayRouteLengthOnSmallMap;
+    private float TotalLength;
 
     // Start is called before the first frame update
     void Start()
@@ -104,25 +102,25 @@ public class PlayerDrawRoute : MonoBehaviour
         {
             if (MyLargerBrushList.Count <= 1)
             {
+                ThreeD_TextToDisplayRouteLengthOnSmallMap.GetComponent<TextMesh>().text = "";
                 yield return null;
             }
             else if (MyLargeBruchListIndex == MyLargerBrushList.Count - 1)
             {
+                CalculateTheNewLengthOfTheRoute();
+                ThreeD_TextToDisplayRouteLengthOnSmallMap.GetComponent<TextMesh>().text = "Length: " + TotalLength + "m";
+                ThreeD_TextToDisplayRouteLengthOnSmallMap.transform.position = MySmallBrushList[MySmallBrushList.Count / 2].transform.position;
+                ThreeD_TextToDisplayRouteLengthOnSmallMap.transform.position += new Vector3(0, 0.5f, 0);
                 yield return null;
             }
             else
             {
-                yield return new WaitForSeconds(0.25f);
+                yield return new WaitForSeconds(0.15f);
                 int LargeBrushListCount = MyLargerBrushList.Count;
                 for (int i = MyLargeBruchListIndex; i < LargeBrushListCount - 1; i++)
                 {
-                    MyFirstBrushPositionIndex = i;
-                    MySecondBrushPositionIndex = i + 1;
-
                     FirstBrushPosition = new Vector3(MyLargerBrushList[i].transform.position.x, MyLargerBrushList[i].transform.position.y, MyLargerBrushList[i].transform.position.z);
                     SecondBrushPosition = new Vector3(MyLargerBrushList[i + 1].transform.position.x, MyLargerBrushList[i + 1].transform.position.y, MyLargerBrushList[i + 1].transform.position.z);
-                    //FirstBrushPosition.y += 2.5f;
-                    //SecondBrushPosition.y += 2.5f;
 
                     Vector3 CenterOfTwoBrush = (FirstBrushPosition + SecondBrushPosition) / 2;
                     float DistanceBetweenTwoBrush = Vector3.Distance(FirstBrushPosition, SecondBrushPosition);
@@ -131,8 +129,6 @@ public class PlayerDrawRoute : MonoBehaviour
                     //Add several brush between two brush
                     for (int o = 1; o < NumberOfExtraBrushNeeded; o++)
                     {
-                        CurLoopIndex = i;
-
                         float X = GetNewXYZ(FirstBrushPosition.x, SecondBrushPosition.x, DistanceBetweenTwoBrush, 1f, o);
                         float Y = GetNewXYZ(FirstBrushPosition.y, SecondBrushPosition.y, DistanceBetweenTwoBrush, 1f, o);
                         float Z = GetNewXYZ(FirstBrushPosition.z, SecondBrushPosition.z, DistanceBetweenTwoBrush, 1f, o);
@@ -143,58 +139,7 @@ public class PlayerDrawRoute : MonoBehaviour
 
                         yield return new WaitForSeconds(0.05f);
                     }
-
-                    /*
-                    //After this for loop, temp list contain all the new brush between two point.
-                    //Add temp list into CombineList, so we know the new brush list that between point A and B is here.
-                    //Then clear templist
-                    List<GameObject> TempListCopy = TempList.ConvertAll(G => new GameObject());
-
-                    //foreach (GameObject A in TempList)
-                    //{
-                    //    TempListCopy.Add(A);
-                    //}
-
-                    ExtraListBetweenOriginBrush.Add(TempListCopy);
-                    TempList.Clear();
-                    yield return new WaitForSeconds(0.05f);
-                    */
                 }
-
-                /*
-                ////After this for loop, MyLargerBrushList still contain the original brush. Combine contain the new list between each original brush.
-                ////Now combine the ExtraListBetweenOriginBrush into the MyLargerBrushList
-                ////0 1 2 3 4
-                //// 5 2 3 4
-                //int BrushListCount = MyLargerBrushList.Count - 1;
-                //int ExtraListIndex = 0;
-                //int ExtraLength = 0;
-                //for (int i = MyLargeBruchListIndex; i < BrushListCount; i++)
-                //{
-                //    List<GameObject> T = ExtraListBetweenOriginBrush[ExtraListIndex];
-                //    ExtraListIndex++;
-                //    ExtraLength += T.Count;
-                //    Debug.Log(T.Count);
-
-                //    for (int o = 0; o < T.Count - 1; o++)
-                //    {
-                //        MyLargerBrushList.Insert(o + i + 1, T[o]);
-                //    }
-
-                //    BrushListCount += T.Count;
-                //    i += T.Count;
-                //    //"0" 1 2 3 4 5 "1" 1 2 "2" 1 2 3 "3" 1 2 3 4 "4"
-                //}
-
-                ////LargeBrushListCount is original length (mins 1 is the index, mins),
-                ////0 1 2
-                //// 5 2
-                ////"0" 1 2 3 4 5 "1" 1 2 "2"
-                ////0 += 3 - 1 - 0 + 7  + 1 ==== 10
-                //MyLargeBruchListIndex += LargeBrushListCount - 1 - MyLargeBruchListIndex + ExtraLength + 1;
-                //ExtraListBetweenOriginBrush.Clear();
-                */
-
                 //LargeBrushListCount is original length (mins 1 is the index, mins),
                 //0 1 2
                 //0 += 3 - 1 - 0 ==== 2
@@ -253,6 +198,17 @@ public class PlayerDrawRoute : MonoBehaviour
         }
     }
 
+    private void CalculateTheNewLengthOfTheRoute()
+    {
+        TotalLength = 0;
+
+        for (int i = 0; i < MyLineRenenderBetweenBrush.Count - 1; i++)
+        {
+            float L = Vector3.Distance(MyLineRenenderBetweenBrush[i].transform.position, MyLineRenenderBetweenBrush[i + 1].transform.position);
+            TotalLength += L;
+        }
+    }
+
     private float GetNewXYZ(float xyz1, float xyz2, float L, float M, int o)
     {
         float NewXYZ = xyz1 + (xyz2 - xyz1) / L * M * o;
@@ -266,30 +222,11 @@ public class PlayerDrawRoute : MonoBehaviour
         MyLineRenenderBetweenBrush.Add(_myGameObject);
     }
 
-    //private static void SetLineRenenderSmallMap(GameObject _myGameObject)
-    //{
-    //    _myGameObject.transform.parent = ThisGameObject.transform;
-    //    _myGameObject.GetComponent<LineRenderer>().SetPosition(0, FirstBrushPositionSmallMap);
-    //    _myGameObject.GetComponent<LineRenderer>().SetPosition(1, SecondBrushPositionSmallMap);
-    //    MyLineRenenderBetweenBrushSmallMap.Add(_myGameObject);
-    //}
-
     //New Version
     private static void SetLineRenenderSmallMap(GameObject _myGameObject)
     {
         _myGameObject.transform.parent = ThisGameObject.transform;
         MyLineRenenderBetweenBrushSmallMap.Add(_myGameObject);
-    }
-
-    private void DrawLineRendererBetweenTwoBrush()
-    {
-        LineRenderer MyLine = new GameObject("Line").AddComponent<LineRenderer>();
-        MyLine.startColor = Color.yellow;
-        MyLine.endColor = Color.yellow;
-        MyLine.startWidth = 0.01f;
-        MyLine.endWidth = 0.01f;
-        MyLine.positionCount = 2;
-        MyLine.useWorldSpace = true;
     }
 
     private static void GetEachBrushOnWhiteBoard(GameObject _myGameObject)
@@ -404,6 +341,9 @@ public class PlayerDrawRoute : MonoBehaviour
         MyLargerBrushList.Clear();
         MyLineRenenderBetweenBrush.Clear();
         MyLineRenenderBetweenBrushSmallMap.Clear();
+
+        MyLargeBruchListIndex = 0;
+        MySmallBrushListIndex = 0;
     }
 
     private static void EraseLastTenLineOnMap()
@@ -468,13 +408,59 @@ public class PlayerDrawRoute : MonoBehaviour
         return MyLargerBrushList;
     }
 
-    public List<List<GameObject>> GetExtraListBetweenOriginBrush()
-    {
-        return ExtraListBetweenOriginBrush;
-    }
-
     public List<GameObject> GetMyLineRenenderBetweenBrush()
     {
         return MyLineRenenderBetweenBrush;
     }
 }
+
+
+/*
+//After this for loop, temp list contain all the new brush between two point.
+//Add temp list into CombineList, so we know the new brush list that between point A and B is here.
+//Then clear templist
+List<GameObject> TempListCopy = TempList.ConvertAll(G => new GameObject());
+
+//foreach (GameObject A in TempList)
+//{
+//    TempListCopy.Add(A);
+//}
+
+ExtraListBetweenOriginBrush.Add(TempListCopy);
+TempList.Clear();
+yield return new WaitForSeconds(0.05f);
+*/
+
+/*
+////After this for loop, MyLargerBrushList still contain the original brush. Combine contain the new list between each original brush.
+////Now combine the ExtraListBetweenOriginBrush into the MyLargerBrushList
+////0 1 2 3 4
+//// 5 2 3 4
+//int BrushListCount = MyLargerBrushList.Count - 1;
+//int ExtraListIndex = 0;
+//int ExtraLength = 0;
+//for (int i = MyLargeBruchListIndex; i < BrushListCount; i++)
+//{
+//    List<GameObject> T = ExtraListBetweenOriginBrush[ExtraListIndex];
+//    ExtraListIndex++;
+//    ExtraLength += T.Count;
+//    Debug.Log(T.Count);
+
+//    for (int o = 0; o < T.Count - 1; o++)
+//    {
+//        MyLargerBrushList.Insert(o + i + 1, T[o]);
+//    }
+
+//    BrushListCount += T.Count;
+//    i += T.Count;
+//    //"0" 1 2 3 4 5 "1" 1 2 "2" 1 2 3 "3" 1 2 3 4 "4"
+//}
+
+////LargeBrushListCount is original length (mins 1 is the index, mins),
+////0 1 2
+//// 5 2
+////"0" 1 2 3 4 5 "1" 1 2 "2"
+////0 += 3 - 1 - 0 + 7  + 1 ==== 10
+//MyLargeBruchListIndex += LargeBrushListCount - 1 - MyLargeBruchListIndex + ExtraLength + 1;
+//ExtraListBetweenOriginBrush.Clear();
+*/

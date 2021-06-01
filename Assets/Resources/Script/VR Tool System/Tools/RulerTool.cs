@@ -7,7 +7,7 @@ using Valve.VR;
 public class RulerTool : MonoBehaviour
 {
 
-    //RoadTool is the class that handles the VR player's ruler which they can use to get the scale of the map they are using
+    //RulerTool is the class that handles the VR player's ruler which they can use to get the scale of the map they are using
 
     //there should be one and only one instance of this script in the unity scene.
 
