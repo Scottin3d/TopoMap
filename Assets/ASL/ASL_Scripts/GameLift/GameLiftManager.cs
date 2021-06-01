@@ -119,6 +119,7 @@ namespace ASL
         /// </summary>
         public enum OpCode
         {
+            
             /// <summary>Packet identifier that indicates a player has logged in</summary>
             PlayerLoggedIn,
             /// <summary>Packet identifier that indicates a player has joined the match</summary>
@@ -197,7 +198,21 @@ namespace ASL
             /// <summary>Used to help keep the Android socket connection alive</summary>
             AndroidKeepConnectionAlive,
             /// <summary>Packet code for sending object tags</summary>
-            TagUpdate
+            TagUpdate,
+            /// <summary>Packet code for deforming an objects mesh</summary>
+            DeformMesh,
+            /// <summary>Packet code for clearing a mesh</summary>
+            ClearMesh,
+            /// <summary>Packet code for setting a mesh</summary>
+            SetMesh,
+            /// <summary>Packet code for sending mesh verticies</summary>
+            SendVertices,
+            /// <summary>Packet code for sending mesh normals</summary>
+            SendNormals,
+            /// <summary>Packet code for sending mesh triangles</summary>
+            SendTriangles,
+            /// <summary>Packet code for sending mesh uvs</summary>
+            SendUVs
 
         }
 
@@ -316,11 +331,13 @@ namespace ASL
         private void OnDataReceived(object sender, DataReceivedEventArgs _packet)
         {
             #if (ASL_DEBUG)
+            
             string data = System.Text.Encoding.Default.GetString(_packet.Data);
             //Debug.Log($"[server-sent] OnDataReceived - Sender: {_packet.Sender} OpCode: {_packet.OpCode} data: {data.ToString()}");
             #endif
             switch (_packet.OpCode)
             {
+                
                 case (int)OpCode.PlayerLoggedIn: //Auto packet sent by GameLift
                     break;
                 case (int)OpCode.PlayerJoinedMatch:
@@ -417,7 +434,7 @@ namespace ASL
                     break;
                 case (int)OpCode.SendTexture2D:
                     QForMainThread(m_GameController.RecieveTexture2D, _packet);
-                        break;
+                    break;
                 case (int)OpCode.ResolveAnchorId:
                     QForMainThread(m_GameController.ResolveAnchorId, _packet);
                     break;
@@ -432,6 +449,27 @@ namespace ASL
                     break;
                 case (int)OpCode.LobbyTextMessage:
                     QForMainThread(m_LobbyManager.UpdateChatLog, _packet);
+                    break;
+                case (int)OpCode.DeformMesh:
+                    QForMainThread(m_GameController.DeformMesh, _packet);
+                    break;
+                case (int)OpCode.ClearMesh:
+                    QForMainThread(m_GameController.ClearMesh, _packet);
+                    break;
+                case (int)OpCode.SetMesh:
+                    QForMainThread(m_GameController.SetMesh, _packet);
+                    break;
+                case (int)OpCode.SendVertices:
+                    QForMainThread(m_GameController.SendVertices, _packet);
+                    break;
+                case (int)OpCode.SendNormals:
+                    QForMainThread(m_GameController.SendNormals, _packet);
+                    break;
+                case (int)OpCode.SendTriangles:
+                    QForMainThread(m_GameController.SendTriangles, _packet);
+                    break;
+                case (int)OpCode.SendUVs:
+                    QForMainThread(m_GameController.SendUVs, _packet);
                     break;
                 default:
                     Debug.LogError("Unassigned OpCode received: " + _packet.OpCode);

@@ -274,6 +274,10 @@ namespace ASL
                 }
             }
 
+            
+
+
+
             /// <summary>
             /// Sets the object specified by the id contained in _packet to the color specified in _packet. This function is triggered by a packet received from the relay server.
             /// </summary>
@@ -390,6 +394,242 @@ namespace ASL
                 {
                     myObject.transform.localScale = ConvertByteArrayIntoVector(_packet.Data, startLocation[1], dataLength[1]);
                 }
+            }
+
+            public void DeformMesh(DataReceivedEventArgs _packet) {
+                // [0] - id
+                // [1] - (int) vertex count
+                // [2] = (float[]) vertex indices
+                // [3] - (float[] => vector3[]) vertex Vector3
+
+                (int[] startLocation, int[] dataLength) = DataLengthsAndStartLocations(_packet.Data);
+                string id = ConvertByteArrayIntoString(_packet.Data, startLocation[0], dataLength[0]);
+
+                if (ASLHelper.m_ASLObjects.TryGetValue(id ?? string.Empty, out ASLObject myObject)) {
+                    // get vertex count
+                    int vertexCount = ConvertByteArrayIntoInt(_packet.Data, startLocation[1], dataLength[1]);
+                    // get vertex indicies array
+                    float[] vertexIndicesFloatArray = ConvertByteArrayIntoFloatArray(_packet.Data, startLocation[2], dataLength[2]);
+
+                    // get vertex V3 array
+                    List<Vector3> vertexV3s = new List<Vector3>(vertexCount);
+                    float[] vertexVector3FloatArray = ConvertByteArrayIntoFloatArray(_packet.Data, startLocation[3], dataLength[3]);
+                    for (int i = 0; i < vertexVector3FloatArray.Length; i+= 3) {
+                        Vector3 vertPosition = new Vector3(vertexVector3FloatArray[i], 
+                                                           vertexVector3FloatArray[i + 1], 
+                                                           vertexVector3FloatArray[i + 2]);
+                        vertexV3s.Add(vertPosition);
+                    }
+
+                    myObject.TryGetComponent<MeshFilter>(out MeshFilter meshFilter);
+                    if (meshFilter != null) {
+                        // vertexV3s.count should equal vertexIndicesFloatArray.length
+                        Vector3[] vertices = meshFilter.mesh.vertices;
+                        for (int i = 0; i < vertexIndicesFloatArray.Length; i++) {
+                            int index = (int)vertexIndicesFloatArray[i];
+                            vertices[index] = vertexV3s[i];
+                        }
+
+                        meshFilter.mesh.vertices = vertices;
+                        meshFilter.mesh.RecalculateNormals();
+                        meshFilter.mesh.RecalculateBounds();
+
+                    }
+                }
+            }
+
+            public void ClearMesh(DataReceivedEventArgs _packet) {
+                // [0] - id
+                (int[] startLocation, int[] dataLength) = DataLengthsAndStartLocations(_packet.Data);
+                // 0 - id
+                string id = ConvertByteArrayIntoString(_packet.Data, startLocation[0], dataLength[0]);
+
+                if (ASLHelper.m_ASLObjects.TryGetValue(id ?? string.Empty, out ASLObject myObject)) {
+                    myObject.TryGetComponent<MeshFilter>(out MeshFilter meshFilter);
+
+                    if (meshFilter != null) {
+                        meshFilter.mesh.Clear();
+                    }
+                }
+            }
+
+            public void SendVertices(DataReceivedEventArgs _packet) {
+                // [0] - id
+                // [1] - (float[] => Vector3[]) vertices
+
+                (int[] startLocation, int[] dataLength) = DataLengthsAndStartLocations(_packet.Data);
+                // 0 - id
+                string id = ConvertByteArrayIntoString(_packet.Data, startLocation[0], dataLength[0]);
+                if (ASLHelper.m_ASLObjects.TryGetValue(id ?? string.Empty, out ASLObject myObject)) {
+                    // 1 - (float[] => Vector3[]) vertices
+                    float[] fVertices = ConvertByteArrayIntoFloatArray(_packet.Data, startLocation[1], dataLength[1]);
+                    // convert to V3
+                    Vector3[] vertices = ConvertFloatArrayToVector3Array(fVertices);
+                    
+                    myObject.TryGetComponent<MeshFilter>(out MeshFilter meshFilter);
+                    if (meshFilter != null) {
+                        meshFilter.mesh.vertices = vertices;
+                    }
+                }
+            }
+
+            public void SendNormals(DataReceivedEventArgs _packet) {
+                // [0] - id
+                // [1] - (float[] => Vector3[]) normals
+
+                (int[] startLocation, int[] dataLength) = DataLengthsAndStartLocations(_packet.Data);
+                // 0 - id
+                string id = ConvertByteArrayIntoString(_packet.Data, startLocation[0], dataLength[0]);
+
+                if (ASLHelper.m_ASLObjects.TryGetValue(id ?? string.Empty, out ASLObject myObject)) {
+                    // 1 - (float[] => Vector3[]) normals
+                    float[] fNormals = ConvertByteArrayIntoFloatArray(_packet.Data, startLocation[1], dataLength[1]);
+                    // convert to V3
+                    Vector3[] normals = ConvertFloatArrayToVector3Array(fNormals);
+
+                    myObject.TryGetComponent<MeshFilter>(out MeshFilter meshFilter);
+                    if (meshFilter != null) {
+                        meshFilter.mesh.normals = normals;
+                    }
+                }
+            }
+
+            public void SendTriangles(DataReceivedEventArgs _packet) {
+                // [0] - id
+                // [1] - ((int)float[]) triangles
+
+                (int[] startLocation, int[] dataLength) = DataLengthsAndStartLocations(_packet.Data);
+                // 0 - id
+                string id = ConvertByteArrayIntoString(_packet.Data, startLocation[0], dataLength[0]);
+
+                if (ASLHelper.m_ASLObjects.TryGetValue(id ?? string.Empty, out ASLObject myObject)) {
+
+                    int[] triangles = ConvertByteArrayInt16(_packet.Data, startLocation[1], dataLength[2]);
+
+                    myObject.TryGetComponent<MeshFilter>(out MeshFilter meshFilter);
+                    if (meshFilter != null) {
+                        meshFilter.mesh.triangles = triangles;
+                    }
+                }
+            }
+
+            public void SendUVs(DataReceivedEventArgs _packet) {
+                // [0] - id
+                // [1] - (float[] => Vector2[]) UVs
+
+                (int[] startLocation, int[] dataLength) = DataLengthsAndStartLocations(_packet.Data);
+                // 0 - id
+                string id = ConvertByteArrayIntoString(_packet.Data, startLocation[0], dataLength[0]);
+
+                if (ASLHelper.m_ASLObjects.TryGetValue(id ?? string.Empty, out ASLObject myObject)) {
+                    // 1 - (float[] => Vector2[]) uvs
+                    float[] fUVs = ConvertByteArrayIntoFloatArray(_packet.Data, startLocation[1], dataLength[1]);
+                    // convert to V2
+                    Vector2[] uvs = ConvertFloatArrayToVector2Array(fUVs);
+
+                    myObject.TryGetComponent<MeshFilter>(out MeshFilter meshFilter);
+                    if (meshFilter != null) {
+                        meshFilter.mesh.uv = uvs;
+                    }
+                }
+            }
+
+            public void SetMesh(DataReceivedEventArgs _packet) {
+                // [0] - id
+                // [1] - (float[] => Vector3[]) vertices
+                // [2] = (float[] => Vector3[]) normals
+                // [3] - ((int)float[]) triangles
+                // [4] - (float[] => Vector2[]) UVs
+
+                (int[] startLocation, int[] dataLength) = DataLengthsAndStartLocations(_packet.Data);
+                // 0 - id
+                string id = ConvertByteArrayIntoString(_packet.Data, startLocation[0], dataLength[0]);
+                if (ASLHelper.m_ASLObjects.TryGetValue(id ?? string.Empty, out ASLObject myObject)) {
+                    /*
+                    // 1 - (float[] => Vector3[]) vertices
+                    float[] fVertices = ConvertByteArrayIntoFloatArray(_packet.Data, startLocation[1], dataLength[1]);
+                    // convert to V3
+                    Vector3[] vertices = ConvertFloatArrayToVector3Array(fVertices);
+                    
+                    // 2 = (float[] => Vector3[]) normals
+                    float[] fNormals = ConvertByteArrayIntoFloatArray(_packet.Data, startLocation[2], dataLength[2]);
+                    // convert to V3
+                    Vector3[] normals = ConvertFloatArrayToVector3Array(fNormals);
+                    
+                    // 3 - ((int)float[]) triangles
+                    float[] fTriangles = ConvertByteArrayIntoFloatArray(_packet.Data, startLocation[3], dataLength[3]);
+                    int[] triangles = ConvertFloatArratToIntArray(fTriangles);
+
+                    // 4 - (float[] => Vector2[]) UVs
+                    float[] fUVs = ConvertByteArrayIntoFloatArray(_packet.Data, startLocation[4], dataLength[4]);
+                    // convert to UVs
+                    Vector2[] uvs = ConvertFloatArrayToVector2Array(fUVs);
+
+                    */
+                    // set and create mesh
+                    myObject.TryGetComponent<MeshFilter>(out MeshFilter meshFilter);
+                    if (meshFilter != null) {
+                        /*
+                        meshFilter.mesh.Clear();
+                        meshFilter.mesh.vertices = vertices;
+                        meshFilter.mesh.triangles = triangles;
+                        meshFilter.mesh.normals = normals;
+                        meshFilter.mesh.uv = uvs;
+                        */
+                        meshFilter.mesh.RecalculateNormals();
+                        meshFilter.mesh.RecalculateBounds();
+
+                    }
+
+                    // set mesh collider
+                    myObject.TryGetComponent<MeshCollider>(out MeshCollider meshCollider);
+                    if (meshCollider != null) {
+                        meshCollider.sharedMesh = meshFilter.mesh;
+                    }
+
+                }
+
+            }
+
+            private Vector3[] ConvertFloatArrayToVector3Array(float[] _input) {
+                Vector3[] array = new Vector3[_input.Length / 3];
+                for (int i = 0, v = 0; i < _input.Length; i++, v += 3) {
+                        Vector3 v3 = new Vector3(_input[v],
+                                            _input[v + 1],
+                                            _input[v + 2]);
+                        array[i] = v3;
+                    }
+                return array;
+            }
+
+            private Vector2[] ConvertFloatArrayToVector2Array(float[] _input) {
+                Vector2[] array = new Vector2[_input.Length / 2];
+                for (int i = 0, v = 0; i < _input.Length; i++, v += 2) {
+                    Vector2 v2 = new Vector2(_input[v],
+                                        _input[v + 1]);
+                    array[i] = v2;
+                }
+                return array;
+            }
+
+            private int[] ConvertByteArrayInt16(byte[] _data, int _startLocation, int _length) { 
+                int[] array = new int[_length / 2];
+                for (int i = _startLocation, b = 0; i< _length; i++, b += 2) {
+                    array[i] = ToInt(_data[b], _data[b + 1]);
+                }
+                return array;
+            }
+
+            int ToInt(short byte1, short byte2) {
+                return (byte2 << 8) + byte1;
+            }
+
+            private int[] ConvertFloatArratToIntArray(float[] _input) {
+                int[] array = new int[_input.Length];
+                for (int i = 0; i < _input.Length; i++) {
+                    array[i] = (int)_input[i];
+                }
+                return array;
             }
 
             /// <summary>

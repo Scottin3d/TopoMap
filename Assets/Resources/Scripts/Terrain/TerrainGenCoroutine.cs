@@ -80,7 +80,7 @@ public partial class GenerateMapFromHeightMap : MonoBehaviour {
 
                 DemoTextUpdater.current.miscText.text += "Creating Map Chunk...\n";
                 // create chunk
-                mapChunks[x, z] = new MapChunk(_heightmap, _chunkCenter, _mapData);
+                mapChunks[x, z] = new MapChunk(_heightmap, _chunkCenter, _mapData, z + x);
 
                 demoChunk.GetComponent<MeshRenderer>().material.mainTexture = _heightmap;
                 ChangeChunkColor();
