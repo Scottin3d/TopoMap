@@ -62,11 +62,14 @@ public class VRTracedInput : MonoBehaviour
         if (SteamVR_Actions.default_GrabGrip.state)
         {
             ProjectMarker();
-            
         }
         else
         {
-            initialGrip = true;
+            if (initialGrip == false)
+            {
+                initialGrip = true;
+                ProjectMarkerLast();
+            }
         }
     }
 
@@ -101,7 +104,24 @@ public class VRTracedInput : MonoBehaviour
             {
                 LocalProjectMarker.transform.position = Hit.point;
                 //LocalProjectMarker.SetActive(false);
+                initialGrip = false;
             }
+        }
+    }
+
+    //function that projects the marker when the grip is released
+    private void ProjectMarkerLast()
+    {
+        Debug.Log("in project marker last");
+        Vector3 startPosition = frontObject.transform.position;
+        Vector3 rayDirection = (frontObject.transform.position - backObject.transform.position).normalized;
+        Ray MouseRay = new Ray(startPosition, rayDirection);
+        RaycastHit Hit;
+        if (Physics.Raycast(MouseRay, out Hit))
+        {
+            //Debug.Log("in raycast hit");
+            messageOnGripRelease(Hit.point);
+            LocalProjectMarker.transform.position = Hit.point;
         }
     }
 
@@ -115,5 +135,11 @@ public class VRTracedInput : MonoBehaviour
     private void messageOnGrip(Vector3 position)
     {
         RoadTool.placeRoad(position);
+    }
+
+    //this function will call all classws which need to know when the player releases grip
+    private void messageOnGripRelease(Vector3 position)
+    {
+        TeleportTool.teleportPlayer(position);
     }
 }

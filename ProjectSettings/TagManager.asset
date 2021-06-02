@@ -16,6 +16,7 @@ TagManager:
   - PathCam
   - Marker
   - Object
+  - 3DText
   layers:
   - Default
   - TransparentFX

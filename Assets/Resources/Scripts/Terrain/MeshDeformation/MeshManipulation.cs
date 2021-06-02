@@ -85,6 +85,11 @@ public partial class MeshManipulation : MonoBehaviour {
         }
 
         if (selectMode && currentSelection && Input.GetMouseButtonDown(0)) {
+            DeformObject sendDeformInfo = new DeformObject(currentSelection, selectedVerts, deformationStrength);
+            //meshDefoController.SendAndSetClaim(() => {
+                //meshDefoController.SendMessage("ASLModifyMesh", sendDeformInfo);
+            //});
+
             ModifyMesh(deformationStrength);
         }
 
@@ -225,10 +230,9 @@ public partial class MeshManipulation : MonoBehaviour {
             Vector3 realworldV3Position = localToWorld.MultiplyPoint3x4(vertices[i]);
             float distance = Mathf.Abs(Vector3.Distance(realworldV3Position, center));
             if (distance <= radius) {
-                float strength = 1 - (distance / radius);
 
                 // store vert for deformation
-                VertToDeform vert = new VertToDeform(i, distance, strength * deformationStrength);
+                VertToDeform vert = new VertToDeform(i, distance);
                 selectedVerts[0].Add(vert);
 
                 // place display vert
@@ -258,9 +262,7 @@ public partial class MeshManipulation : MonoBehaviour {
                     float distance = Mathf.Abs(Vector3.Distance(realworldV3Position, center));
                     if (distance <= radius) {
 
-                        float strength = 1 - (distance / radius);
-
-                        VertToDeform vert = new VertToDeform(i, distance, strength * deformationStrength);
+                        VertToDeform vert = new VertToDeform(i, distance);
                         selectedVerts[neighborIndex].Add(vert);
 
                         GameObject v = GetVertexFromPool();
@@ -298,8 +300,8 @@ public struct DeformInstruction {
     public List<List<VertToDeform>> deformVertices;
     public float deformDelta;
 
-    public DeformInstruction(int _id, List<List<VertToDeform>> _deformVertices, float _deformDelta) {
-        this.id = _id;
+    public DeformObject(GameObject _currentSelection, List<List<VertToDeform>> _deformVertices, float _deformDelta) {
+        currentSelection = _currentSelection;
         deformVertices = _deformVertices;
         deformDelta = _deformDelta;
     }
@@ -311,13 +313,11 @@ public struct DeformInstruction {
 public struct VertToDeform {
     public int index;
     public float distance;
-    public float defromStrength;
 
 
-    public VertToDeform(int _index, float _distance, float _strength) {
+    public VertToDeform(int _index, float _distance) {
         index = _index;
         distance = _distance;
-        defromStrength = _strength;
     }
 }
 

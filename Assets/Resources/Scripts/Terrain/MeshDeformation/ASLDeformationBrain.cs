@@ -12,12 +12,17 @@ using ASL;
 /// </summary>
 public class ASLDeformationBrain : MonoBehaviour {
     public static ASLDeformationBrain current;
-    public GenerateMapFromHeightMap mapGen = null;
-    private static ASLObject brain;
 
     public List<GameObject> localMapChunks = new List<GameObject>();
-    public static Queue<Instruction> instructions = new Queue<Instruction>();
 
+    public GameObject testCube = null;
+    static GameObject cube = null;
+    static Vector3 pos;
+    static float deltaY;
+
+    static Queue<Instruction> instructions = new Queue<Instruction>();
+    private static ASLObject brain;
+    public GenerateMapFromHeightMap mapGen = null;
     bool IsInit = false;
 
     /// <summary>
@@ -30,7 +35,8 @@ public class ASLDeformationBrain : MonoBehaviour {
     /// <summary>
     /// Assing the ASL brian and initialize variables.
     /// </summary>
-    void Start() {
+    void Start()
+    {
         brain = GetComponent<ASLObject>();
         StartCoroutine(Initialize());
     }
@@ -236,32 +242,25 @@ public class ASLDeformationBrain : MonoBehaviour {
             Debug.Log("The name of the object that sent these floats is: " + myObject.name);
         }
 
-        List<float[]> splitPayload = SplitPayload(_myFloats);
-        int id = Convert.ToInt32(splitPayload[0][0]);
-        int count = Convert.ToInt32(splitPayload[1][0]);
+        int chunkID = Convert.ToInt32(_myFloats[0]);
+        float delta = _myFloats[1];
 
-        int[] vertexIndices = new int[count];
-        for (int v = 0; v < count; v++) {
-            vertexIndices[v] = Convert.ToInt32(splitPayload[2][v]);
-        }
-
-
-        Instruction i = new Instruction(id, vertexIndices, splitPayload[3]);
+        Instruction i = new Instruction(chunkID, delta);
         instructions.Enqueue(i);
     }
+
+
 }
 
 /// <summary>
 /// The structure of a deformation instruction
 /// </summary>
 public struct Instruction {
-    public int id;
-    public int[] vertexIndices;
-    public float[] vertexDeformation;
+    public int instructionID;
+    public float delta;
 
-    public Instruction(int _id, int[] indices, float[] deformation) {
-        id = _id;
-        vertexIndices = indices;
-        vertexDeformation = deformation;
+    public Instruction(int _id, float _delta) {
+        instructionID = _id;
+        delta = _delta;
     }
 }
