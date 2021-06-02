@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using ASL;
 
 public class PlayerDrawRoute : MonoBehaviour
 {
@@ -24,8 +25,12 @@ public class PlayerDrawRoute : MonoBehaviour
     private static Vector3 SecondBrushPositionSmallMap = new Vector3();
     private static int MySmallBrushListIndex = 0;
 
+    private static Dictionary<string, List<Vector3>> OtherPlayerRoute = new Dictionary<string, List<Vector3>>();
+    private static int SendMyRouteIndex = 0;
+
     public Dropdown MyEraseDropDown;
     private static GameObject ThisGameObject;
+    public GameObject MyRouteHelper;
 
     public GameObject ThreeD_TextToDisplayRouteLengthOnSmallMap;
     private float TotalLength;
@@ -39,11 +44,14 @@ public class PlayerDrawRoute : MonoBehaviour
         StartCoroutine(DrawTheLineIE());
         StartCoroutine(LinkLastTwoRouteOnLargeMap());
         StartCoroutine(LinkLastTwoRouteOnSmallMap());
+        StartCoroutine(SendMyBrushListToOther());
+        MyRouteHelper.GetComponent<ASL.ASLObject>()._LocallySetFloatCallback(MyFloatFunction);
+
     }
 
     private void Update()
     {
-        //Debug.Log(MyLargerBrushList.Count);
+
     }
 
     IEnumerator DrawTheLineIE()
@@ -115,7 +123,7 @@ public class PlayerDrawRoute : MonoBehaviour
             }
             else
             {
-                yield return new WaitForSeconds(0.15f);
+                yield return new WaitForSeconds(0.03f);
                 int LargeBrushListCount = MyLargerBrushList.Count;
                 for (int i = MyLargeBruchListIndex; i < LargeBrushListCount - 1; i++)
                 {
@@ -137,7 +145,7 @@ public class PlayerDrawRoute : MonoBehaviour
 
                         ASL.ASLHelper.InstantiateASLObject("LargeBrush", NewPosition, Quaternion.identity, "", "", SetLineRenender);
 
-                        yield return new WaitForSeconds(0.05f);
+                        yield return new WaitForSeconds(0.01f);
                     }
                 }
                 //LargeBrushListCount is original length (mins 1 is the index, mins),
@@ -164,7 +172,7 @@ public class PlayerDrawRoute : MonoBehaviour
             }
             else
             {
-                yield return new WaitForSeconds(0.5f);
+                yield return new WaitForSeconds(0.05f);
                 int SmallBrushListCount = MySmallBrushList.Count;
                 for (int i = MySmallBrushListIndex; i < SmallBrushListCount - 1; i++)
                 {
@@ -181,11 +189,11 @@ public class PlayerDrawRoute : MonoBehaviour
                         float X = GetNewXYZ(FirstBrushPositionSmallMap.x, SecondBrushPositionSmallMap.x, DistanceBetweenTwoBrush, 0.015f, o);
                         float Y = GetNewXYZ(FirstBrushPositionSmallMap.y, SecondBrushPositionSmallMap.y, DistanceBetweenTwoBrush, 0.015f, o);
                         float Z = GetNewXYZ(FirstBrushPositionSmallMap.z, SecondBrushPositionSmallMap.z, DistanceBetweenTwoBrush, 0.015f, o);
-                        Vector3 NewPosition = new Vector3 (X, Y, Z);
+                        Vector3 NewPosition = new Vector3(X, Y, Z);
 
                         ASL.ASLHelper.InstantiateASLObject("Brush", NewPosition, Quaternion.identity, "", "", SetLineRenenderSmallMap);
 
-                        yield return new WaitForSeconds(0.05f);
+                        yield return new WaitForSeconds(0.03f);
                     }
 
                     //yield return new WaitForSeconds(0.015f);
@@ -344,6 +352,8 @@ public class PlayerDrawRoute : MonoBehaviour
 
         MyLargeBruchListIndex = 0;
         MySmallBrushListIndex = 0;
+
+        SendMyRouteIndex = 0;
     }
 
     private static void EraseLastTenLineOnMap()
@@ -398,11 +408,6 @@ public class PlayerDrawRoute : MonoBehaviour
         }
     }
 
-    IEnumerator SendMyBrushListToOther()
-    {
-        yield return new WaitForSeconds(10f);
-    }
-
     public List<GameObject> GetMyLargerBrushList()
     {
         return MyLargerBrushList;
@@ -411,6 +416,116 @@ public class PlayerDrawRoute : MonoBehaviour
     public List<GameObject> GetMyLineRenenderBetweenBrush()
     {
         return MyLineRenenderBetweenBrush;
+    }
+
+    public Dictionary<string, List<Vector3>> GetOtherPlayerRoute()
+    {
+        return OtherPlayerRoute;
+    }
+
+    IEnumerator SendMyBrushListToOther()
+    {
+        while (true)
+        {
+            //If nothing in the list, send a unique float array
+            if (MyLineRenenderBetweenBrush.Count <= 1)
+            {
+                yield return new WaitForSeconds(3f);
+
+                MyRouteHelper.GetComponent<ASL.ASLObject>().SendAndSetClaim(() =>
+                {
+                    float[] MyFloatPathPosition = new float[4];
+                    MyFloatPathPosition[0] = 0f;
+                    MyFloatPathPosition[1] = 0f;
+                    MyFloatPathPosition[2] = 10000f;
+
+                    //Send ID to other player, they can use the ID to display the name.
+                    MyFloatPathPosition[3] = GameLiftManager.GetInstance().m_PeerId;
+                    MyRouteHelper.GetComponent<ASL.ASLObject>().SendFloatArray(MyFloatPathPosition);
+                });
+            }
+            else
+            {
+                yield return new WaitForSeconds(5f);
+
+                MyRouteHelper.GetComponent<ASL.ASLObject>().SendAndSetClaim(() =>
+                {
+                    //Send a start message
+                    Debug.Log("Send Start");
+                    float[] StartMessage = new float[4];
+                    StartMessage[0] = 0f;
+                    StartMessage[1] = 0f;
+                    StartMessage[2] = 12000f;
+
+                    StartMessage[3] = GameLiftManager.GetInstance().m_PeerId;
+                    MyRouteHelper.GetComponent<ASL.ASLObject>().SendFloatArray(StartMessage);
+                });
+
+                MyRouteHelper.GetComponent<ASL.ASLObject>().SendAndSetClaim(() =>
+                {
+                    foreach (GameObject B in MyLineRenenderBetweenBrush)
+                    {
+                        Debug.Log("Send");
+                        float[] MyFloatPathPosition = new float[4];
+                        MyFloatPathPosition[0] = B.transform.position.x;
+                        MyFloatPathPosition[1] = B.transform.position.y;
+                        MyFloatPathPosition[2] = B.transform.position.z;
+
+                        //Send ID to other player, they can use the ID to display the name.
+                        MyFloatPathPosition[3] = GameLiftManager.GetInstance().m_PeerId;
+                        MyRouteHelper.GetComponent<ASL.ASLObject>().SendFloatArray(MyFloatPathPosition);
+
+                        //FloatIndex++;
+                    }
+                });
+            }
+        }
+    }
+
+    public static void MyFloatFunction(string _id, float[] _myFloats)
+    {
+        //If _myFloats contain a new m_PeerId (Player will always send a 0,0,10000 message first)
+        if (!OtherPlayerRoute.ContainsKey(GameLiftManager.GetInstance().m_Players[(int)_myFloats[3]]))
+        {
+            //If other players send a empty list and it's a new user, add a empty List<Vector3> for that user.
+            if (_myFloats[0] == 0 && _myFloats[1] == 0 && _myFloats[2] == 10000)
+            {
+                List<Vector3> RouteListFromOther = new List<Vector3>();
+                OtherPlayerRoute.Add(GameLiftManager.GetInstance().m_Players[(int)_myFloats[3]], RouteListFromOther);
+            }
+            //else
+            //{
+            //    Vector3 NewPositionFromOther = new Vector3();
+            //    NewPositionFromOther.x = _myFloats[0];
+            //    NewPositionFromOther.y = _myFloats[1];
+            //    NewPositionFromOther.z = _myFloats[2];
+
+            //    List<Vector3> RouteListFromOther = new List<Vector3>();
+            //    RouteListFromOther.Add(NewPositionFromOther);
+
+            //    OtherPlayerRoute.Add(GameLiftManager.GetInstance().m_Players[(int)_myFloats[3]], RouteListFromOther);
+            //}
+        }
+        else
+        {
+            //If player send a clear list message, replace the old list to a new empty List<Vector3> for that user.
+            //0,0,10000 means player clear their route. 0,0,12000 means player gonna resend the entire list to me.
+            if (_myFloats[0] == 0f && _myFloats[1] == 0f && _myFloats[2] == 10000f || _myFloats[0] == 0F && _myFloats[1] == 0F && _myFloats[2] == 12000f)
+            //if (_myFloats[0] == 0f && _myFloats[1] == 0f && _myFloats[2] == 10000f)
+            {
+                List<Vector3> RouteListFromOther = new List<Vector3>();
+                OtherPlayerRoute[GameLiftManager.GetInstance().m_Players[(int)_myFloats[3]]] = RouteListFromOther;
+            }
+            else
+            {
+                Vector3 NewPositionFromOther = new Vector3();
+                NewPositionFromOther.x = _myFloats[0];
+                NewPositionFromOther.y = _myFloats[1];
+                NewPositionFromOther.z = _myFloats[2];
+
+                OtherPlayerRoute[GameLiftManager.GetInstance().m_Players[(int)_myFloats[3]]].Add(NewPositionFromOther);
+            }
+        }
     }
 }
 

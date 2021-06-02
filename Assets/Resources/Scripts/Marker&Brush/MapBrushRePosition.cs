@@ -17,7 +17,7 @@ public class MapBrushRePosition : MonoBehaviour
         RaycastHit Hit;
         if (Physics.Raycast(this.transform.position, Vector3.down, out Hit))
         {
-            Vector3 NewPosition = new Vector3(this.transform.position.x, Hit.point.y - 2.2f, this.transform.position.z);
+            Vector3 NewPosition = new Vector3(this.transform.position.x, Hit.point.y - 2.3f, this.transform.position.z);
             this.transform.position = NewPosition;
             this.GetComponent<ASL.ASLObject>().SendAndSetClaim(() =>
             {
