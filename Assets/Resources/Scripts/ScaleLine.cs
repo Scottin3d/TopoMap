@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -9,6 +10,7 @@ public class ScaleLine : MonoBehaviour
     public Canvas myCanvas;
     public RectTransform RenderPanel, RenderBase, RenderM, RenderF;
     public Text LabelM, LabelF;
+    private RectTransform LabelM_Rect, LabelF_Rect;
 
     private static Camera curDisplay;
     private static ChunkData closestChunk;
@@ -26,6 +28,10 @@ public class ScaleLine : MonoBehaviour
         Debug.Assert(RenderBase != null);
         Debug.Assert(RenderM != null);
         Debug.Assert(RenderF != null);
+        Debug.Assert(LabelF != null);
+        Debug.Assert(LabelM != null);
+        LabelM_Rect = LabelM.GetComponent<RectTransform>();
+        LabelF_Rect = LabelF.GetComponent<RectTransform>();
         StartCoroutine(UpdateScaleLine());
     }
 
@@ -33,11 +39,13 @@ public class ScaleLine : MonoBehaviour
     {
         while (true)
         {
+            bool OnSmallMap = false;
+
             //get height of canvas
             float canvasHeight = myCanvas.pixelRect.height;
             //get height, width of line panel
             float panelHeight = canvasHeight * 0.3f; float panelWidth = 2f;
-            float scaleWidth = 24f; float scaleHeight = 2f;
+            float scaleWidth = 18f; float scaleHeight = 2f;
             float baseWidth = scaleWidth * 2f + panelWidth;
 
             float panelX = 50f; float panelY = canvasHeight * 0.3f;
@@ -51,30 +59,74 @@ public class ScaleLine : MonoBehaviour
             //Debug.Log(closestChunk);
             if (closestChunk != null)
             {
-                //Debug.Log("Name: " + closestChunk.gameObject.name + " with parent: " + closestChunk.gameObject.transform.parent);
                 //get parent of chunk
                 Transform chunkParent = closestChunk.transform.parent;
-                //get heightmap size
-                float mapSize = -1f;
+                //get chunk size
+                float chunkSize = -1f;
                 if (chunkParent != null)
                 {
-                    mapSize = chunkParent.gameObject.GetComponent<GenerateMapFromHeightMap>().mapSize;
+                    chunkSize = chunkParent.gameObject.GetComponent<GenerateMapFromHeightMap>().ChunkSize;
+                    if (chunkParent.gameObject.tag == "SpawnSmallMap") { 
+                        //chunkSize = chunkSize * MarkerDisplay.GetScaleFactor();
+                        OnSmallMap = true;
+                    } else { OnSmallMap = false; }
+                    
                 }
+                if(chunkSize > 0)
+                {
+                    if (OnSmallMap)
+                    {
+                        //get positions on opposite ends of the chunk (center y is y of parent) (+- 0.5f * chunkSize * Vector3.forward)
+                        Vector3 topPos = new Vector3(closestChunk.MapChunk.center.x, chunkParent.position.y, closestChunk.MapChunk.center.y) + 0.5f * chunkSize * Vector3.forward;
+                        Vector3 botPos = new Vector3(closestChunk.MapChunk.center.x, chunkParent.position.y, closestChunk.MapChunk.center.y) - 0.5f * chunkSize * Vector3.forward;
+                        //convert world positions to screen positions 
+                        Vector3 screenTop = curDisplay.WorldToScreenPoint(topPos);
+                        Vector3 screenBot = curDisplay.WorldToScreenPoint(botPos);
+                        //get distance between screen positions
+                        float chunkScreenSize = (screenBot - screenTop).magnitude;
+                        //compare distance to total height of scale line (this is meter distance)
+                        float scaleFactor = 1f;
+                        if (chunkScreenSize > panelHeight) { chunkScreenSize /= 2f; scaleFactor /= 2f; }
+                        float tempScreenSize = chunkScreenSize * 2f;
+                        
+                        while(tempScreenSize < panelHeight)
+                        {
+                            scaleFactor *= 2f;
+                            tempScreenSize *= 2f;
+                        }
+                        chunkScreenSize *= scaleFactor;
+                        float displaySizeM = chunkSize * MarkerDisplay.GetScaleFactor() * scaleFactor;
+                        float displaySizeF = displaySizeM / 3.28084f;   //divide by 3.28084(this is ft distance)
+                        //Debug.Log((chunkScreenSize / panelHeight) + " vs " + ((chunkScreenSize / panelHeight) / 3.28084f));
 
-                float mf_ScaleOffset = 0.25f * 3.28084f - 0.5f;
-                RenderF.anchoredPosition = new Vector2(panelX - 0.5f * (scaleWidth + panelWidth), panelY + mf_ScaleOffset * panelHeight);
-                RenderF.sizeDelta = new Vector2(scaleWidth, scaleHeight);
+                        RenderM.anchoredPosition = new Vector2(panelX - 0.5f * (scaleWidth + panelWidth), panelY + (chunkScreenSize / panelHeight - 0.5f) * panelHeight);
+                        RenderF.anchoredPosition = new Vector2(panelX + 0.5f * (scaleWidth + panelWidth), panelY + ((chunkScreenSize / panelHeight) / 3.28084f - 0.5f) * panelHeight);
+                        LabelM_Rect.anchoredPosition = new Vector2(RenderM.anchoredPosition.x, RenderM.anchoredPosition.y + 5f);
+                        LabelF_Rect.anchoredPosition = new Vector2(RenderF.anchoredPosition.x, RenderF.anchoredPosition.y + 5f);
+                        LabelM.text = String.Format("{0}m", displaySizeM);
+                        LabelF.text = String.Format("{0}ft.", displaySizeF);
+                    }   
+                    else
+                    {
 
-                RenderM.anchoredPosition = new Vector2(panelX + 0.5f * (scaleWidth + panelWidth), panelY - 0.25f * panelHeight);
-                RenderM.sizeDelta = new Vector2(scaleWidth, scaleHeight);
+                    }
+                    //float mf_ScaleOffset = 0.25f * 3.28084f - 0.5f;
+                } else
+                {
+                    RenderM.anchoredPosition = new Vector2(panelX - 0.5f * (scaleWidth + panelWidth), panelY - 0.5f * panelHeight);
+                    RenderF.anchoredPosition = new Vector2(panelX + 0.5f * (scaleWidth + panelWidth), panelY - 0.5f * panelHeight);
+                    LabelM.text = "";
+                    LabelF.text = "";
+                }                
             } else
             {
                 RenderM.anchoredPosition = new Vector2(panelX - 0.5f * (scaleWidth + panelWidth), panelY - 0.5f * panelHeight);
-                RenderM.sizeDelta = new Vector2(scaleWidth, scaleHeight);
-
                 RenderF.anchoredPosition = new Vector2(panelX + 0.5f * (scaleWidth + panelWidth), panelY - 0.5f * panelHeight);
-                RenderF.sizeDelta = new Vector2(scaleWidth, scaleHeight);
+                LabelM.text = "";
+                LabelF.text = "";
             }
+            RenderF.sizeDelta = new Vector2(scaleWidth, scaleHeight);
+            RenderM.sizeDelta = new Vector2(scaleWidth, scaleHeight);
             yield return new WaitForSeconds(0.01f);
         }        
     }
