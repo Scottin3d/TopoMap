@@ -4,21 +4,21 @@ using System.Collections.Generic;
 using UnityEngine;
 using ASL;
 
+/// <summary>
+/// ASLDeformationBrain is the core logic for handling the manipulation of chunk meshes using the ASL library.  
+/// Deformation is broken down into payloads sent over ASL and then reconstructed.  Beause ASL function callbacks
+/// are handled asynchronously, when a payload is recieved, it is reconstructed into an instruction object and added
+/// to a queue that will then continuously try to execute in the Update() function.
+/// </summary>
 public class ASLDeformationBrain : MonoBehaviour {
     public static ASLDeformationBrain current;
+    public GenerateMapFromHeightMap mapGen = null;
+    private static ASLObject brain;
 
     public List<GameObject> localMapChunks = new List<GameObject>();
+    public static Queue<Instruction> instructions = new Queue<Instruction>();
 
-    public GameObject testCube = null;
-    static GameObject cube = null;
-    static Vector3 pos;
-    static float deltaY;
-
-    static Queue<Instruction> instructions = new Queue<Instruction>();
-    private static ASLObject brain;
-    public GenerateMapFromHeightMap mapGen = null;
     bool IsInit = false;
-    // bool IsChange = false;
 
     /// <summary>
     /// Set a static reference to the script for access outside of scope.
@@ -30,8 +30,7 @@ public class ASLDeformationBrain : MonoBehaviour {
     /// <summary>
     /// Assing the ASL brian and initialize variables.
     /// </summary>
-    void Start()
-    {
+    void Start() {
         brain = GetComponent<ASLObject>();
         StartCoroutine(Initialize());
     }
@@ -152,13 +151,15 @@ public class ASLDeformationBrain : MonoBehaviour {
         mesh.vertices = vertices;
         mesh.RecalculateBounds();
         mesh.RecalculateNormals();
+
+        chunk.GetComponent<MeshCollider>().sharedMesh = mesh;
     }
 
     /// <summary>
-    /// 
+    /// Splits a float[] payload into a list of instruction steps.
     /// </summary>
-    /// <param name="_payload"></param>
-    /// <returns></returns>
+    /// <param name="_payload">The float[] to be split</param>
+    /// <returns>The instruction steps in list form</returns>
     public static List<float[]> SplitPayload(float[] _payload) {
         List<float[]> splitPayload = new List<float[]>();
         splitPayload.Add(new float[1] { _payload[0] });
@@ -225,22 +226,6 @@ public class ASLDeformationBrain : MonoBehaviour {
         return array;
     }
 
-    /*
-    // eventually take in
-    private void DeformMesh(RaycastHit hit, float f) {
-        hit.collider.TryGetComponent<ChunkData>(out ChunkData chunk);
-        if (chunk != null) {
-            int chunkID = chunk.MapChunk.chunkID;
-
-            float[] payload = new float[] { Convert.ToSingle(chunkID), f };
-
-            brain.SendAndSetClaim(() => {
-                brain.SendFloatArray(payload);
-            });
-        }
-    }
-    */
-
     /// <summary>
     /// The SendFloatArray Callback function associated with ASL and the deformation brain.
     /// </summary>
@@ -251,25 +236,32 @@ public class ASLDeformationBrain : MonoBehaviour {
             Debug.Log("The name of the object that sent these floats is: " + myObject.name);
         }
 
-        int chunkID = Convert.ToInt32(_myFloats[0]);
-        float delta = _myFloats[1];
+        List<float[]> splitPayload = SplitPayload(_myFloats);
+        int id = Convert.ToInt32(splitPayload[0][0]);
+        int count = Convert.ToInt32(splitPayload[1][0]);
 
-        Instruction i = new Instruction(chunkID, delta);
+        int[] vertexIndices = new int[count];
+        for (int v = 0; v < count; v++) {
+            vertexIndices[v] = Convert.ToInt32(splitPayload[2][v]);
+        }
+
+
+        Instruction i = new Instruction(id, vertexIndices, splitPayload[3]);
         instructions.Enqueue(i);
     }
-
-
 }
 
 /// <summary>
 /// The structure of a deformation instruction
 /// </summary>
 public struct Instruction {
-    public int instructionID;
-    public float delta;
+    public int id;
+    public int[] vertexIndices;
+    public float[] vertexDeformation;
 
-    public Instruction(int _id, float _delta) {
-        instructionID = _id;
-        delta = _delta;
+    public Instruction(int _id, int[] indices, float[] deformation) {
+        id = _id;
+        vertexIndices = indices;
+        vertexDeformation = deformation;
     }
 }
