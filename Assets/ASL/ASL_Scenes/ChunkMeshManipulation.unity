@@ -311,8 +311,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   UPDATES_PER_SECOND: 20
-  currentSelection: {fileID: 0}
-  radius: 5
   colorGradient:
     serializedVersion: 2
     key0: {r: 1, g: 0, b: 0, a: 1}
@@ -366,6 +364,7 @@ MonoBehaviour:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
+  currentSelection: {fileID: 0}
   mapGen: {fileID: 468696375}
 --- !u!4 &330221379
 Transform:
@@ -1670,7 +1669,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 538317692418114363, guid: 9c55283d019522d459ff46407bd79dc4, type: 3}
       propertyPath: m_IsActive
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 1565700341831208893, guid: 9c55283d019522d459ff46407bd79dc4, type: 3}
       propertyPath: m_StartingScene

@@ -231,8 +231,6 @@ public partial class MeshManipulation : MonoBehaviour {
     /// <param name="hit"></param>
     /// <param name="radius"></param>
     private void  GetRadialVerts(RaycastHit hit, float radius) {
-
-
         Vector3 center = hit.point;
 
         // check current chunk
@@ -349,7 +347,6 @@ public partial class MeshManipulation : MonoBehaviour {
 
         return array;
     }
-    */
 
     private void ModifyMesh(float delta) {
         
@@ -389,13 +386,6 @@ public partial class MeshManipulation : MonoBehaviour {
 
                     float[] payload = CombineFloatArrays(id, numberOfAffectedVertices, verticesToChange, affectedVertexDelta);
                     terrainBrain.SendFloatArray(payload);
-                    //asl.SendAndDeformMesh(verticesToChange, verticesVector3s);
-
-
-                    // non asl manipulation
-                    //currentSelection.GetComponent<MeshFilter>().mesh.vertices = vertices;
-                    //currentSelection.GetComponent<MeshFilter>().mesh.RecalculateBounds();
-                    //currentSelection.GetComponent<MeshFilter>().mesh.RecalculateNormals();
                 
                 });
 
@@ -445,7 +435,6 @@ public partial class MeshManipulation : MonoBehaviour {
 
         return array;
     }
-    */
 }
 
 

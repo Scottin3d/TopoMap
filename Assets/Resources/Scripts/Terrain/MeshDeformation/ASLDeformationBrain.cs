@@ -6,8 +6,6 @@ using ASL;
 
 public class ASLDeformationBrain : MonoBehaviour {
     public static ASLDeformationBrain current;
-    public GenerateMapFromHeightMap mapGen = null;
-    private static ASLObject brain;
 
     public List<GameObject> localMapChunks = new List<GameObject>();
 
@@ -16,6 +14,7 @@ public class ASLDeformationBrain : MonoBehaviour {
     static Vector3 pos;
     static float deltaY;
 
+    static Queue<Instruction> instructions = new Queue<Instruction>();
     private static ASLObject brain;
     public GenerateMapFromHeightMap mapGen = null;
     bool IsInit = false;
@@ -33,15 +32,8 @@ public class ASLDeformationBrain : MonoBehaviour {
     /// </summary>
     void Start()
     {
-
-        static Queue<Instruction> instructions = new Queue<Instruction>();
-        cube = testCube;
-        //testCube = GameObject.CreatePrimitive(PrimitiveType.Cube);
         brain = GetComponent<ASLObject>();
-        //brain.GetComponent<ASLObject>()._LocallySetFloatCallback(MyFloatFunction);
         StartCoroutine(Initialize());
-
-
     }
 
     /// <summary>
