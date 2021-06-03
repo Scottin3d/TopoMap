@@ -16,7 +16,8 @@ public class ToolBox : MonoBehaviour
     private const float timeToAnimate = 1f; //how long in seconds the swipe animation should take
 
     private GameObject primaryText;
-    private GameObject transitionText;
+    private GameObject leftTransitionText;
+    private GameObject rightTransitionText;
 
     //start sets the child gameobjects, and assumes that the canvas is the first child under the toolbox,
     //and assumes the primary text and transition text are the first and second children of the canvas
@@ -24,7 +25,8 @@ public class ToolBox : MonoBehaviour
     private void Start()
     {
         primaryText = transform.GetChild(0).GetChild(0).gameObject;
-        transitionText = transform.GetChild(0).GetChild(1).gameObject;
+        leftTransitionText = transform.GetChild(1).GetChild(0).gameObject;
+        rightTransitionText = transform.GetChild(2).GetChild(0).gameObject;
     }
 
     //activates the renderers for this object and allows interaction
@@ -61,23 +63,9 @@ public class ToolBox : MonoBehaviour
         }
     }
 
-    //this function will transition the text leftwards in a small animation.
+    //this function will transition the text in a small animation of the box turning to the left.
     //the bool returns true if the toolbox is not already in an animation and begins.
     //otherwise it returns false
-    //
-    //positional text information:
-    //
-    //animate moving in the negative x direction locally
-    //
-    //final position:
-    //center pivot
-    //T: 0f,0f,0f
-    //R: 0f,0f,0f
-    //S: 2f,1f,1f
-    //width: 1000f
-    //height: 100f
-    //anchors and pivot min/max all at 0.5f
-    //
     public bool transitionLeft(string newText)
     {
         if (inAnimation)
@@ -86,29 +74,29 @@ public class ToolBox : MonoBehaviour
         }
 
         inAnimation = true;
-        transitionText.GetComponent<Text>().text = newText;
+        leftTransitionText.GetComponent<Text>().text = newText;
+        leftTransitionText.GetComponent<Text>().color = Color.black;
 
         StartCoroutine("incrementLeftChange");
         return true;
     }
 
-    //this coroutine animates the object, currently fading out old text and fading in new text
+    //this coroutine animates the object, 
+    //now with rotation, spins the toolbox in the positive Z direction
     IEnumerator incrementLeftChange()
     {
         float currentTime = 0f;
-        Color colorToSet = Color.black;
         while (true)
         {
             if(currentTime >= timeToAnimate)
             {
-                onAnimationEnd();
+                onAnimationEnd(true);
                 break;
             }
 
-            colorToSet.a = (timeToAnimate - currentTime) / timeToAnimate;
-            primaryText.GetComponent<Text>().color = colorToSet;
-            colorToSet.a = currentTime / timeToAnimate;
-            transitionText.GetComponent<Text>().color = colorToSet;
+            Quaternion newRot = transform.localRotation;
+            newRot *= Quaternion.AngleAxis((Time.deltaTime * 90f), Vector3.forward);
+            transform.localRotation = newRot;
 
             currentTime += Time.deltaTime;
             yield return new WaitForFixedUpdate();
@@ -116,18 +104,71 @@ public class ToolBox : MonoBehaviour
         
     }
 
-    //function that resets objects at the end of the transitional animation
-    private void onAnimationEnd()
+    //this function will transition the text in a small animation of the box turning to the right.
+    //the bool returns true if the toolbox is not already in an animation and begins.
+    //otherwise it returns false
+    public bool transitionRight(string newText)
     {
-        primaryText.GetComponent<Text>().text = transitionText.GetComponent<Text>().text;
+        if (inAnimation)
+        {
+            return false;
+        }
+
+        inAnimation = true;
+        rightTransitionText.GetComponent<Text>().text = newText;
+        rightTransitionText.GetComponent<Text>().color = Color.black;
+
+        StartCoroutine("incrementRightChange");
+        return true;
+    }
+
+    //this coroutine animates the object, 
+    //now with rotation, spins the toolbox in the negative Z direction
+    IEnumerator incrementRightChange()
+    {
+        float currentTime = 0f;
+        while (true)
+        {
+            if (currentTime >= timeToAnimate)
+            {
+                onAnimationEnd(false);
+                break;
+            }
+
+            Quaternion newRot = transform.localRotation;
+            newRot *= Quaternion.AngleAxis(-(Time.deltaTime * 90f), Vector3.forward);
+            transform.localRotation = newRot;
+
+            currentTime += Time.deltaTime;
+            yield return new WaitForFixedUpdate();
+        }
+
+    }
+
+    //function that resets objects at the end of the transitional animation
+    //boolean indicates which function is calling the animation end in order to access the correct text.
+    private void onAnimationEnd(bool isLeft)
+    {
+        if (isLeft)
+        {
+            primaryText.GetComponent<Text>().text = leftTransitionText.GetComponent<Text>().text;
+        }
+        else
+        {
+            primaryText.GetComponent<Text>().text = rightTransitionText.GetComponent<Text>().text;
+        }
 
         Color colorToSet = Color.black;
         primaryText.GetComponent<Text>().color = colorToSet;
         colorToSet.a = 0f;
-        transitionText.GetComponent<Text>().color = colorToSet;
+        leftTransitionText.GetComponent<Text>().color = colorToSet;
+        rightTransitionText.GetComponent<Text>().color = colorToSet;
 
         primaryText.transform.localPosition = Vector3.zero;
-        transitionText.transform.localPosition = Vector3.zero;
+        leftTransitionText.transform.localPosition = Vector3.zero;
+
+        //reset rotation
+        transform.localRotation = Quaternion.Euler(new Vector3(4.244f, 104.451f, 26.596f));
 
         inAnimation = false;
     }

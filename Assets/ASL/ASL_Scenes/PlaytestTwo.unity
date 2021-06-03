@@ -2199,15 +2199,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c898ef4bf03a0c746bea49737d93341b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  updatesPerSecond: 10
-  heightAboveMarker: 10
-  batchSize: 10
-  MapDisplay: {fileID: 0}
-  scanFactor: 2
-  scaleFactor: 2
-  mySpline: {fileID: 1714597436}
-  oldSpline: {fileID: 139236885}
-  traceSpeed: 2
 --- !u!1 &830439850
 GameObject:
   m_ObjectHideFlags: 0

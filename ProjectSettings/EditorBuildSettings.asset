@@ -14,13 +14,13 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/ASL/ASL_Scenes/DeformationBrain.unity
     guid: 18a82ffe17bd2924a9002584d44182c5
-  - enabled: 1
-    path: Assets/ASL/ASL_Scenes/ChunkMeshManipulation.unity
-    guid: bc11fa15751bc7d4f9fc816725bbf8a3
+  - enabled: 0
+    path: 
+    guid: 00000000000000000000000000000000
   - enabled: 0
     path: Assets/Resources/Scene/WaitingRoom.unity
     guid: 4b9e535e510abae449699304cc376399
-  - enabled: 0
+  - enabled: 1
     path: Assets/ASL/ASL_Scenes/PlaytestOneScene.unity
     guid: 9903a08b28a2f6e41a3bbb95dacd4c89
   - enabled: 0

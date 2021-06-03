@@ -433,28 +433,28 @@ public class VRToolSelector : MonoBehaviour
         }
         else if(swipeObject == RightPad) //swipe right
         {
-            switch (currentState) //currently using transition left as it is not yet based on direction
+            switch (currentState)
             {
                 case toolSelectionState.None:
-                    if (ToolBox.GetComponent<ToolBox>().transitionLeft(RoadText))
+                    if (ToolBox.GetComponent<ToolBox>().transitionRight(RoadText))
                     {
                         currentState = toolSelectionState.Road;
                     }
                     break;
                 case toolSelectionState.Road:
-                    if (ToolBox.GetComponent<ToolBox>().transitionLeft(MarkerText))
+                    if (ToolBox.GetComponent<ToolBox>().transitionRight(MarkerText))
                     {
                         currentState = toolSelectionState.Marker;
                     }
                     break;
                 case toolSelectionState.Marker:
-                    if (ToolBox.GetComponent<ToolBox>().transitionLeft(RulerText))
+                    if (ToolBox.GetComponent<ToolBox>().transitionRight(RulerText))
                     {
                         currentState = toolSelectionState.Ruler;
                     }
                     break;
                 case toolSelectionState.Ruler:
-                    if (ToolBox.GetComponent<ToolBox>().transitionLeft(TeleportText))
+                    if (ToolBox.GetComponent<ToolBox>().transitionRight(TeleportText))
                     {
                         currentState = toolSelectionState.Teleport;
                     }
