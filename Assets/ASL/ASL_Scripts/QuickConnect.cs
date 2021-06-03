@@ -37,7 +37,8 @@ namespace ASL
             if (!m_StaticQuickStart && (FindObjectOfType<GameLiftManager>() == null || GameLiftManager.GetInstance() == null || !GameLiftManager.GetInstance().m_Client.ConnectedAndReady))
             {
                 m_StaticQuickStart = true;
-                m_StaticRoomName = m_RoomName;
+                //m_StaticRoomName = m_RoomName;
+                m_StaticRoomName = SceneManager.GetActiveScene().name;
                 m_StaticStartingScene = m_StartingScene;
                 SceneManager.LoadScene("ASL_LobbyScene");
             }

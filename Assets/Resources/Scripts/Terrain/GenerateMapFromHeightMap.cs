@@ -9,6 +9,8 @@ using ASL;
 /// Each mesh has a chunk resolution of 64x64 triangles.
 /// </summary>
 public partial class GenerateMapFromHeightMap : MonoBehaviour {
+    //TerrainASLObjectsGeneration taslog;
+
     private float worldMaxHeight = float.MinValue;
     private float worldMinHeight = float.MaxValue;
 
@@ -19,13 +21,19 @@ public partial class GenerateMapFromHeightMap : MonoBehaviour {
     [Tooltip("The size of the map in meters.")]
     public int mapSize = 10;                                // the total size of the map
 
-    public static readonly int chunkResolution = 32;       // the texture resolution of each chunk
+    public static readonly int chunkResolution = 16;       // the texture resolution of each chunk
     private int numberOfChunks;                             // the number of chunks (width, height) the heightmap is made of. heightmap resolution / chunkResolution
     public int NumberOfChunks { get => numberOfChunks; set => numberOfChunks = value; }
     private float chunkSize;                                // the world unit size of each chunk. mapSize / numberOf Chunks 
     public float ChunkSize { get => chunkSize; set => chunkSize = value; }
     public GameObject[,] mapChunksGameObjects;              // map chunk container
-    public GameObject[,] ASLMapChunks;
+
+
+    public List<GameObject> ChunksObjects { get => chunksObjects; set => chunksObjects = value; }
+    List<GameObject> chunksObjects = new List<GameObject>();
+
+    //public GameObject[,] ASLMapChunks;
+    //List<GameObject> ASLTerrainObjects;
     public MapChunk[,] mapChunks;                         // map chunk container
 
 
@@ -59,6 +67,7 @@ public partial class GenerateMapFromHeightMap : MonoBehaviour {
     private bool DoneGeneration = false;
     public bool IsGenerated { get { return DoneGeneration; } }
 
+
     /// <summary>
     /// Assigns class variables.
     /// </summary>
@@ -75,6 +84,8 @@ public partial class GenerateMapFromHeightMap : MonoBehaviour {
         }
 
         noiseProperties = new NoiseProperties(noiseInfluence, noiseScale, octaves, persistence, lacunarity, seed);
+
+        //taslog = new TerrainASLObjectsGeneration();
     }
 
     /// <summary>
@@ -84,6 +95,11 @@ public partial class GenerateMapFromHeightMap : MonoBehaviour {
         if (demoMode) {
             GenDemo();
         } else {
+            /*
+            if (GameLiftManager.GetInstance().m_PeerId == 1) { 
+                StartCoroutine(GenerateMap());
+            }
+            */
             GenerateMap();
         }
     }
@@ -95,13 +111,13 @@ public partial class GenerateMapFromHeightMap : MonoBehaviour {
     /// 3. smooth the edges of the terrain chunks
     /// 4. generate the chunk meshes
     /// </summary>
-    public void GenerateMap() {
+    void GenerateMap() {
         worldMaxHeight = float.MinValue;
         worldMinHeight = float.MaxValue;
 
         mapChunks = new MapChunk[numberOfChunks, numberOfChunks];   // set map chunk container
         mapChunksGameObjects = new GameObject[numberOfChunks, numberOfChunks];
-        ASLMapChunks = new GameObject[numberOfChunks, numberOfChunks];
+
         int mapWidth = heightmap.width;                             // full heightmap resolution, min 32
         int mapHeight = heightmap.height;                           // full heightmap resolution, min 32
 
@@ -119,7 +135,7 @@ public partial class GenerateMapFromHeightMap : MonoBehaviour {
             // find the center of the chunk
             float halfChunk = chunkSize / 2f;
             Vector2 _chunkCenter = new Vector2(transform.position.x + mapLowerLeftX + (row * chunkSize) + halfChunk,
-                                             transform.position.z + mapLowerLeftZ + (col * chunkSize) + halfChunk);
+                                                transform.position.z + mapLowerLeftZ + (col * chunkSize) + halfChunk);
 
             // generate heightmap chunk
             Texture2D _heightmap = TextureGenerator.GetPixelMap(heightmap, (mapWidth / numberOfChunks) * row,
@@ -129,23 +145,35 @@ public partial class GenerateMapFromHeightMap : MonoBehaviour {
             MapData _mapData = GenerateMapData(_heightmap);
 
             // create chunk
-            MapChunk mapChunk = new MapChunk(_heightmap, _chunkCenter, _mapData);
+            MapChunk mapChunk = new MapChunk(_heightmap, _chunkCenter, _mapData, c);
             mapChunks[row, col] = mapChunk;
-
             GameObject chunk = new GameObject();
+           
+            // set chunk parent
             chunk.transform.parent = transform;
+
+            // set chunk scale
             chunk.transform.localScale = Vector3.one;
-            chunk.tag = "Chunk";
-            chunk.name = "Chunk" + row + ", " + col;
-            chunk.layer = LayerMask.NameToLayer("Ground");
+
+            // set chunk position
             chunk.transform.position = new Vector3(mapChunk.center.x, transform.position.y, mapChunk.center.y);
-            chunk.AddComponent<ChunkData>();
-            chunk.GetComponent<ChunkData>().MapChunk = mapChunk;
+
+            // set chunk tag
+            chunk.tag = "Chunk";
+                
+            // set chunk name
+            chunk.name = "Chunk" + row + ", " + col;
+
+            // set chunk layerMask
+            chunk.layer = LayerMask.NameToLayer("Ground");
+
+            // set mapchunk
+            chunk.AddComponent<ChunkData>().MapChunk = mapChunk;
+
             StartCoroutine(chunk.GetComponent<ChunkData>().AskIfVisible());
-
+            
+            chunksObjects.Add(chunk);
             mapChunksGameObjects[row, col] = chunk;
-            //ASLHelper.InstantiateASLObject(PrimitiveType.Plane, chunk.transform.position, Quaternion.identity, null, null, GenerateASLChunk);
-
             row++;
         }
 
@@ -163,6 +191,7 @@ public partial class GenerateMapFromHeightMap : MonoBehaviour {
             if (col + 1 <= numberOfChunks - 1) {
                 mapChunks[row, col].chunkNeighbors[(int)MapChunkNeighbor.Top] = mapChunks[row, col + 1];
                 mapChunks[row, col].chunkNeighborObjects[(int)MapChunkNeighbor.Top] = mapChunksGameObjects[row, col + 1];
+               
 
                 // check corners
                 // left
@@ -170,14 +199,14 @@ public partial class GenerateMapFromHeightMap : MonoBehaviour {
                 if (topLeft) {
                     mapChunks[row, col].chunkNeighbors[(int)MapChunkNeighbor.TopLeft] = mapChunks[row - 1, col + 1];
                     mapChunks[row, col].chunkNeighborObjects[(int)MapChunkNeighbor.TopLeft] = mapChunksGameObjects[row - 1, col + 1];
-
+                   
                 }
                 // right
                 bool topRight = (row + 1 <= numberOfChunks - 1);
                 if (topRight) {
                     mapChunks[row, col].chunkNeighbors[(int)MapChunkNeighbor.TopRight] = mapChunks[row + 1, col + 1];
                     mapChunks[row, col].chunkNeighborObjects[(int)MapChunkNeighbor.TopRight] = mapChunksGameObjects[row + 1, col + 1];
-
+                    
                 }
             }
 
@@ -185,26 +214,27 @@ public partial class GenerateMapFromHeightMap : MonoBehaviour {
             if (row + 1 <= numberOfChunks - 1) {
                 mapChunks[row, col].chunkNeighbors[(int)MapChunkNeighbor.Right] = mapChunks[row + 1, col];
                 mapChunks[row, col].chunkNeighborObjects[(int)MapChunkNeighbor.Right] = mapChunksGameObjects[row + 1, col];
-
+               
             }
 
             // Bottom : z - 1 >= 0
             if (col - 1 >= 0) {
                 mapChunks[row, col].chunkNeighbors[(int)MapChunkNeighbor.Bottom] = mapChunks[row, col - 1];
                 mapChunks[row, col].chunkNeighborObjects[(int)MapChunkNeighbor.Bottom] = mapChunksGameObjects[row, col - 1];
+                
 
                 // check corners
                 // left
                 if (row - 1 >= 0) {
                     mapChunks[row, col].chunkNeighbors[(int)MapChunkNeighbor.BottomLeft] = mapChunks[row - 1, col - 1];
                     mapChunks[row, col].chunkNeighborObjects[(int)MapChunkNeighbor.BottomLeft] = mapChunksGameObjects[row - 1, col - 1];
-
+                    
                 }
                 // right
                 if (row + 1 <= numberOfChunks - 1) {
                     mapChunks[row, col].chunkNeighbors[(int)MapChunkNeighbor.BottomRight] = mapChunks[row + 1, col - 1];
                     mapChunks[row, col].chunkNeighborObjects[(int)MapChunkNeighbor.BottomRight] = mapChunksGameObjects[row + 1, col - 1];
-
+                   
                 }
             }
 
@@ -244,13 +274,12 @@ public partial class GenerateMapFromHeightMap : MonoBehaviour {
 
             // create chunk mesh
             Mesh mesh = mapChunks[row, col].meshData.CreateMesh();
-        
+
             // create game object of chunk
             mapChunksGameObjects[row, col].AddComponent<MeshFilter>().sharedMesh = mesh;
             mapChunksGameObjects[row, col].AddComponent<MeshCollider>().sharedMesh = mesh;
             mapChunksGameObjects[row, col].AddComponent<MeshRenderer>().sharedMaterial = material;
             mapChunksGameObjects[row, col].GetComponent<MeshRenderer>().sharedMaterial.mainTexture = mapChunks[row, col].heightmap;
-            
 
             row++;
         }
@@ -258,8 +287,12 @@ public partial class GenerateMapFromHeightMap : MonoBehaviour {
         DoneGeneration = true;
     }
 
-    private void GenerateASLChunk(GameObject _gameObject) { 
-    
+    public GameObject GetChunkGameObject(int _index) {
+        return chunksObjects[_index];
+    }
+
+    public void GetMapChunks(ref List<GameObject> mapChunks) {
+        mapChunks = chunksObjects;
     }
 
     /// <summary>
@@ -391,6 +424,7 @@ public partial class GenerateMapFromHeightMap : MonoBehaviour {
 public class MapChunk {
     public Texture2D heightmap;
     public Vector2 center;
+    public int chunkID;
     public MapData mapData;
     public MeshData meshData;
 
@@ -407,10 +441,11 @@ public class MapChunk {
 
     // corner order
     // bottom left, bottom right, top left, top right
-    public MapChunk(Texture2D _heightmap, Vector2 _center, MapData _mapData) {
+    public MapChunk(Texture2D _heightmap, Vector2 _center, MapData _mapData, int _mapID) {
         this.heightmap = _heightmap;
         this.center = _center;
         this.mapData = _mapData;
+        this.chunkID = _mapID;
         noiseValues = Noise.GenerateNoiseMap(_heightmap.width, _heightmap.height, _mapData.noiseProperties.seed,
                                              _mapData.noiseProperties.noiseScale, _mapData.noiseProperties.octaves,
                                              _mapData.noiseProperties.persistence, _mapData.noiseProperties.lacunarity, _center);
