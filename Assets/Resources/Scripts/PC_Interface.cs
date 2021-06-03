@@ -45,7 +45,7 @@ public class PC_Interface : MonoBehaviour
         PlayerCamera.enabled = true;
         TableViewCamera.enabled = false;
 
-        //Cursor.lockState = CursorLockMode.Locked;
+        Cursor.lockState = CursorLockMode.Locked;
         StartCoroutine(PaintMap());
     }
 
