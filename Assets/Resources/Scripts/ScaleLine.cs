@@ -14,6 +14,7 @@ public class ScaleLine : MonoBehaviour
 
     private static Camera curDisplay;
     private static ChunkData closestChunk;
+    private static bool IsValidUpdate = false;
 
     void Awake()
     {
@@ -35,10 +36,15 @@ public class ScaleLine : MonoBehaviour
         StartCoroutine(UpdateScaleLine());
     }
 
+    /// <summary>
+    /// Updates the scale line GUI widget. 
+    /// </summary>
+    /// <returns></returns>
     IEnumerator UpdateScaleLine()
     {
         while (true)
         {
+            IsValidUpdate = false;
             bool OnSmallMap = false;
 
             //get height of canvas
@@ -77,6 +83,7 @@ public class ScaleLine : MonoBehaviour
                 {
                     if (OnSmallMap)
                     {
+                        //horizontal distance
                         //get positions on opposite ends of the chunk (center y is y of parent) (+- 0.5f * chunkSize * Vector3.forward)
                         Vector3 topPos = new Vector3(closestChunk.MapChunk.center.x, chunkParent.position.y, closestChunk.MapChunk.center.y) + 0.5f * chunkSize * Vector3.forward;
                         Vector3 botPos = new Vector3(closestChunk.MapChunk.center.x, chunkParent.position.y, closestChunk.MapChunk.center.y) - 0.5f * chunkSize * Vector3.forward;
@@ -87,7 +94,7 @@ public class ScaleLine : MonoBehaviour
                         float chunkScreenSize = (screenBot - screenTop).magnitude;
                         //compare distance to total height of scale line (this is meter distance)
                         float scaleFactor = 1f;
-                        if (chunkScreenSize > panelHeight) { chunkScreenSize /= 2f; scaleFactor /= 2f; }
+                        while (chunkScreenSize > canvasHeight) { chunkScreenSize /= 2f; scaleFactor /= 2f; }
                         float tempScreenSize = chunkScreenSize * 2f;
                         if(tempScreenSize > 0f)
                         {
@@ -107,74 +114,65 @@ public class ScaleLine : MonoBehaviour
                             LabelF_Rect.anchoredPosition = new Vector2(RenderF.anchoredPosition.x + 10f, RenderF.anchoredPosition.y + 20f);
                             LabelM.text = String.Format("{0}m", displaySizeM);
                             LabelF.text = String.Format("{0}ft.", displaySizeF);
-                        } else
-                        {
-                            RenderM.anchoredPosition = new Vector2(panelX - 0.5f * (scaleWidth + panelWidth), panelY - 0.5f * panelHeight);
-                            RenderF.anchoredPosition = new Vector2(panelX + 0.5f * (scaleWidth + panelWidth), panelY - 0.5f * panelHeight);
-                            LabelM.text = "";
-                            LabelF.text = "";
-                        }
+                            IsValidUpdate = true;
+                        } 
                         
                     }   
                     else
                     {
                         if(meshHeight > 0)
                         {
+
                             //Get positions corresponding to mesh height
-                            Vector3 botPos = new Vector3(closestChunk.MapChunk.center.x, chunkParent.position.y, closestChunk.MapChunk.center.y);
-                            Vector3 topPos = new Vector3(0f, chunkParent.position.y + meshHeight, 0f) + botPos;
+                            Vector3 forwardPos = curDisplay.transform.position + curDisplay.transform.forward;
+                            Vector3 topPos = forwardPos + curDisplay.transform.up * meshHeight;
                             //convert world positions to screen positions 
                             Vector3 screenTop = curDisplay.WorldToScreenPoint(topPos);
-                            Vector3 screenBot = curDisplay.WorldToScreenPoint(botPos);
+                            Vector3 screenBot = curDisplay.WorldToScreenPoint(forwardPos);
                             //get distance between screen positions
                             float chunkScreenSize = (screenBot - screenTop).magnitude;
                             //compare distance to total height of scale line (this is meter distance)
                             float scaleFactor = 1f;
-                            if (chunkScreenSize > panelHeight) { chunkScreenSize /= 2f; scaleFactor /= 2f; }
-                            float tempScreenSize = chunkScreenSize * 2f;
-                            if(tempScreenSize > 0f)
+                            
+                            while (chunkScreenSize > canvasHeight) { chunkScreenSize /= 2f; /*scaleFactor /= 2f;*/ } 
+                            
+                            if(chunkScreenSize > 0f)
                             {
-                                while (tempScreenSize < panelHeight)
+                                float tempScreenSize = chunkScreenSize;
+                                if(tempScreenSize > panelHeight)
                                 {
-                                    scaleFactor *= 2f;
-                                    tempScreenSize *= 2f;
+                                    while (tempScreenSize > panelHeight)
+                                    {
+                                        scaleFactor /= 2f;
+                                        tempScreenSize /= 2f;
+                                    }
+                                } else if(tempScreenSize < panelHeight)
+                                {
+                                    while (tempScreenSize < panelHeight)
+                                    {
+                                        scaleFactor *= 2f;
+                                        tempScreenSize *= 2f;
+                                    }
                                 }
+                                //Debug.Log(panelHeight + " vs " + chunkScreenSize);
                                 chunkScreenSize *= scaleFactor;
-                                float displaySizeM = chunkSize * scaleFactor;
+                                float displaySizeM = meshHeight * scaleFactor;
                                 float displaySizeF = displaySizeM / 3.28084f;
 
                                 RenderM.anchoredPosition = new Vector2(panelX - 0.5f * (scaleWidth + panelWidth), panelY + (chunkScreenSize / panelHeight - 0.5f) * panelHeight);
                                 RenderF.anchoredPosition = new Vector2(panelX + 0.5f * (scaleWidth + panelWidth), panelY + ((chunkScreenSize / panelHeight) / 3.28084f - 0.5f) * panelHeight);
-                                LabelM_Rect.anchoredPosition = new Vector2(RenderM.anchoredPosition.x, RenderM.anchoredPosition.y + 5f);
-                                LabelF_Rect.anchoredPosition = new Vector2(RenderF.anchoredPosition.x, RenderF.anchoredPosition.y + 5f);
+                                LabelM_Rect.anchoredPosition = new Vector2(RenderM.anchoredPosition.x + 10f, RenderM.anchoredPosition.y + 20f);
+                                LabelF_Rect.anchoredPosition = new Vector2(RenderF.anchoredPosition.x + 10f, RenderF.anchoredPosition.y + 20f);
                                 LabelM.text = String.Format("{0}m", displaySizeM);
                                 LabelF.text = String.Format("{0}ft.", displaySizeF);
-                            } else
-                            {
-                                RenderM.anchoredPosition = new Vector2(panelX - 0.5f * (scaleWidth + panelWidth), panelY - 0.5f * panelHeight);
-                                RenderF.anchoredPosition = new Vector2(panelX + 0.5f * (scaleWidth + panelWidth), panelY - 0.5f * panelHeight);
-                                LabelM.text = "";
-                                LabelF.text = "";
-                            }
-                            
-                        } else
-                        {
-                            RenderM.anchoredPosition = new Vector2(panelX - 0.5f * (scaleWidth + panelWidth), panelY - 0.5f * panelHeight);
-                            RenderF.anchoredPosition = new Vector2(panelX + 0.5f * (scaleWidth + panelWidth), panelY - 0.5f * panelHeight);
-                            LabelM.text = "";
-                            LabelF.text = "";
-                        }
-                        
+                                IsValidUpdate = true;
+                            }                             
+                        }                         
                     }
                     //float mf_ScaleOffset = 0.25f * 3.28084f - 0.5f;
-                } else
-                {
-                    RenderM.anchoredPosition = new Vector2(panelX - 0.5f * (scaleWidth + panelWidth), panelY - 0.5f * panelHeight);
-                    RenderF.anchoredPosition = new Vector2(panelX + 0.5f * (scaleWidth + panelWidth), panelY - 0.5f * panelHeight);
-                    LabelM.text = "";
-                    LabelF.text = "";
-                }                
-            } else
+                }               
+            } 
+            if (!IsValidUpdate)
             {
                 RenderM.anchoredPosition = new Vector2(panelX - 0.5f * (scaleWidth + panelWidth), panelY - 0.5f * panelHeight);
                 RenderF.anchoredPosition = new Vector2(panelX + 0.5f * (scaleWidth + panelWidth), panelY - 0.5f * panelHeight);
@@ -187,11 +185,19 @@ public class ScaleLine : MonoBehaviour
         }        
     }
 
+    /// <summary>
+    /// Sets the display camera used for calculations and visibility checking
+    /// </summary>
+    /// <param name="_c">The camera to use as the new display</param>
     public static void CheckDisplay(Camera _c)
     {
         curDisplay = _c;
     }
 
+    /// <summary>
+    /// Tests if a MapChunk would be "visible" within some distance of the current display camera
+    /// </summary>
+    /// <param name="mChunk">The MapChunk data to use in testing</param>
     public static void IsChunkVisible(ChunkData mChunk)
     {
         if (curDisplay == null) return;
