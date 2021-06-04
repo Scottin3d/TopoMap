@@ -23,6 +23,9 @@ public class FollowTheDrawingRouteOnLargeMap : MonoBehaviour
     private Vector3 SecondBrush;
     private float TheTotalLengthOfTheRoute;
 
+    private bool FollowMyRoute = false;
+    private bool FollowOtherRoute = false;
+
     void Start()
     {
         MyPlayersRoute.options.Clear();
@@ -121,6 +124,9 @@ public class FollowTheDrawingRouteOnLargeMap : MonoBehaviour
             }
 
             TotalLengthOfTheRoute();
+
+            FollowMyRoute = true;
+            FollowOtherRoute = false;
         }
         else
         {
@@ -146,6 +152,9 @@ public class FollowTheDrawingRouteOnLargeMap : MonoBehaviour
             }
 
             TotalLengthOfTheRouteOtherPlayer();
+
+            FollowMyRoute = false;
+            FollowOtherRoute = true;
         }
     }
 
@@ -206,7 +215,8 @@ public class FollowTheDrawingRouteOnLargeMap : MonoBehaviour
 
     private void MoveToNextTwoBrush()
     {
-        if (MyPlayersRoute.options[MyPlayersRoute.value].text == "My Own Route")
+        //if (MyPlayersRoute.options[MyPlayersRoute.value].text == "My Own Route")
+        if (FollowMyRoute)
         {
             FirstBrush = MyEntireBrushList[CurIndex].transform.position;
             SecondBrush = MyEntireBrushList[CurIndex + 1].transform.position;
