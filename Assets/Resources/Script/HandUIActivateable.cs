@@ -4,13 +4,20 @@ using UnityEngine;
 
 public class HandUIActivateable : MonoBehaviour
 {
+    //debug boolean which enables or disables the buttons turning
+    //green when enabled, and red when disabled.
     private const bool DEBUG_COLORS = false;
-    //this is a component for the UI Buttons that the VR player uses. when triggered it sends itself to the VRUIController in order to activate its action
 
-    public Transform otherHand; //this is the hand that the button should interact with, all this transform needs to represent is the position of the hand, and does not need to be attatched to SteamVR's hand necessarily.
+    //this class is a component for the UI buttons that the VR player uses.
+    //when this class is triggered by the VR user touching the button, it
+    //activates the activatedUIButton method in the VRUIController class, sending
+    //itself and enabling the behavior the button currently represents.
 
+    //this class is intended to be created at runtime by VRUIController.
+
+
+    //these public variables are set by the VRUIController class when created.
     public VRUIController reciever;
-
     public GameObject UICollider;
 
     public float triggerDistance = 0.005f; //this is the distance the other hand needs to be from the button to trigger it. (1.0f = 1 meter distance, which is why the number is so small)
@@ -30,29 +37,10 @@ public class HandUIActivateable : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        //checkHandDistance();
+        
     }
 
-    public void checkHandDistance()
-    {
-        Vector3 distance = this.transform.position - otherHand.position;
-        //Debug.Log("buttonlocation: " + otherHand.position);
-        if (!isOn)
-        {
-            if (distance.magnitude < triggerDistance)
-            {
-                triggerOnState();
-            }
-        }
-        else
-        {
-            if (distance.magnitude > triggerDistance)
-            {
-                triggerOffState();
-            }
-        }
-    }
-
+    //activates the button, and activates the behavior in VRUIController
     public void triggerOnState()
     {
         isOn = true;
@@ -63,6 +51,7 @@ public class HandUIActivateable : MonoBehaviour
         }
     }
 
+    //deactivates the button, allowing it to be activated again
     public void triggerOffState()
     {
         isOn = false;
@@ -72,6 +61,8 @@ public class HandUIActivateable : MonoBehaviour
         }
     }
 
+    //when a trigger enters the collider, this function checks if it's the
+    //trigger attatched to the hand, and activates the button if it is.
     private void OnTriggerEnter(Collider other)
     {
         if(other.gameObject == UICollider)
@@ -83,7 +74,7 @@ public class HandUIActivateable : MonoBehaviour
         }
     }
 
-
+    //deactivates the button when the UI trigger exits
     private void OnTriggerExit(Collider other)
     {
         if (other.gameObject == UICollider)
