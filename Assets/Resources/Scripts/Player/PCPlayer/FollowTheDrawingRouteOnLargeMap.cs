@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using TMPro;
 using ASL;
 
 public class FollowTheDrawingRouteOnLargeMap : MonoBehaviour
@@ -9,6 +10,7 @@ public class FollowTheDrawingRouteOnLargeMap : MonoBehaviour
     public GameObject Player;
     public GameObject TeleportManger;
     public Text SpeedDistanceDisplay;
+    public TextMeshProUGUI SpeedDistanceDisplayOutLine;
     public Dropdown MyPlayersRoute;
 
     private float MoveSpeed = 1f;
@@ -53,6 +55,7 @@ public class FollowTheDrawingRouteOnLargeMap : MonoBehaviour
         }
         else
         {
+            SpeedDistanceDisplayOutLine.enabled = false;
             SpeedDistanceDisplay.enabled = false;
         }
     }
@@ -62,6 +65,7 @@ public class FollowTheDrawingRouteOnLargeMap : MonoBehaviour
         if (Input.GetKeyDown(KeyCode.Alpha3) && StartFollowingRoute == false)
         {
             GetRouteList();
+            SpeedDistanceDisplayOutLine.enabled = true;
             SpeedDistanceDisplay.enabled = true;
 
             Debug.Log(BrushListLength);
@@ -162,9 +166,14 @@ public class FollowTheDrawingRouteOnLargeMap : MonoBehaviour
     {
         float RemainLength = PartLengthOfTheRoute(CurIndex);
         float RemainTime = RemainLength / MoveSpeed;
+
+        RemainLength = Mathf.Round(RemainLength * 100f) / 100f;
+        RemainTime = Mathf.Round(RemainTime * 100f) / 100f;
+
         string Info = "Speed: " + MoveSpeed + "m/s" + "\r\n" + "Remaining Distance: " + RemainLength + "m" + "\r\n" + "Remaining Time: " + RemainTime + "s";
 
-        SpeedDistanceDisplay.GetComponent<Text>().text = Info;
+        //SpeedDistanceDisplay.GetComponent<Text>().text = Info;
+        SpeedDistanceDisplayOutLine.GetComponent<TMPro.TextMeshProUGUI>().text = Info;
     }
 
     private void TotalLengthOfTheRoute()
