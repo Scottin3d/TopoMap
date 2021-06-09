@@ -91,13 +91,14 @@ public class VRUIController : MonoBehaviour
     private GameObject leftHand;
     private GameObject rightHand;
 
+    //this is a general function for making the UI objects reflect the current state of the VRUI.
+    //more specific behavior for each state is found in the setup functions this function calls.
     private void updateUIDisplay()
     {
         if (!VRStartupController.isInVR)
         {
             Debug.LogWarning("Warning: VR UI update called while VR is off");
         }
-        removeCurrentUI();
         switch (currentUIState)
         {
             case VRUI_State.Main:
@@ -123,12 +124,8 @@ public class VRUIController : MonoBehaviour
         }
     }
 
-    //these functions (removeX and setupX) are UI Setup/Removal functions designed to provide the correct UI we want to update to
+    //these functions (setupX) are UI Setup/Removal functions designed to provide the correct UI we want to update to
     //currently this changes the text on the buttons to reflect their current action
-    private void removeCurrentUI()
-    {
-        //currently unneeded
-    }
 
     private void setupMainMenu()
     {
@@ -220,6 +217,8 @@ public class VRUIController : MonoBehaviour
     }
 
     // Start is called before the first frame update
+    //start, in this case, initializes the UI button array and starts the coroutine that activates behavior
+    //once the VR player is created.
     void Start()
     {
         currentUIObjects = new GameObject[4];
@@ -232,7 +231,8 @@ public class VRUIController : MonoBehaviour
         
     }
 
-    //this function is intended to be called by the buttons when pressed to allow for the correct behavior to be performed
+    //this function is intended to be called by the buttons when pressed to allow for the correct behavior to be performed.
+    //it takes the button pressed as input, and using that information activates the associated behavior.
     public void activatedUIButton(GameObject button)
     {
         if (!VRStartupController.isInVR)

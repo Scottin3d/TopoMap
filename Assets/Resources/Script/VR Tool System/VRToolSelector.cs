@@ -15,20 +15,19 @@ public class VRToolSelector : MonoBehaviour
     //tools they may need to use in or on the map. Currently this includes:
     //the road system
     //the marker system
+    //the small map ruler
+    //and the teleportation system.
     //
     //selection is done by facing the left hand plam-up, where a selection menu will display, the player will then
-    //swipe left or right to their desired tool, up and down for the variations of the tool, and grab to select the tool.
+    //swipe left or right to their desired tool, and grab to select the tool.
     //
-    //here is a horizontal and vertical layout of the menu so far:
-    //
-    //
-    //
-    //
-    //
+    //here is a horizontal layout of the menu so far:
     //
     // None <-> Road <-> Marker <-> Ruler <-> Teleporter
     //
     //
+    //the following is positional information to place the tool-related objects around the left hand
+    //of the VR player.
     //info for the swipe hitboxes:
     //tool:
     //   T: 0.179f, -0.0233f, -0.07689f
@@ -80,6 +79,7 @@ public class VRToolSelector : MonoBehaviour
     private GameObject LeftPad = null; //object that will detect the player swiping left
     private GameObject RightPad = null;//object that will detect the player swiping right
 
+    //enumerator used in keeping track of the state of the VR player toolbox.
     public enum toolSelectionState
     {
         None,
@@ -229,6 +229,8 @@ public class VRToolSelector : MonoBehaviour
         }
     }
 
+    //this is a function which does all the object creation and reference setting which requires
+    //the VR player to be set up to perform.
     private void StartUp()
     {
         leftHand = VRStartupController.VRPlayerObject.transform.Find("SteamVRObjects/LeftHand").gameObject;
@@ -242,6 +244,7 @@ public class VRToolSelector : MonoBehaviour
         createToolBox();
     }
 
+    //coroutine to delay the initialization of references that require the VR player to be set up.
     IEnumerator delayInitialization()
     {
         while(VRStartupController.VRPlayerObject == null)
@@ -254,7 +257,7 @@ public class VRToolSelector : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        checkActive(); //see if we need to activate/deactivate
+        checkActive(); //see if we need to activate/deactivate the toolbox
     }
 
     //checks for the left palm facing upwards (z is around 90 degrees), and activates toolbox if so.
@@ -296,7 +299,8 @@ public class VRToolSelector : MonoBehaviour
         ToolBox.GetComponent<ToolBox>().deactivate();
     }
 
-    //this is a public function to be called by the hotspots in order to activate a tool
+    //this is a public function to be called by the hotspots in order to activate a tool.
+    //it will deactivate all tools which are not the tool selected, and activate the specified tool.
     public void recieveHotSpotInput(GameObject theSpot)
     {
         if(theSpot == HotSpot_0)
@@ -342,6 +346,7 @@ public class VRToolSelector : MonoBehaviour
     }
 
     //this function indicates that the toolbox has been grabbed, and will activate the respective tool.
+    //this function also deactivates all other tools
     public void BoxActivated()
     {
         if (!isActive)
@@ -390,6 +395,8 @@ public class VRToolSelector : MonoBehaviour
         }
     }
 
+    //this function recieves the swipe input from the swipe hitboxes in order to turn the
+    //toolbox to the next tool.
     public void recieveSwipeInput(GameObject swipeObject)
     {
         if (!isActive)
@@ -471,6 +478,7 @@ public class VRToolSelector : MonoBehaviour
         }
     }
 
+    //helper function to change the text of the toolbox.
     private void changeToolBoxText(string text)
     {
         ToolBox.GetComponentInChildren<Text>().text = text;

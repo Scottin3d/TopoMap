@@ -9,18 +9,15 @@ public class ASLVRTrack : MonoBehaviour
 
 
 
-    private static ASLObject leftHand = null;
-    private static ASLObject rightHand = null;
     public static GameObject leftHandLocal = null; //left hand to be tracked
     public static GameObject rightHandLocal = null; //right hand to be tracked
     public GameObject leftHandLocalNS = null; //non static version to be set in editor
     public GameObject rightHandLocalNS = null; //non static version to be set in editor
     public static GameObject lHandStore = null; //temp storage for the left hand while ASLObject is instantiated
     public static GameObject rHandStore = null; //temp storage for the right hand while ASLObject is instantiated
-    //Add head when ready, for now focusing on hand tracking and sync
-    //private static ASLObject Head = null;
 
     // Start is called before the first frame update
+    //begins the coroutine which delays variable initialization.
     void Start()
     {
         StartCoroutine("delayInitialization");
@@ -32,6 +29,7 @@ public class ASLVRTrack : MonoBehaviour
         
     }
 
+    //this function initializes behavior and variables dependant on the VR Player being active.
     private void Startup()
     {
         leftHandLocalNS = VRStartupController.VRPlayerObject.transform.Find("SteamVRObjects/LeftHand").gameObject;
@@ -53,6 +51,8 @@ public class ASLVRTrack : MonoBehaviour
         Startup();
     }
 
+    //this is a coroutine which tracks the VR Player's hands over ASL in order
+    //to represent the VR Player's hands over all clients.
     IEnumerator UpdatePositions()
     {
 
@@ -70,40 +70,21 @@ public class ASLVRTrack : MonoBehaviour
         {
             //Debug.Log(leftHand.transform.position);
             //Debug.Log(leftHandLocal.transform.position);
-            //handToTrack.SendAndSetClaim(SendAndSetLocalPosition(this.transform.position));
             lHandStore.GetComponent<ASLObject>().SendAndSetClaim(() => { lHandStore.GetComponent<ASLObject>().SendAndSetLocalPosition(leftHandLocal.transform.position); lHandStore.GetComponent<ASLObject>().SendAndSetLocalRotation(leftHandLocal.transform.rotation); });
             rHandStore.GetComponent<ASLObject>().SendAndSetClaim(() => { rHandStore.GetComponent<ASLObject>().SendAndSetLocalPosition(rightHandLocal.transform.position); rHandStore.GetComponent<ASLObject>().SendAndSetLocalRotation(rightHandLocal.transform.rotation); });
             yield return new WaitForSeconds(0.1f); //update ten times per second
-                                                   //.SendAndSetClaim(() =>{Cube.GetComponent<ASL.ASLObject>().SendAndSetWorldRotation(PlayerObject.transform.rotation);Cube.GetComponent<ASL.ASLObject>().SendAndSetWorldPosition(PlayerObject.transform.position);
         }
     }
 
+    //sets the left hand which is to be tracked.
     private static void SetLeftTrackedHand(GameObject newHand)
     {
         lHandStore = newHand;
-        //if(newHand.GetComponent<ASLObject>() == null)
-        //{
-        //    StartCoroutine("waitForLInit");
-        //    
-        //}
-        //leftHand = newHand.GetComponent<ASLObject>();
     }
 
+    //sets the right hand which is to be tracked.
     private static void SetRightTrackedHand(GameObject newHand)
     {
         rHandStore = newHand;
-        //rightHand = newHand.GetComponent<ASLObject>();
-    }
-
-    IEnumerator waitForLInit()
-    {
-        yield return new WaitForSeconds(0.5f);
-        SetLeftTrackedHand(lHandStore);
-    }
-
-    IEnumerator waitForRInit()
-    {
-        yield return new WaitForSeconds(0.5f);
-        SetRightTrackedHand(rHandStore);
     }
 }

@@ -5,6 +5,8 @@ using ASL;
 
 public class ASLVRCameraTracking : MonoBehaviour
 {
+    //ASLVRCameraTracking is a script meant to track the VR Player's head position and relay that information over ASL
+    //in order to create a representation of the VR player on all connected clients.
 
     //public VRStartupController VRController = null; //VR Controller to know the state of VR
     public static GameObject VRCameraToTrack = null; //ASL Synced object representing the VR camera
@@ -22,10 +24,11 @@ public class ASLVRCameraTracking : MonoBehaviour
         
     }
 
+    //this coroutine handles the behavior of both waiting to initialize behavior and variables reliant on the VR Player,
+    //and updating the position of the VR player's representation over ASL.
     IEnumerator TrackOverASL()
     {
         Debug.Log(VRStartupController.isVRDetected());
-        //yield return new WaitForSeconds(0.1f); //wait for ASLObject instantiation
         if (VRStartupController.isVRDetected()) //only checks for starting up the VR object at the start because if we are not in VR at this point, then the user does not have VR installed
         {
             while (VRStartupController.VRPlayerObject == null)
@@ -51,7 +54,6 @@ public class ASLVRCameraTracking : MonoBehaviour
                 VRCameraToTrack.GetComponent<ASLObject>().SendAndSetClaim(() => { 
                     VRCameraToTrack.GetComponent<ASLObject>().SendAndSetLocalPosition(LocalVRCamera.transform.position); 
                     VRCameraToTrack.GetComponent<ASLObject>().SendAndSetLocalRotation(LocalVRCamera.transform.rotation);
-                    //ASLObjectTrackingSystem.UpdatePlayerTransform(VRCameraToTrack.GetComponent<ASLObject>(), VRCameraToTrack.transform);
                 });
             }
             else

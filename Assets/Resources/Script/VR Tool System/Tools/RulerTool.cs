@@ -7,7 +7,11 @@ using Valve.VR;
 public class RulerTool : MonoBehaviour
 {
 
-    //RulerTool is the class that handles the VR player's ruler which they can use to get the scale of the map they are using
+    //RulerTool is the class that handles the VR player's ruler which they can use to get the scale of the map they are using.
+    //this tool will take the distance between the player's hands, and when they hold grip, generate a ruler which shows
+    //how far that distance is in real world units (kilometers).
+    //this class makes the assumption that the large map is 1-1 between unity units and metric units (that is, one unity unit
+    //on the large map is equivalent to one meter in real life).
 
     //there should be one and only one instance of this script in the unity scene.
 
@@ -32,7 +36,10 @@ public class RulerTool : MonoBehaviour
     private static bool isActive = false;
 
 
-    // Start is called before the first frame update
+    //Start is called before the first frame update
+    //Start will assign local variables to static variables (allowing these variables to be set in the editor),
+    //and begins a delayed init (which waits for the VR player to be fully created in order to get some
+    //critical object references).
     void Start()
     {
         ThisGameObject = this.gameObject;
@@ -42,12 +49,14 @@ public class RulerTool : MonoBehaviour
         StartCoroutine("delayInitialization");
     }
 
+    //function which sets some critical references this script needs. (the VR player's hands)
     private void StartUp()
     {
         leftHandTransform = VRStartupController.VRPlayerObject.transform.Find("SteamVRObjects/LeftHand");
         rightHandTransform = VRStartupController.VRPlayerObject.transform.Find("SteamVRObjects/RightHand");
     }
 
+    //this is a coroutine which will wait until the VR player exists to attempt to find the VR player's hands.
     IEnumerator delayInitialization()
     {
         while (VRStartupController.VRPlayerObject == null)
@@ -58,6 +67,9 @@ public class RulerTool : MonoBehaviour
     }
 
     // Update is called once per frame
+    //this function checks for the activation status (that the tool is active and the player is holding grip),
+    //and will place a ruler between the hands of the player, setting text on the ruler to diplay the units it
+    //represents.
     void Update()
     {
         if(isActive && SteamVR_Actions.default_GrabGrip.state)
@@ -76,6 +88,8 @@ public class RulerTool : MonoBehaviour
         
     }
 
+    //these are activation and deactivation methods for VRToolSelector to enable or disable this
+    //class, respectively.
     public static void activate()
     {
         isActive = true;

@@ -6,6 +6,11 @@ using Valve.VR;
 
 public class ToolBox : MonoBehaviour
 {
+
+    //ToolBox is the script responsible for the toolbox which appears when facing the left plam upwards.
+    //it keeps track of the active status of the object, tells VRToolSelector when activated, and handles
+    //the transitional animations when switching between tools in the box.
+
     protected bool isActive;
     //toolbox is the controlling script for the toolbox the player pulls their tools out of.
 
@@ -145,8 +150,11 @@ public class ToolBox : MonoBehaviour
 
     }
 
-    //function that resets objects at the end of the transitional animation
-    //boolean indicates which function is calling the animation end in order to access the correct text.
+    //function that resets objects at the end of the transitional animation.
+    //what resetting means in this context is placing the box back in it's original rotation, and replacing
+    //the main text with the new text.
+    //
+    //isLeft boolean indicates which function is calling the animation end in order to access the correct text.
     private void onAnimationEnd(bool isLeft)
     {
         if (isLeft)

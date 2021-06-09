@@ -37,12 +37,12 @@ public class VRGestureInterpretation : MonoBehaviour
         SwipeUp,
         SwipeDown,
         SwipeLeft,
-        SwipeRight,
-        SpinClockwise,
-        SpinCounterClockwise
+        SwipeRight
     }
 
     // Start is called before the first frame update
+    //this will initialize many variables and begin the coroutine to set the ones
+    //related to the VR player specifically.
     void Start()
     {
         positionBacklog = new Vector3[BACKLOG_FRAME_SIZE];
@@ -55,6 +55,7 @@ public class VRGestureInterpretation : MonoBehaviour
         StartCoroutine("DelayStartup");
     }
 
+    //this is a coroutine made to delay reference setting in this class until the VR player has been properly set up.
     IEnumerator DelayStartup()
     {
         while (VRStartupController.VRPlayerObject == null)
@@ -302,6 +303,7 @@ public class VRGestureInterpretation : MonoBehaviour
         return gesture.None;
     }
 
+    //debug function which will color cubes based on what gesture has been detected.
     private void colorCubes(Color newColor)
     {
         for(int i = 0; i < BACKLOG_FRAME_SIZE; i++)
