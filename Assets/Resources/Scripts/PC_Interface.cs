@@ -118,6 +118,9 @@ public class PC_Interface : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Sets the camera used for the scale display
+    /// </summary>
     public static void TestScaleProjection()
     {
         if(IsViewingTable)
@@ -133,6 +136,10 @@ public class PC_Interface : MonoBehaviour
 
     #region PC_DRAG/DRAW CAST
 
+    /// <summary>
+    /// Function on LMB click
+    /// </summary>
+    /// <param name="LShift">whether left shift is held</param>
     public static void OnClickLMB(bool LShift)
     {
         //Debug.Log("Trying to place marker: " + LShift);
@@ -147,6 +154,9 @@ public class PC_Interface : MonoBehaviour
         }
     }   
 
+    /// <summary>
+    /// Function on LMB hold
+    /// </summary>
     public static void OnHoldLMB()
     {
         drawTime -= Time.deltaTime;
@@ -162,6 +172,9 @@ public class PC_Interface : MonoBehaviour
         }
     }    
 
+    /// <summary>
+    /// Function on LMB release
+    /// </summary>
     public static void OnReleaseLMB()
     {
         if (IsViewingTable)
@@ -182,11 +195,19 @@ public class PC_Interface : MonoBehaviour
 
     #region BRUSH_DRAW
 
+    /// <summary>
+    /// Determines whether map brush painting should be done
+    /// </summary>
+    /// <param name="ShouldPaint">Sets whether painting is occurring</param>
     public static void Paint(bool ShouldPaint)
     {
         IsPainting = ShouldPaint;
     }
 
+    /// <summary>
+    /// Paints the topographic map to make note of an area of interest
+    /// </summary>
+    /// <returns></returns>
     public static IEnumerator PaintMap()
     {
         while (true)
@@ -215,6 +236,9 @@ public class PC_Interface : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Erases part or all of the map brush lines
+    /// </summary>
     public static void ErasePC()
     {
         if (_pcInterface.eraseDropdown.options[_pcInterface.eraseDropdown.value].text == "EraseAll")
@@ -260,6 +284,9 @@ public class PC_Interface : MonoBehaviour
         //lock camera based on new state of paused
     }
 
+    /// <summary>
+    /// Sets the state of the cursor
+    /// </summary>
     public static void SetCursorState()
     {
         if(IsViewingTable)
@@ -273,6 +300,9 @@ public class PC_Interface : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Toggles which camera is being used for viewing
+    /// </summary>
     public static void ToggleCamerasPC()
     {
         if (IsViewingTable)
@@ -298,6 +328,11 @@ public class PC_Interface : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Updates the state of the player's flashlight
+    /// </summary>
+    /// <param name="playerBody">The player model</param>
+    /// <param name="_aslFlashlight">The ASLObject attached to the flashlight</param>
     public static void UpdateFlashlight(GameObject playerBody, ASLObject _aslFlashlight)
     {
         if (_aslFlashlight == null) return;
@@ -315,6 +350,10 @@ public class PC_Interface : MonoBehaviour
         });
     }
 
+    /// <summary>
+    /// Toggles the state of the player's flashlight
+    /// </summary>
+    /// <param name="flashlight">The flashlight game object</param>
     public static void ToggleFlashlight(GameObject flashlight)
     {
         IsFlashlightOn = !IsFlashlightOn;
