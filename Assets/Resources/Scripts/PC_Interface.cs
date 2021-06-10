@@ -287,7 +287,7 @@ public class PC_Interface : MonoBehaviour
     /// <summary>
     /// Sets the state of the cursor
     /// </summary>
-    public static void SetCursorState()
+    public static void SetCursorState(bool UnlockCursor)
     {
         if(IsViewingTable)
         {
@@ -295,8 +295,16 @@ public class PC_Interface : MonoBehaviour
             Cursor.visible = IsPaused;
         } else
         {
-            Cursor.lockState = CursorLockMode.Locked;
-            Cursor.visible = false;
+            if (UnlockCursor)
+            {
+                Cursor.lockState = CursorLockMode.None;
+                Cursor.visible = true;
+            } else
+            {
+                Cursor.lockState = CursorLockMode.Locked;
+                Cursor.visible = false;
+            }
+            
         }
     }
 

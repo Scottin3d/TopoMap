@@ -94,7 +94,7 @@ public class ControlTesting : MonoBehaviour
                 PC_Interface.Paint(Input.GetMouseButton(1));
                 PC_Interface.UpdateFlashlight(Player, aslFlash);
                 PC_Interface.TestScaleProjection();
-                PC_Interface.SetCursorState();
+                PC_Interface.SetCursorState(Input.GetKey(KeyCode.Q));
 
                 if (Input.GetMouseButtonDown(0))    //Raycast to either place marker or select/deselect a marker
                 {
