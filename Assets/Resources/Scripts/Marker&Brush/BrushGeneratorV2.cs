@@ -16,6 +16,12 @@ public static class BrushGeneratorV2
 
     #region DRAW
 
+    /// <summary>
+    /// Draws a brush object to both maps
+    /// </summary>
+    /// <param name="mouseRay">The raycast used for placing the brush object</param>
+    /// <param name="_smCenter">The center of the small map</param>
+    /// <param name="_lmCenter">The center of the large map</param>
     public static void DrawBrush(Ray mouseRay, Vector3 _smCenter, Vector3 _lmCenter)
     {
         if (IsClearingBrush) return;
@@ -35,12 +41,20 @@ public static class BrushGeneratorV2
         }
     }
 
+    /// <summary>
+    /// Instantiates a brush object on the small map
+    /// </summary>
+    /// <param name="_myBrush">The brush object that initiated this callback</param>
     private static void InstantiateSmallBrush(GameObject _myBrush)
     {
         _myBrush.transform.parent = BrushStorage.Instance.gameObject.transform;
         smallBrush.Add(_myBrush);
     }
 
+    /// <summary>
+    /// Instantiates a brush object on the large map
+    /// </summary>
+    /// <param name="_myBrush">The brush object that initiated this callback</param>
     private static void InsantiateLargeBrush(GameObject _myBrush)
     {
         _myBrush.transform.parent = BrushStorage.Instance.gameObject.transform;
@@ -51,6 +65,9 @@ public static class BrushGeneratorV2
 
     #region ERASE
 
+    /// <summary>
+    /// Deletes all of the brush objects drawn by the player
+    /// </summary>
     public static void EraseLine()
     {
         IsClearingBrush = true;
@@ -76,6 +93,10 @@ public static class BrushGeneratorV2
         IsClearingBrush = false;
     }
 
+    /// <summary>
+    /// Deletes some of the brush objects drawn by the player, starting from the end of the list
+    /// </summary>
+    /// <param name="count">The number of brush objects to delete</param>
     public static void EraseCount(int count)
     {
         IsClearingBrush = true;

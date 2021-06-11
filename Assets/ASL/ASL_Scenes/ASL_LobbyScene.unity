@@ -38,7 +38,7 @@ RenderSettings:
   m_ReflectionIntensity: 1
   m_CustomReflection: {fileID: 0}
   m_Sun: {fileID: 0}
-  m_IndirectSpecularColor: {r: 0.18028378, g: 0.22571412, b: 0.30692285, a: 1}
+  m_IndirectSpecularColor: {r: 0.18028334, g: 0.22571328, b: 0.3069217, a: 1}
   m_UseRadianceAmbientProbe: 0
 --- !u!157 &3
 LightmapSettings:
@@ -1013,7 +1013,7 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 723893227}
   m_HandleRect: {fileID: 1192939527}
   m_Direction: 2
-  m_Value: 1.0000019
+  m_Value: 1.0000015
   m_Size: 0.84067833
   m_NumberOfSteps: 0
   m_OnValueChanged:
@@ -3346,9 +3346,7 @@ MonoBehaviour:
   m_Value: 0
   m_Options:
     m_Options:
-    - m_Text: DeformationBrain
-      m_Image: {fileID: 0}
-    - m_Text: ChunkMeshManipulation
+    - m_Text: PlaytestOneScene
       m_Image: {fileID: 0}
   m_OnValueChanged:
     m_PersistentCalls:
@@ -5080,7 +5078,7 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 0
     m_LineSpacing: 1
-  m_Text: DeformationBrain
+  m_Text: PlaytestOneScene
 --- !u!222 &1522670409
 CanvasRenderer:
   m_ObjectHideFlags: 0

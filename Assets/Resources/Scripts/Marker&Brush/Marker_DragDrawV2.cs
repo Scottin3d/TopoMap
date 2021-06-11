@@ -14,6 +14,13 @@ public static class Marker_DragDrawV2
 
     #region RAYCAST_INPUT
 
+    /// <summary>
+    /// Raycasts in response to user action, and initiates draw & draw functionality if a marker object is hit.
+    /// </summary>
+    /// <param name="LShift">If left shift is held</param>
+    /// <param name="mouseRay">The ray used to calculate raycasts</param>
+    /// <param name="_sm">The small map</param>
+    /// <param name="_lm">The large map</param>
     public static void ClickCast(bool LShift, Ray mouseRay, GameObject _sm, GameObject _lm)
     {
         RaycastHit hit;
@@ -50,6 +57,11 @@ public static class Marker_DragDrawV2
         }
     }
 
+    /// <summary>
+    /// Raycasts while action is held, provided drag & draw was successfully initiated. Used as a visual for the end state of the cast.
+    /// </summary>
+    /// <param name="mouseRay">The ray used in raycast calculations</param>
+    /// <param name="drawTime">Time remaining before draw cast begins</param>
     public static void HoldCast(Ray mouseRay, float drawTime)
     {
         if (!HasDrawOrigin) return;
@@ -68,6 +80,13 @@ public static class Marker_DragDrawV2
         }
     }
 
+    /// <summary>
+    /// Raycasts at the completion of action, provided drag & draw was successfully initiated.
+    /// </summary>
+    /// <param name="mouseRay">The ray used in raycast calculations</param>
+    /// <param name="_sm">The small map</param>
+    /// <param name="_lm">The large map</param>
+    /// <param name="drawTime">Time remaining before draw cast begins</param>
     public static void ReleaseCast(Ray mouseRay, GameObject _sm, GameObject _lm, float drawTime)
     {
         bool FromLargeMap = OriginLargeMap();
@@ -100,6 +119,10 @@ public static class Marker_DragDrawV2
 
     #region POST_RAYCAST
 
+    /// <summary>
+    /// Sets the origin of drag & draw cast functions.
+    /// </summary>
+    /// <param name="_g">The marker to be used as the origin</param>
     public static void SetDrawOrigin(GameObject _g)
     {
         if (!_g.Equals(drawOrigin))
@@ -124,6 +147,12 @@ public static class Marker_DragDrawV2
         drawOrigin.GetComponent<MarkerObject>().Select(true);
     }
 
+    /// <summary>
+    /// Raycasts to place the projection marker where the user is looking
+    /// </summary>
+    /// <param name="castPoint"></param>
+    /// <param name="IsOnLargeMap">Whether the cast is being performed on the large map</param>
+    /// <param name="SuccessfulCast">Whether the raycast was successful</param>
     public static void DrawCast(Vector3 castPoint, bool IsOnLargeMap, bool SuccessfulCast)
     {
         if (MarkerGeneratorV2.HasSelectedObject)
@@ -158,8 +187,15 @@ public static class Marker_DragDrawV2
 
     #endregion
 
+    /// <summary>
+    /// Determines whether the current drag & draw has an origin marker
+    /// </summary>
     public static bool HasDrawOrigin { get { return drawOrigin != null; } }
 
+    /// <summary>
+    /// Determins whether the origin marker is on the large map
+    /// </summary>
+    /// <returns>Returns true if drawOrigin is placed on the large map. Returns false if non-existent or on the small map</returns>
     public static bool OriginLargeMap()
     {
         if (drawOrigin == null) return false;
