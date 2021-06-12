@@ -9,6 +9,7 @@ public class VRToolSwipe : MonoBehaviour
     //this is the script for the behavior of the swiping zones of the toolbox that the VR player uses. They are very similar to
     //HandUIActivateable, as they just wait for the UI collider, and then trigger the tool selector class when they collide.
 
+    //these public variables need to be set by the controlling VRToolSelector script when swipe hitboxes are created.
     public VRToolSelector reciever;
     public GameObject UICollider;
     public VRGestureInterpretation.gesture triggerGesture;
@@ -27,6 +28,8 @@ public class VRToolSwipe : MonoBehaviour
         
     }
 
+    //when the player swipes through the swipe hitbox, this function will pick up on it and activate
+    //the behavior by signaling VRToolSelector.
     private void OnTriggerEnter(Collider other)
     {
         //Debug.Log("is it the collider? " + (other.gameObject == UICollider));
@@ -39,6 +42,7 @@ public class VRToolSwipe : MonoBehaviour
         }
     }
 
+    //this function will reset the ability to swipe with this swipe hitbox
     private void OnTriggerExit(Collider other)
     {
         if (other.gameObject == UICollider) //to avoid other things causing a second swipe

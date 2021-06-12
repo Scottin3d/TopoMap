@@ -9,6 +9,4 @@ public class StaticVRVariables : MonoBehaviour
     //the player can move vertically, which may need to be seen and managed by a wide variety of other classes.
     public static bool allowVerticalVRMovement = false;
     public static bool inVRFreeFlight = true;
-
-
 }

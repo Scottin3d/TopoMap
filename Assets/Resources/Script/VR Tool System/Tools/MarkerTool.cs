@@ -5,8 +5,9 @@ using UnityEngine;
 public class MarkerTool : MonoBehaviour
 {
     //MarkerTool is the class that places the VR Player's markers on the map.
-    //alot of this class is modified parts of the playermarkergenerator class
-    
+    //then the player first presses grip, if they are pointing at the small map, a marker will be placed.
+    //a large portion of this class is made up of modified parts of the playermarkergenerator class.
+
     //there should be one and only one instance of this script in the unity scene.
 
     //bool which tracks whether or not this tool is active and should place objects on the map
@@ -26,7 +27,8 @@ public class MarkerTool : MonoBehaviour
     private static List<GameObject> LargerMapMarkerList = new List<GameObject>();
 
     // Start is called before the first frame update
-    //this will set many of the static references needed to run the class
+    //this will set many of the static references needed to run the class, and does so from
+    //an instance of the class which allows these references to be set in the editor.
     void Start()
     {
         LargerMapCenter = LargerMapGenerator.transform.position;
@@ -41,7 +43,8 @@ public class MarkerTool : MonoBehaviour
         
     }
 
-    //activate and deactivate change the status of this tool when called.
+    //activate and deactivate change the status of this tool when called. These
+    //functions are for VRToolSelector to control the active tool.
     public static void activate()
     {
         isActive = true;
@@ -52,7 +55,7 @@ public class MarkerTool : MonoBehaviour
     }
 
     //this function places a marker at the given position, it is called in the VRTracedInput class as a first grip frame action.
-    //the position should be given in world coordinates
+    //the position should be given in world coordinates.
     public static void placeMarker(Vector3 position)
     {
         if (!isActive)
@@ -64,6 +67,7 @@ public class MarkerTool : MonoBehaviour
         ASL.ASLHelper.InstantiateASLObject("Marker", NewPositionOnLargeMap, Quaternion.identity, "", "", GetLargerFromSmaller);
     }
 
+    //helper class for marker positional information.
     private static void GetLargerFromSmaller(GameObject _myGameObject)
     {
         ASLObjectTrackingSystem.AddObjectToTrack(_myGameObject.GetComponent<ASL.ASLObject>());

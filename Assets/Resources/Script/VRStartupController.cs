@@ -6,6 +6,12 @@ using Valve.VR;
 
 public class VRStartupController : MonoBehaviour
 {
+    //VRStartupController is the class which handles the startup of the VR portion of the project, as well as holding many
+    //key references (seen below such as the VRPlayerObject) for other VR scripts.
+
+    //notably, the activation of the VR portion of the project can be delayed by setting it's associated object or component
+    //to disabled in the editor. This class will activate VR when it is enabled.
+
     //static reference to the one instance of VRStartupController
     public static VRStartupController staticReference;
 
@@ -30,13 +36,11 @@ public class VRStartupController : MonoBehaviour
     //boolean to store whether or not this class needs to restore a locked cursor when switching back to PC
     private bool reLockCursor = false;
 
-    //this is the UI controller which needs the instantiated VR Player to start up
-    //note: currently the VRUIController checks for the player object
-    //public VRUIController VRUIControl = null;
     
 
 
     // Start is called before the first frame update
+    //this will start up the VR portion of the project only if VR is properly detected.
     void Start()
     {
         staticReference = this;

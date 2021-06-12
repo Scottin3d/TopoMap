@@ -5,7 +5,8 @@ using UnityEngine;
 public class RoadTool : MonoBehaviour
 {
     //RoadTool is the class that places the VR Player's roads on the map.
-    //alot of this class is modified parts of the playermarkergenerator class
+    //while the player is holding grip, if this tool is active it will place road squares on the small map.
+    //a large portion of this class is made up of modified parts of the playermarkergenerator class.
 
     //there should be one and only one instance of this script in the unity scene.
 
@@ -32,7 +33,8 @@ public class RoadTool : MonoBehaviour
     private static List<GameObject> MyLargerBrushList = new List<GameObject>();
 
     // Start is called before the first frame update
-    //this will set many of the static references needed to run the class
+    //this will set many of the static references needed to run the class, and does so from
+    //an instance of the class which allows these references to be set in the editor.
     void Start()
     {
         ThisGameObject = this.gameObject;
@@ -50,7 +52,8 @@ public class RoadTool : MonoBehaviour
         
     }
 
-    //activate and deactivate change the status of this tool when called.
+    //activate and deactivate change the status of this tool when called. These
+    //functions are for VRToolSelector to control the active tool.
     public static void activate()
     {
         isActive = true;
@@ -60,7 +63,8 @@ public class RoadTool : MonoBehaviour
         isActive = false;
     }
 
-    //this function places roads along the map at the given position, it is in the VRTracedInput class for normal grip input
+    //this function places roads along the map at the given position, it is in the VRTracedInput class for normal grip input.
+    //the position should be given in world coordinates.
     public static void placeRoad(Vector3 position)
     {
         if (!isActive)
@@ -87,17 +91,4 @@ public class RoadTool : MonoBehaviour
         MyLargerBrushList.Add(_myGameObject);
         //GenerateExtraLineOnMap(_myGameObject);
     }
-
-    //generates the lines between points on the map
-    //private static void GenerateExtraLineOnMap(GameObject _myGameObject)
-    //{
-    //    if (MyLargerBrushList.Count == 1)
-    //    {
-    //        return;
-    //    }
-    //    else
-    //    {
-    //        _myGameObject.GetComponent<MapBrushRePosition>().SecondToLastBrushPosition = MyLargerBrushList[MyLargerBrushList.Count - 2].transform.position;
-    //    }
-    //}
 }

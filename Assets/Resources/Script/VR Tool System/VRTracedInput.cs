@@ -6,7 +6,8 @@ using Valve.VR;
 public class VRTracedInput : MonoBehaviour
 {
     //this is a script meant to handle any input relating to tracing a line from the VR player's right hand.
-    //this means pointing at the map for route and marker placement, for example
+    //this means pointing at the map for route and marker placement, for example.
+    //this script is responsible for signaling many of the tools when a grip action happens.
 
     //hand objects which I will need
     private GameObject leftHand = null; //left hand of the VR player
@@ -25,6 +26,8 @@ public class VRTracedInput : MonoBehaviour
 
 
     // Start is called before the first frame update
+    //this function will set many of the variables this class needs, and activate the
+    //coroutine which delays the initialization of the rest.
     void Start()
     {
         LocalProjectMarker = GameObject.CreatePrimitive(PrimitiveType.Sphere);
@@ -36,6 +39,7 @@ public class VRTracedInput : MonoBehaviour
         StartCoroutine("delayInitialization");
     }
 
+    //startup function to assign all variables which need the VR player active to do so.
     private void StartUp()
     {
         leftHand = VRStartupController.VRPlayerObject.transform.Find("SteamVRObjects/LeftHand").gameObject;
@@ -47,6 +51,7 @@ public class VRTracedInput : MonoBehaviour
         frontObject.transform.localPosition = new Vector3(0.02905f, -0.0572f, -0.0038f);
     }
 
+    //coroutine to delay the initialization of variables which need the VR player to be set up.
     IEnumerator delayInitialization()
     {
         while (VRStartupController.VRPlayerObject == null)
@@ -57,6 +62,7 @@ public class VRTracedInput : MonoBehaviour
     }
 
     // Update is called once per frame
+    //this handles the grip logic of the input system in this class.
     void Update()
     {
         if (SteamVR_Actions.default_GrabGrip.state)
@@ -75,8 +81,9 @@ public class VRTracedInput : MonoBehaviour
 
 
 
-    //code from the current marker generation code (will be getting changed):
+    //code from the current marker generation code:
     //Project a local marker to the small map
+    //also calls message functions for other tool scripts.
     private void ProjectMarker()
     {
         Vector3 startPosition = frontObject.transform.position;
@@ -103,7 +110,6 @@ public class VRTracedInput : MonoBehaviour
             else
             {
                 LocalProjectMarker.transform.position = Hit.point;
-                //LocalProjectMarker.SetActive(false);
                 initialGrip = false;
             }
         }

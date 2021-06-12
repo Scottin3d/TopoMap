@@ -12,6 +12,7 @@ public class VRTeleportHandler : MonoBehaviour
     private static Transform groundTeleportPosition;
 
     // Start is called before the first frame update
+    //initializes variable references this class needs.
     void Start()
     {
         tableTeleportPosition = this.transform.Find("Table Teleport position");
@@ -24,12 +25,14 @@ public class VRTeleportHandler : MonoBehaviour
         
     }
 
+    //method for sending the VR player to the set table position
     public static void TeleportVRPlayerToTable()
     {
         VRStartupController.VRPlayerObject.transform.position = tableTeleportPosition.position;
         VRStartupController.VRPlayerObject.transform.rotation = tableTeleportPosition.rotation;
     }
 
+    //method for sending the VR player to the set large map position
     public static void TeleportVRPlayerToGround()
     {
         VRStartupController.VRPlayerObject.transform.position = groundTeleportPosition.position;
