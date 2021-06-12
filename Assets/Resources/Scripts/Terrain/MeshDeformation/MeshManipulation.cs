@@ -29,7 +29,7 @@ public partial class MeshManipulation : MonoBehaviour {
     private int currentPoolIndex = 0;
 
 
-    public GameObject currentSelection = null;
+    private GameObject currentSelection = null;
     private List<List<VertToDeform>> selectedVerts = new List<List<VertToDeform>>();
     private ASLObject terrainBrain;
     public GenerateMapFromHeightMap mapGen = null;
@@ -278,12 +278,12 @@ public partial class MeshManipulation : MonoBehaviour {
     /// <summary>
     /// 
     /// </summary>
-    /// <param name="delta"></param>
-    private void ModifyMesh(float delta) {
+    /// <param name="deformatinoStrength"></param>
+    private void ModifyMesh(float deformatinoStrength) {
 
         MapChunk chunk = currentSelection.GetComponent<ChunkData>().MapChunk;
 
-        DeformInstruction i = new DeformInstruction(chunk.chunkID, selectedVerts, delta);
+        DeformInstruction i = new DeformInstruction(chunk.chunkID, selectedVerts, deformatinoStrength);
         ASLDeformationBrain.current.QueueInstruction(i);
     }
 }

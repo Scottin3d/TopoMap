@@ -434,6 +434,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: TreeSpawner
       objectReference: {fileID: 0}
+    - target: {fileID: 7876980960229039237, guid: 0fc3fdc580b137d4297fd25318557f8a, type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 7876980960229039239, guid: 0fc3fdc580b137d4297fd25318557f8a, type: 3}
       propertyPath: m_RootOrder
       value: 7
